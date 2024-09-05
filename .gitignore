@@ -1,0 +1,54 @@
+# Ignore build output directories
+Debug/
+Release/
+obj/
+bin/
+
+# Ignore generated files from the build process
+*.elf
+*.hex
+*.eep
+*.lss
+*.map
+*.srec
+*.sav
+
+# Ignore IDE-specific files and folders
+.vscode/
+*.suo
+*.user
+*.ncb
+*.sdf
+*.opensdf
+*.suo
+*.useros
+*.pdb
+*.aps
+*.ncb
+*.log
+*.iobj
+*.opendb
+*.dep
+.settings/
+project.xml
+
+# Ignore temporary files
+*.tmp
+*.swp
+*.bak
+*.log
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore other unnecessary files
+*.pdf
+*.doc
+*.xls
+*.ppt
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
