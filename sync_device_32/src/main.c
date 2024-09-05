@@ -6,10 +6,12 @@
  */
 
 #include <asf.h>
-#include "sys_globals.h"
+#include "sd_globals.h"
+#include "sd_comport.h"
 
 // Declaration of function prototypes
-void outputs_init(void);
+void init_IO(void);
+
 
 // ENTRY POINT
 int main(void)
@@ -18,11 +20,17 @@ int main(void)
 	sysclk_init();   // Initialize the system clock
 	board_init();    // Initialize the board (configures default pins)
 
-	outputs_init();  // Initialize IO pins
+    init_IO();
+    //init_UART();
+
+    // Notify the host that we are ready
+    //UART_tx("Sync device is ready. Firmware version: ");
+    //UART_tx(VERSION);
+
 
 	while (1)
 	{
-		// Set the pin high
+/*		// Set the pin high
 		ioport_set_pin_level(CY2_PIN, true);
 		ioport_set_pin_level(CY3_PIN, false);
 		delay_ms(1000);  // Wait for 1 second
@@ -31,12 +39,15 @@ int main(void)
 		ioport_set_pin_level(CY2_PIN, false);
 		ioport_set_pin_level(CY3_PIN, true);
 		ioport_toggle_pin_level(CY5_PIN);
-		delay_ms(1000);  // Wait for 1 second
+		delay_ms(1000);  // Wait for 1 second*/
+		
+		;
+		//poll_UART();
 	}
 }
 
 
-void outputs_init(void)
+void init_IO(void)
 {
 	// Initialize the IOPORT system
 	ioport_init();   // Initialize the IOPORT system

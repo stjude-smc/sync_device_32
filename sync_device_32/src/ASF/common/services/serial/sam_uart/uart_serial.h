@@ -36,6 +36,8 @@
 #ifndef _UART_SERIAL_H_
 #define _UART_SERIAL_H_
 
+#include <status_codes.h>
+
 #include "compiler.h"
 #include "sysclk.h"
 #if (SAMG55)

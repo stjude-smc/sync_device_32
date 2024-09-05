@@ -527,6 +527,15 @@
     <Folder Include="src\config\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\sd_comport.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\sd_comport.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\sd_globals.h">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="src\ASF\common\services\delay\delay.h">
       <SubType>compile</SubType>
     </None>
