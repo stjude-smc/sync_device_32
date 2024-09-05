@@ -5,16 +5,28 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "sync_device_32", "sync_device_32\sync_device_32.cproj", "{DCE6C7E3-EE26-4D79-826B-08594B9AD897}"
 EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "firmware", "..\sync_device\firmware\firmware\firmware.cppproj", "{E0F03071-DA59-4941-94FD-CC12A98CA485}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
+		Debug|AVR = Debug|AVR
 		Release|ARM = Release|ARM
+		Release|AVR = Release|AVR
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|ARM.ActiveCfg = Debug|ARM
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|ARM.Build.0 = Debug|ARM
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|AVR.ActiveCfg = Debug|ARM
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|ARM.ActiveCfg = Release|ARM
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|ARM.Build.0 = Release|ARM
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|AVR.ActiveCfg = Release|ARM
+		{E0F03071-DA59-4941-94FD-CC12A98CA485}.Debug|ARM.ActiveCfg = Debug|AVR
+		{E0F03071-DA59-4941-94FD-CC12A98CA485}.Debug|AVR.ActiveCfg = Debug|AVR
+		{E0F03071-DA59-4941-94FD-CC12A98CA485}.Debug|AVR.Build.0 = Debug|AVR
+		{E0F03071-DA59-4941-94FD-CC12A98CA485}.Release|ARM.ActiveCfg = Release|AVR
+		{E0F03071-DA59-4941-94FD-CC12A98CA485}.Release|AVR.ActiveCfg = Release|AVR
+		{E0F03071-DA59-4941-94FD-CC12A98CA485}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

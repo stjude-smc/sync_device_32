@@ -1,3 +1,16 @@
+/**
+ * @file sys_globals.h
+ * @author Roman Kiselev (roman.kiselev@stjude.org)
+ * @brief Global system definitions: pin out and settings.
+ * @version 0.4
+ * @date 2022-01-10
+ *
+ * @copyright Copyright (c) 2023
+ *
+ */
+#pragma once
+#include <ioport.h>
+
 #define VERSION "0.6.0\n"
 
 
@@ -15,13 +28,21 @@ HELPFUL BIT MANIPULATION FUNCTIONS
 /****************************
 PINOUT AND WIRING DEFINITIONS
 ****************************/
-// Laser shutters
-const uint32_t CY2_PIN = PIO_PA16_IDX; // aka Arduino pin A0
-const uint32_t CY3_PIN = PIO_PA24_IDX; // aka Arduino pin A1
-const uint32_t CY5_PIN = PIO_PA23_IDX; // aka Arduino pin A2
-const uint32_t CY7_PIN = PIO_PA22_IDX; // aka Arduino pin A3
-const uint32_t SHUTTERS_MASK = PIO_PA16 | PIO_PA24 | PIO_PA23 | PIO_PA22;
-#define SHUTTERS_PORT IOPORT_PIOA
-
 // Camera trigger
-const uint32_t CAMERA_PIN = PIO_PB27_IDX; // aka Arduino pin 13
+#define CAMERA_PIN	PIO_PB27_IDX // aka Arduino pin 13
+
+// Fluidics trigger
+#define FLUIDIC_PIN PIO_PB25_IDX // aka Arduino pin 2
+
+// Laser shutters (see pio_sam3x8e.h for pin names) - these have to be on the same port!
+#define CY2_PIN		PIO_PA16_IDX // aka Arduino pin A0
+#define CY3_PIN		PIO_PA24_IDX // aka Arduino pin A1
+#define CY5_PIN		PIO_PA23_IDX // aka Arduino pin A2
+#define CY7_PIN		PIO_PA22_IDX // aka Arduino pin A3
+
+#define SHUTTERS_MASK (ioport_pin_to_mask(CY2_PIN) | ioport_pin_to_mask(CY3_PIN) | ioport_pin_to_mask(CY5_PIN) | ioport_pin_to_mask(CY7_PIN))
+#define SHUTTERS_PORT ioport_pin_to_port_id(CY2_PIN)
+
+
+
+
