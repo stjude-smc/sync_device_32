@@ -15,6 +15,7 @@ bin/
 
 # Ignore IDE-specific files and folders
 .vscode/
+*.atsuo
 *.suo
 *.user
 *.ncb
