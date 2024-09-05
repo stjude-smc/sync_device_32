@@ -42,15 +42,11 @@ void outputs_init(void)
 	ioport_init();   // Initialize the IOPORT system
 
 	// Configure the laser shutters as outputs
-	/*
-	ioport_set_pin_dir(CY2_PIN, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_dir(CY3_PIN, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_dir(CY5_PIN, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_dir(CY7_PIN, IOPORT_DIR_OUTPUT);
-	*/
 	ioport_set_port_dir(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_DIR_OUTPUT);
 
-	// Configure the camera trigger as outputs
-	ioport_set_pin_dir(CAMERA_PIN, IOPORT_DIR_OUTPUT);
+	// Configure the fluidic trigger as output
+	ioport_set_pin_dir(FLUIDIC_PIN, IOPORT_DIR_OUTPUT);
 
+	// Configure the camera trigger as output
+	ioport_set_pin_dir(CAMERA_PIN, IOPORT_DIR_OUTPUT);
 }
