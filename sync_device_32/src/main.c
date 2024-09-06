@@ -46,22 +46,26 @@ int main(void)
     //UART_tx(VERSION);
 
 
-	char buf;
+	char i = 32;
 	while (1)
 	{
-		buf = uart_read_char();
-		uart_write_char(buf + 1);
-		delay_ms(100);
-/*		// Set the pin high
+//		buf = uart_read_char();
+		uart_write_char(i);
+		if (i++ > 127){
+			i = 32;
+		}
+
+
+		// Set the pin high
 		ioport_set_pin_level(CY2_PIN, true);
 		ioport_set_pin_level(CY3_PIN, false);
-		delay_ms(1000);  // Wait for 1 second
+		delay_ms(50);  // Wait for 1 second
 		
 		// Set the pin low
 		ioport_set_pin_level(CY2_PIN, false);
 		ioport_set_pin_level(CY3_PIN, true);
 		ioport_toggle_pin_level(CY5_PIN);
-		delay_ms(1000);  // Wait for 1 second*/
+		delay_ms(50);  // Wait for 1 second*/
 		
 		;
 		//poll_UART();
