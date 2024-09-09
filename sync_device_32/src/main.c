@@ -14,6 +14,8 @@
 void sd_init_IO(void);
 
 
+
+
 // ENTRY POINT
 int main(void)
 {
@@ -27,31 +29,14 @@ int main(void)
     // Notify the host that we are ready
 	sd_send_string("Sync device is ready. Firmware version: ");
     sd_send_string(VERSION);
+	
 
 
-	uint8_t uart_data;
+	pdc_rx_clear_cnt(uart_get_pdc_base(UART));
 	while (1)
 	{
-		if (uart_is_rx_ready(UART))
-		{
-			uart_read(UART, &uart_data);
-			sd_send_chr(uart_data + 1);
-			ioport_toggle_pin_level(CY5_PIN);
-		}
-		
-/*		// Set the pin high
-		ioport_set_pin_level(CY2_PIN, true);
-		ioport_set_pin_level(CY3_PIN, false);
-		delay_ms(1000);  // Wait for 1 second
-		
-		// Set the pin low
-		ioport_set_pin_level(CY2_PIN, false);
-		ioport_set_pin_level(CY3_PIN, true);
+		delay_ms(100);
 		ioport_toggle_pin_level(CY5_PIN);
-		delay_ms(1000);  // Wait for 1 second*/
-		
-		;
-		//poll_UART();
 	}
 }
 

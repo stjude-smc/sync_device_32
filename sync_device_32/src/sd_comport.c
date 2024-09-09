@@ -38,7 +38,8 @@ void sd_init_UART(void)
 	uart_enable_tx(UART);
 	uart_enable_rx(UART);
 	
-	pdc_enable_transfer(uart_get_pdc_base(UART), PERIPH_PTCR_TXTEN | PERIPH_PTCR_RXTEN);
+	// Enable DMA for UART transmissions
+	pdc_enable_transfer(uart_get_pdc_base(UART), PERIPH_PTCR_TXTEN);
 }
 
 

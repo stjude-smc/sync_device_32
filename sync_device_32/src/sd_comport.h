@@ -9,7 +9,7 @@
 #include <asf.h>
 #include <sd_globals.h>
 
-// Memory buffers for transmission and reception
+// Memory buffer for DMA transmission
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
 
 
