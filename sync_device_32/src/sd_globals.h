@@ -44,5 +44,9 @@ PINOUT AND WIRING DEFINITIONS
 #define SHUTTERS_PORT ioport_pin_to_port_id(CY2_PIN)
 
 
+/*************************
+UART AND DMA CONFIGURATION
+*************************/
 
-
+#define UART_BUFFER_SIZE 100   // Size of DMA-controlled UART buffer
+#define UART_BAUDRATE 115200

@@ -1,5 +1,7 @@
 #include "sd_comport.h"
-#include <asf.h>
+
+void activate_DMA(void); // Activate direct memory access for UART
+
 
 void sd_init_UART(void)
 {
@@ -17,9 +19,9 @@ void sd_init_UART(void)
 	
 	// Initialize UART with our specific settings
 	const sam_uart_opt_t uart_settings = {
-		.ul_mck = 84000000,        // Master clock frequency
-		.ul_baudrate = 115200,     // Desired baudrate
-		.ul_mode = UART_MR_PAR_NO  // No parity, normal channel mode
+		.ul_mck = BOARD_MCK,            // Master clock frequency
+		.ul_baudrate = UART_BAUDRATE,   // Desired baudrate
+		.ul_mode = UART_MR_PAR_NO       // No parity, normal channel mode
 	};
 		
 	// Init UART and enable receiver and transmitter
@@ -33,4 +35,10 @@ void sd_init_UART(void)
 	
 	uart_enable_tx(UART);
 	uart_enable_rx(UART);
+}
+
+
+void activate_DMA(void)
+{
+	
 }

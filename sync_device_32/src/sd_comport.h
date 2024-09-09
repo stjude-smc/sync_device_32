@@ -6,6 +6,8 @@
  */ 
 
 #pragma once
+#include <asf.h>
+#include <sd_globals.h>
 
 
 void sd_init_UART(void);
