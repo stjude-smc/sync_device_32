@@ -31,7 +31,6 @@ int main(void)
     sd_tx_string(VERSION);
 	
 
-	uint8_t byte;
 	while (1)
 	{
 		sd_poll_UART();

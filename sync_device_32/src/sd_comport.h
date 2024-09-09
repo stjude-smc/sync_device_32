@@ -32,7 +32,7 @@ union Data
 		};
 	};
 
-	char bytes[5];
+	uint8_t bytes[5];
 };
 
 void sd_init_UART(void);

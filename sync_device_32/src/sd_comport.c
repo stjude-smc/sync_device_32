@@ -102,11 +102,6 @@ void sd_poll_UART(void)
 	}	
 }
 
-void parse_UART_command(const union Data data)
-{
-	sd_tx_string("Got five bytes before timeout!\n");
-}
-
 
 errcode sd_rx_byte(uint8_t *byte)
 {
@@ -126,9 +121,13 @@ errcode sd_rx_byte(uint8_t *byte)
 errcode sd_rx_string(uint8_t *bytearray, uint8_t size)
 {
 	for (uint8_t i = 0; i < size; i++)
-		if (sd_rx_byte(bytearray[i]) == ERR_TIMEOUT)
+		if (sd_rx_byte(&bytearray[i]) == ERR_TIMEOUT)
+		{
+			ioport_set_pin_level(CY5_PIN, 1);  // FIXME - delete
 			return ERR_TIMEOUT;
+		}
 
+	ioport_set_pin_level(CY5_PIN, 0);  // FIXME - delete
 	return OK;
 }
 
@@ -151,17 +150,99 @@ void _init_UART_TC(void)
 	tc_enable_interrupt(TC0, TC_CHAN, TC_IER_CPCS);
 	
 	tc_start(TC0, TC_CHAN);
-	
-	//NVIC_EnableIRQ(TC0_IRQn + TC_CHAN);
 }
 
 
-void TC0_Handler(void){
-	// Read the status register to clear the interrupt flag
-	tc_get_status(TC0, TC_CHAN);
 
-	// Toggle LED
-	ioport_toggle_pin_level(CY5_PIN);
+/************************************************************************/
+/* Implementation of the communication protocol                         */
+/************************************************************************/
 
-	tc_start(TC0, TC_CHAN);
+void parse_UART_command(const union Data data)
+{
+	switch (data.cmd)
+	{
+		// Set laser shutters and ALEX
+		case 'L':
+		sd_tx_string("sys.lasers_in_use = data.lasers.lasers_in_use & SHUTTERS_MASK\n");
+		sd_tx_string("sys.ALEX_enabled = data.lasers.ALEX_enabled;\n");
+		sd_tx_string("reset_lasers();\n");
+		sd_tx_string("UART_tx_ok();\n");
+		sd_tx_string("if (sys.status == MANUAL)\n");
+		sd_tx_string("{\n");
+			sd_tx_string("set_lasers(sys.lasers_in_use);\n");
+		sd_tx_string("}\n");
+		break;
+
+		// Set acquisition period between frames/bursts
+		case 'A':
+		sd_tx_string("sys.acq_period_us = data.uint32_value\n");
+		sd_tx_string("UART_tx_ok();\n");
+		break;
+
+		// Set exposure time
+		case 'E':
+		sd_tx_string("sys.exp_time_us = data.uint32_value\n");
+		sd_tx_string("UART_tx_ok();\n");
+		break;
+
+		// Set shutter delay
+		case 'D':
+		sd_tx_string("sys.shutter_delay_us = data.uint32_value\n");
+		sd_tx_string("UART_tx_ok();\n");
+		break;
+
+		// Set camera readout delay
+		case 'I':
+		sd_tx_string("sys.cam_readout_us = data.uint32_value\n");
+		sd_tx_string("UART_tx_ok();\n");
+		break;
+
+		// Set fluidics trigger
+		case 'F':
+		sd_tx_string("sys.fluidics_frame = data.int32_value\n");
+		sd_tx_string("UART_tx_ok();\n");
+		break;
+
+		// Start stroboscopic acquisition
+		case 'S':
+		sd_tx_string("UART_tx_ok()\n");
+		sd_tx_string("start_stroboscopic_acq(data.uint32_value);\n");
+		break;
+
+		// Start continuous acquisition
+		case 'C':
+		sd_tx_string("UART_tx_ok()\n");
+		sd_tx_string("start_continuous_acq(data.uint32_value);\n");
+		break;
+
+		// Manually open laser shutters
+		case 'M':
+		sd_tx_string("if (sys.status != IDLE)\n");
+		sd_tx_string("{\n");
+			sd_tx_string("	UART_tx_err(\"M: Not in the IDLE state\");\n");
+			sd_tx_string("	break;\n");
+		sd_tx_string("}\n");
+		sd_tx_string("if (sys.lasers_in_use == 0)\n");
+		sd_tx_string("{\n");
+			sd_tx_string("	UART_tx_err(\"M: All lasers are disabled\");\n");
+			sd_tx_string("	break;\n");
+		sd_tx_string("}\n");
+		sd_tx_string("UART_tx_ok();\n");
+		sd_tx_string("set_lasers(sys.lasers_in_use);\n");
+		sd_tx_string("sys.status = MANUAL;\n");
+		break;
+
+		// Stop acquisition
+		case 'Q':
+		sd_tx_string("sys.n_frames = data.uint32_value\n");
+		sd_tx_string("UART_tx_ok();\n");
+		sd_tx_string("stop_acq();\n");
+		break;
+
+		default:
+		break;
+	sd_tx_string("\n");
+
+	}
 }
