@@ -2,8 +2,14 @@
 #include <string.h>
 
 
-void _DMA_tx_wait(Pdc* p_uart_pdc);
+// Memory buffer for DMA transmission
+static uint8_t tx_buffer[UART_BUFFER_SIZE];
 
+#define TC_CHAN 0
+
+void _DMA_tx_wait(Pdc* p_uart_pdc);
+void parse_UART_command(const union Data data);
+void _init_UART_TC(void);
 
 void sd_init_UART(void)
 {
@@ -40,6 +46,9 @@ void sd_init_UART(void)
 	
 	// Enable DMA for UART transmissions
 	pdc_enable_transfer(uart_get_pdc_base(UART), PERIPH_PTCR_TXTEN);
+	
+	// Initialize TC0 for timeout detection
+	_init_UART_TC();
 }
 
 
@@ -82,3 +91,77 @@ void _DMA_tx_wait(Pdc* p_uart_pdc)
 	}
 }
 
+
+
+void poll_UART(void)
+{
+	union Data data;
+	if (sd_rx_string(data.bytes, 5) == OK)
+	{
+		parse_UART_command(data);
+	}	
+}
+
+void parse_UART_command(const union Data data)
+{
+	sd_send_string("Got five bytes before timeout!\n");
+}
+
+
+errcode sd_rx_byte(uint8_t *byte)
+{
+	tc_start(TC0, TC_CHAN);
+	
+	while (!uart_is_rx_ready(UART)) // Wait for data...
+	{
+		if (tc_get_status(TC0, TC_CHAN) & TC_IER_CPCS)  // until a timeout is detected
+			return ERR_TIMEOUT;
+	}  
+	
+	uart_read(UART, byte);
+	tc_start(TC0, TC_CHAN);
+	return OK;
+}
+
+errcode sd_rx_string(uint8_t *bytearray, uint8_t size)
+{
+	for (uint8_t i = 0; i < size; i++)
+		if (sd_rx_byte(bytearray[i]) == ERR_TIMEOUT)
+			return ERR_TIMEOUT;
+
+	return OK;
+}
+
+
+
+// Timer/counter 0 channel 0 is used for UART timeout
+void _init_UART_TC(void)
+{
+	sysclk_enable_peripheral_clock(ID_TC0);
+	
+	tc_init(TC0, TC_CHAN,
+			TC_CMR_TCCLKS_TIMER_CLOCK2 |   // Prescaler MCK/8
+			TC_CMR_WAVSEL_UP_RC            // Count up to TC_RC
+	);
+	
+	uint32_t rc_value = (sysclk_get_peripheral_hz() / 8 / 1000) * UART_TIMEOUT;
+	tc_write_rc(TC0, TC_CHAN, rc_value);
+
+	// Enable the interrupt on RC compare
+	tc_enable_interrupt(TC0, TC_CHAN, TC_IER_CPCS);
+	
+	tc_start(TC0, TC_CHAN);
+	
+	//NVIC_EnableIRQ(TC0_IRQn + TC_CHAN);
+}
+
+
+void TC0_Handler(void){
+	// Read the status register to clear the interrupt flag
+	tc_get_status(TC0, TC_CHAN);
+
+	// Toggle LED
+	ioport_toggle_pin_level(CY5_PIN);
+
+	tc_start(TC0, TC_CHAN);
+}

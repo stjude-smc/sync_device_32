@@ -13,6 +13,12 @@
 
 #define VERSION "0.6.0\n"
 
+/***************/
+/* Error codes */
+/***************/
+typedef signed char errcode;
+#define OK 0
+#define ERR_TIMEOUT -1
 
 /*********************************
 HELPFUL BIT MANIPULATION FUNCTIONS
@@ -49,4 +55,5 @@ UART AND DMA CONFIGURATION
 *************************/
 
 #define UART_BUFFER_SIZE 100   // Size of DMA-controlled UART buffer
-#define UART_BAUDRATE 115200
+#define UART_BAUDRATE 115200   // bits per second
+#define UART_TIMEOUT 1250       // ms
