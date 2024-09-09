@@ -9,5 +9,12 @@
 #include <asf.h>
 #include <sd_globals.h>
 
+// Memory buffers for transmission and reception
+static uint8_t tx_buffer[UART_BUFFER_SIZE];
+
 
 void sd_init_UART(void);
+
+// Send data to the host
+void sd_send_chr(const char chr);
+void sd_send_string(const char *cstring);

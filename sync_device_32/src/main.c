@@ -6,6 +6,7 @@
  */
 
 #include <asf.h>
+#include <string.h>
 #include "sd_globals.h"
 #include "sd_comport.h"
 
@@ -23,10 +24,10 @@ int main(void)
     sd_init_IO();
     sd_init_UART();
 	
-
     // Notify the host that we are ready
-    //UART_tx("Sync device is ready. Firmware version: ");
-    //UART_tx(VERSION);
+	sd_send_string("Sync device is ready. Firmware version: ");
+    sd_send_string(VERSION);
+
 
 	uint8_t uart_data;
 	while (1)
@@ -34,7 +35,7 @@ int main(void)
 		if (uart_is_rx_ready(UART))
 		{
 			uart_read(UART, &uart_data);
-			uart_write(UART, uart_data + 1);
+			sd_send_chr(uart_data + 1);
 			ioport_toggle_pin_level(CY5_PIN);
 		}
 		
