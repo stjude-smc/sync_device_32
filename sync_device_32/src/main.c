@@ -21,15 +21,23 @@ int main(void)
 	board_init();    // Initialize the board (configures default pins)
 
     init_IO();
-    //init_UART();
+    my_init_UART();
+	
 
     // Notify the host that we are ready
     //UART_tx("Sync device is ready. Firmware version: ");
     //UART_tx(VERSION);
 
-
+	uint8_t uart_data;
 	while (1)
 	{
+		if (uart_is_rx_ready(UART))
+		{
+			uart_read(UART, &uart_data);
+			uart_write(UART, uart_data + 1);
+			ioport_toggle_pin_level(CY5_PIN);
+		}
+		
 /*		// Set the pin high
 		ioport_set_pin_level(CY2_PIN, true);
 		ioport_set_pin_level(CY3_PIN, false);
@@ -60,4 +68,6 @@ void init_IO(void)
 
 	// Configure the camera trigger as output
 	ioport_set_pin_dir(CAMERA_PIN, IOPORT_DIR_OUTPUT);
+	
+	// Enable built-in LED on PB27 (Arduino pin 13)
 }

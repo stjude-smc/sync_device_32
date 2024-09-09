@@ -6,7 +6,6 @@
  */ 
 
 #pragma once
-#include <uart_serial.h>
 
 
-void init_UART(void);
+void my_init_UART(void);
