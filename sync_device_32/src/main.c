@@ -10,7 +10,7 @@
 #include "sd_comport.h"
 
 // Declaration of function prototypes
-void init_IO(void);
+void sd_init_IO(void);
 
 
 // ENTRY POINT
@@ -20,8 +20,8 @@ int main(void)
 	sysclk_init();   // Initialize the system clock
 	board_init();    // Initialize the board (configures default pins)
 
-    init_IO();
-    my_init_UART();
+    sd_init_IO();
+    sd_init_UART();
 	
 
     // Notify the host that we are ready
@@ -55,7 +55,7 @@ int main(void)
 }
 
 
-void init_IO(void)
+void sd_init_IO(void)
 {
 	// Initialize the IOPORT system
 	ioport_init();   // Initialize the IOPORT system

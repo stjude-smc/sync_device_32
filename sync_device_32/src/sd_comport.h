@@ -8,4 +8,4 @@
 #pragma once
 
 
-void my_init_UART(void);
+void sd_init_UART(void);

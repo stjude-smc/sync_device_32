@@ -1,7 +1,7 @@
 #include "sd_comport.h"
 #include <asf.h>
 
-void my_init_UART(void)
+void sd_init_UART(void)
 {
 	// Enable clock for PIOA
 	pmc_enable_periph_clk(ID_PIOA);
