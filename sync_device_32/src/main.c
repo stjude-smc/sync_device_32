@@ -27,23 +27,14 @@ int main(void)
     sd_init_UART();
 	
     // Notify the host that we are ready
-	sd_send_string("Sync device is ready. Firmware version: ");
-    sd_send_string(VERSION);
+	sd_tx_string("Sync device is ready. Firmware version: ");
+    sd_tx_string(VERSION);
 	
 
 	uint8_t byte;
 	while (1)
 	{
-		poll_UART();
-/*		if (sd_rx_byte(&byte) == OK)
-		{
-			ioport_set_pin_level(CY5_PIN, 0);
-			sd_send_chr(byte + 1);
-		} else {
-			ioport_set_pin_level(CY5_PIN, 1);
-		}*/
-		// poll_UART();
-		//ioport_toggle_pin_level(CY5_PIN);
+		sd_poll_UART();
 	}
 }
 

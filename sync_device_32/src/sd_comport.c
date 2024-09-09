@@ -53,14 +53,14 @@ void sd_init_UART(void)
 
 
 // Send one character to host
-void sd_send_chr(const char chr)
+void sd_tx_chr(const char chr)
 {
 	uart_write(UART, chr);
 }
 
 
 // Send data to host using DMA controller
-void sd_send_string(const char *cstring)
+void sd_tx_string(const char *cstring)
 {
 	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
 	
@@ -93,7 +93,7 @@ void _DMA_tx_wait(Pdc* p_uart_pdc)
 
 
 
-void poll_UART(void)
+void sd_poll_UART(void)
 {
 	union Data data;
 	if (sd_rx_string(data.bytes, 5) == OK)
@@ -104,7 +104,7 @@ void poll_UART(void)
 
 void parse_UART_command(const union Data data)
 {
-	sd_send_string("Got five bytes before timeout!\n");
+	sd_tx_string("Got five bytes before timeout!\n");
 }
 
 
