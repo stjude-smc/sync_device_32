@@ -1,50 +1,36 @@
-/*
- * uart.c
- *
- * Authors:	Mathias Beckius
- * 			Felix Ruponen
- *
- * Date:	29 September, 2014
- */ 
-
 #include "sd_comport.h"
+#include <asf.h>
 
-void my_uart_init(const uart_settings_t *settings) {
-	/*
-	 * reset receiver, transmitter and status bits,
-	 * disable receiver and transmitter
-	 */
-	UART->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX |	UART_CR_RSTSTA |
-					UART_CR_RXDIS | UART_CR_TXDIS;
-	// configure baud rate
-	UART->UART_BRGR = UART_BRGR_CD(settings->baud_rate);
-	// configure mode
-	UART->UART_MR = UART_MR_CHMODE(settings->ch_mode);
-	// enable receiver and transmitter
-	UART->UART_CR = UART_CR_RXEN | UART_CR_TXEN;
-}
-
-uint32_t uart_tx_ready(void) {
-	return (UART->UART_SR & UART_SR_TXRDY);
-}
-
-uint32_t uart_rx_ready(void) {
-	return (UART->UART_SR & UART_SR_RXRDY);
-}
-
-void uart_write_char(char chr) {
-	UART->UART_THR = (uint32_t) chr;
-}
-
-void uart_write_str(char *str) {
-	while (*str != '\0') {
-		while (!uart_tx_ready());
-		uart_write_char(*str);
-		str++;
+void my_init_UART(void)
+{
+	// Enable clock for PIOA
+	pmc_enable_periph_clk(ID_PIOA);
+	
+	// Give control over pins from PIO to UART
+	pio_set_peripheral(PIOA, PIO_PERIPH_A, PIO_PA8A_URXD | PIO_PA9A_UTXD);
+	
+	// Enable pull-up resistor on these pins
+	pio_pull_up(PIOA, PIO_PA8A_URXD | PIO_PA9A_UTXD, PIO_PULLUP);
+	
+	// Enable UART clock
+	sysclk_enable_peripheral_clock(ID_UART);
+	
+	// Initialize UART with our specific settings
+	const sam_uart_opt_t uart_settings = {
+		.ul_mck = 84000000,        // Master clock frequency
+		.ul_baudrate = 115200,     // Desired baudrate
+		.ul_mode = UART_MR_PAR_NO  // No parity, normal channel mode
+	};
+		
+	// Init UART and enable receiver and transmitter
+	uint32_t status = uart_init(UART, &uart_settings);
+	
+	if (status == 0) {
+		ioport_set_pin_level(PIO_PB27_IDX, true);
+	} else {
+		ioport_set_pin_level(PIO_PB27_IDX, false);
 	}
-}
-
-char uart_read_char(void) {
-	char chr = (char) UART->UART_RHR;
-	return chr;
+	
+	uart_enable_tx(UART);
+	uart_enable_rx(UART);
 }
