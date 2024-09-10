@@ -38,12 +38,4 @@ union Data
 void sd_init_UART(void);
 
 // Send data to the host
-void sd_tx_chr(const char chr);
-void sd_tx_string(const char *cstring);
-
-// Retrieve data received from host. If no data received within 16ms, return ERR_TIMEOUT
-errcode sd_rx_byte(uint8_t *byte);
-errcode sd_rx_string(uint8_t *bytearray, uint8_t size);
-
-// Retrieve and process a 5-byte data packet from host, if available
-void sd_poll_UART(void);
+void sd_tx(const char *cstring);

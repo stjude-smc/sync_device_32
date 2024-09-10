@@ -8,11 +8,12 @@ static uint8_t rx_buffer[UART_BUFFER_SIZE];
 
 #define TC_CHAN 0
 
-// Function prototypes
+// Prototypes of internal functions
 void _DMA_tx_wait(Pdc* p_uart_pdc);
-void parse_UART_command(const union Data data);
+void _parse_UART_command(const union Data data);
 void _init_UART_TC(void);
-void init_UART_DMA_rx(uint8_t size);
+void _init_UART_DMA_rx(uint8_t size);
+
 
 void sd_init_UART(void)
 {
@@ -49,7 +50,7 @@ void sd_init_UART(void)
 	
 	// Enable DMA for UART transmissions
 	pdc_enable_transfer(uart_get_pdc_base(UART), PERIPH_PTCR_TXTEN | PERIPH_PTCR_RXTEN);
-	init_UART_DMA_rx(5);
+	_init_UART_DMA_rx(5);
 	
 	// Enable interrupts
 	uart_enable_interrupt(UART, UART_IER_RXRDY | UART_IER_ENDRX);
@@ -60,15 +61,9 @@ void sd_init_UART(void)
 }
 
 
-// Send one character to host
-void sd_tx_chr(const char chr)
-{
-	uart_write(UART, chr);
-}
-
 
 // Send data to host using DMA controller
-void sd_tx_string(const char *cstring)
+void sd_tx(const char *cstring)
 {
 	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
 	
@@ -88,8 +83,8 @@ void sd_tx_string(const char *cstring)
 	pdc_tx_init(p_uart_pdc, &pdc_uart_tx_packet, NULL);
 }
 
-// WIP
-void init_UART_DMA_rx(uint8_t size)
+
+void _init_UART_DMA_rx(uint8_t size)
 {
 	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
 
@@ -110,46 +105,6 @@ void _DMA_tx_wait(Pdc* p_uart_pdc)
 	{
 		;
 	}
-}
-
-
-
-void sd_poll_UART(void)
-{
-	union Data data;
-	if (sd_rx_string(data.bytes, 5) == OK)
-	{
-		parse_UART_command(data);
-	}	
-}
-
-
-errcode sd_rx_byte(uint8_t *byte)
-{
-	tc_start(TC0, TC_CHAN);
-	
-	while (!uart_is_rx_ready(UART)) // Wait for data...
-	{
-		if (tc_get_status(TC0, TC_CHAN) & TC_IER_CPCS)  // until a timeout is detected
-			return ERR_TIMEOUT;
-	}  
-	
-	uart_read(UART, byte);
-	tc_start(TC0, TC_CHAN);
-	return OK;
-}
-
-errcode sd_rx_string(uint8_t *bytearray, uint8_t size)
-{
-	for (uint8_t i = 0; i < size; i++)
-		if (sd_rx_byte(&bytearray[i]) == ERR_TIMEOUT)
-		{
-			ioport_set_pin_level(CY5_PIN, 1);  // FIXME - delete
-			return ERR_TIMEOUT;
-		}
-
-	ioport_set_pin_level(CY5_PIN, 0);  // FIXME - delete
-	return OK;
 }
 
 
@@ -182,7 +137,7 @@ void TC0_Handler(void)
 	
 	if (status & TC_SR_CPCS) // Communication timeout
 	{
-		init_UART_DMA_rx(5); // Reset the receiver buffer
+		_init_UART_DMA_rx(5); // Reset the receiver buffer
 	}
 }
 
@@ -195,10 +150,10 @@ void UART_Handler(void)
     if (uart_get_status(UART) & UART_SR_ENDRX) {
 		union Data data;
 		memcpy(&data, &rx_buffer, 5);
-	    parse_UART_command(data);
+	    _parse_UART_command(data);
 
 	    // Reinitialize PDC for the next transfer
-		init_UART_DMA_rx(5);
+		_init_UART_DMA_rx(5);
     }
 }
 
@@ -207,56 +162,56 @@ void UART_Handler(void)
 /* Implementation of the communication protocol                         */
 /************************************************************************/
 
-void parse_UART_command(const union Data data)
+void _parse_UART_command(const union Data data)
 {
 	switch (data.cmd)
 	{
 		// Set laser shutters and ALEX
 		case 'L':
-		sd_tx_string("sys.lasers_in_use = data.lasers.lasers_in_use & SHUTTERS_MASK\n");
-		sd_tx_string("sys.ALEX_enabled = data.lasers.ALEX_enabled;\n");
-		sd_tx_string("reset_lasers();\n");
-		sd_tx_string("UART_tx_ok();\n");
-		sd_tx_string("if (sys.status == MANUAL)\n");
-		sd_tx_string("{\n");
-			sd_tx_string("set_lasers(sys.lasers_in_use);\n");
-		sd_tx_string("}\n");
+		sd_tx("sys.lasers_in_use = data.lasers.lasers_in_use & SHUTTERS_MASK\n");
+		sd_tx("sys.ALEX_enabled = data.lasers.ALEX_enabled;\n");
+		sd_tx("reset_lasers();\n");
+		sd_tx("UART_tx_ok();\n");
+		sd_tx("if (sys.status == MANUAL)\n");
+		sd_tx("{\n");
+			sd_tx("set_lasers(sys.lasers_in_use);\n");
+		sd_tx("}\n");
 		break;
 
 		// Set acquisition period between frames/bursts
 		case 'A':
-		sd_tx_string("sys.acq_period_us = data.uint32_value\n");
-		sd_tx_string("UART_tx_ok();\n");
+		sd_tx("sys.acq_period_us = data.uint32_value\n");
+		sd_tx("UART_tx_ok();\n");
 		break;
 
 		// Set exposure time
 		case 'E':
-		sd_tx_string("sys.exp_time_us = data.uint32_value\n");
-		sd_tx_string("UART_tx_ok();\n");
+		sd_tx("sys.exp_time_us = data.uint32_value\n");
+		sd_tx("UART_tx_ok();\n");
 		break;
 
 		// Set shutter delay
 		case 'D':
-		sd_tx_string("sys.shutter_delay_us = data.uint32_value\n");
-		sd_tx_string("UART_tx_ok();\n");
+		sd_tx("sys.shutter_delay_us = data.uint32_value\n");
+		sd_tx("UART_tx_ok();\n");
 		break;
 
 		// Set camera readout delay
 		case 'I':
-		sd_tx_string("sys.cam_readout_us = data.uint32_value\n");
-		sd_tx_string("UART_tx_ok();\n");
+		sd_tx("sys.cam_readout_us = data.uint32_value\n");
+		sd_tx("UART_tx_ok();\n");
 		break;
 
 		// Set fluidics trigger
 		case 'F':
-		sd_tx_string("sys.fluidics_frame = data.int32_value\n");
-		sd_tx_string("UART_tx_ok();\n");
+		sd_tx("sys.fluidics_frame = data.int32_value\n");
+		sd_tx("UART_tx_ok();\n");
 		break;
 
 		// Start stroboscopic acquisition
 		case 'S':
-		sd_tx_string("UART_tx_ok()\n");
-		sd_tx_string("start_stroboscopic_acq(data.uint32_value);\n");
+		sd_tx("UART_tx_ok()\n");
+		sd_tx("start_stroboscopic_acq(data.uint32_value);\n");
 		break;
 
 		// Start continuous acquisition
@@ -270,31 +225,31 @@ void parse_UART_command(const union Data data)
 
 		// Manually open laser shutters
 		case 'M':
-		sd_tx_string("if (sys.status != IDLE)\n");
-		sd_tx_string("{\n");
-			sd_tx_string("	UART_tx_err(\"M: Not in the IDLE state\");\n");
-			sd_tx_string("	break;\n");
-		sd_tx_string("}\n");
-		sd_tx_string("if (sys.lasers_in_use == 0)\n");
-		sd_tx_string("{\n");
-			sd_tx_string("	UART_tx_err(\"M: All lasers are disabled\");\n");
-			sd_tx_string("	break;\n");
-		sd_tx_string("}\n");
-		sd_tx_string("UART_tx_ok();\n");
-		sd_tx_string("set_lasers(sys.lasers_in_use);\n");
-		sd_tx_string("sys.status = MANUAL;\n");
+		sd_tx("if (sys.status != IDLE)\n");
+		sd_tx("{\n");
+			sd_tx("	UART_tx_err(\"M: Not in the IDLE state\");\n");
+			sd_tx("	break;\n");
+		sd_tx("}\n");
+		sd_tx("if (sys.lasers_in_use == 0)\n");
+		sd_tx("{\n");
+			sd_tx("	UART_tx_err(\"M: All lasers are disabled\");\n");
+			sd_tx("	break;\n");
+		sd_tx("}\n");
+		sd_tx("UART_tx_ok();\n");
+		sd_tx("set_lasers(sys.lasers_in_use);\n");
+		sd_tx("sys.status = MANUAL;\n");
 		break;
 
 		// Stop acquisition
 		case 'Q':
-		sd_tx_string("sys.n_frames = data.uint32_value\n");
-		sd_tx_string("UART_tx_ok();\n");
-		sd_tx_string("stop_acq();\n");
+		sd_tx("sys.n_frames = data.uint32_value\n");
+		sd_tx("UART_tx_ok();\n");
+		sd_tx("stop_acq();\n");
 		break;
 
 		default:
 		break;
-	sd_tx_string("\n");
+	sd_tx("\n");
 
 	}
 }

@@ -28,14 +28,14 @@ int main(void)
     sd_init_UART();
 	
     // Notify the host that we are ready
-	sd_tx_string("Sync device is ready. Firmware version: ");
-    sd_tx_string(VERSION);
+	sd_tx("Sync device is ready. Firmware version: ");
+    sd_tx(VERSION);
 	
 	activate_TC1();
 
 	while (1)
 	{
-		//sd_poll_UART();
+		;
 	}
 }
 
