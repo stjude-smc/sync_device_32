@@ -57,12 +57,12 @@ void activate_TC1(void)
 	sysclk_enable_peripheral_clock(ID_TC3);
 	
 	tc_init(TC1, 0,
-			TC_CMR_TCCLKS_TIMER_CLOCK4
+			TC_CMR_TCCLKS_TIMER_CLOCK4 | TC_CMR_WAVE
 	);
 	
-	tc_write_rc(TC1, 0, pulseTrainTable[0].timestamp);
+	tc_write_ra(TC1, 0, pulseTrainTable[0].timestamp);
 	// Enable the interrupt on register compare
-	tc_enable_interrupt(TC1, 0, TC_IER_CPCS);
+	tc_enable_interrupt(TC1, 0, TC_IER_CPAS);
 	
 	NVIC_EnableIRQ(TC3_IRQn);
 	
@@ -75,7 +75,7 @@ static uint32_t next_event_index = 0;
 void TC3_Handler(void)
 {
     // Read Timer Counter Status to clear the interrupt flag
-    if (TC1->TC_CHANNEL[0].TC_SR & TC_SR_CPCS) {
+    if (TC1->TC_CHANNEL[0].TC_SR & TC_SR_CPAS) {
 	    // Get the current time (microseconds)
 	    uint32_t currentTime = TC1->TC_CHANNEL[0].TC_CV;
 
@@ -93,7 +93,7 @@ void TC3_Handler(void)
 
 	    // If more events are left, set the next compare match
 	    if (next_event_index < num_entries) {
-		    TC1->TC_CHANNEL[0].TC_RC = pulseTrainTable[next_event_index].timestamp;
+		    TC1->TC_CHANNEL[0].TC_RA = pulseTrainTable[next_event_index].timestamp;
 	    }
     }
 	
@@ -101,7 +101,7 @@ void TC3_Handler(void)
 	{
 		// start over
 		next_event_index = 0;
-		tc_write_rc(TC1, 0, pulseTrainTable[0].timestamp);
+		tc_write_ra(TC1, 0, pulseTrainTable[0].timestamp);
 		tc_start(TC1, 0);
 	}
 }
