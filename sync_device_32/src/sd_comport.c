@@ -1,6 +1,7 @@
 #include "sd_comport.h"
 #include <string.h>
 #include "sd_events.h"
+#include "sd_triggers.h"
 
 // Memory buffer for DMA transmission
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
@@ -223,6 +224,7 @@ void _parse_UART_command(const union Data data)
 
 		// Manually open laser shutters
 		case 'M':
+			set_lasers(data.lasers.lasers_in_use);
 		sd_tx("if (sys.status != IDLE)\n");
 		sd_tx("{\n");
 			sd_tx("	UART_tx_err(\"M: Not in the IDLE state\");\n");
