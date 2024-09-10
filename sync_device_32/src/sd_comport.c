@@ -1,6 +1,6 @@
 #include "sd_comport.h"
 #include <string.h>
-
+#include "sd_events.h"
 
 // Memory buffer for DMA transmission
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
@@ -212,8 +212,13 @@ void parse_UART_command(const union Data data)
 
 		// Start continuous acquisition
 		case 'C':
-		sd_tx_string("UART_tx_ok()\n");
-		sd_tx_string("start_continuous_acq(data.uint32_value);\n");
+			tc_write_rc(TC1, 0, tc_read_rc(TC1, 0) >> 1);
+		
+			//tc_write_rc(TC1, 0, data.uint32_value);
+			//TC1->TC_CHANNEL[0].TC_RC = data.uint32_value;
+			//tc_enable_interrupt(TC1, 0, TC_IER_CPCS);
+
+			tc_start(TC1, 0);
 		break;
 
 		// Manually open laser shutters

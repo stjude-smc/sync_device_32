@@ -577,6 +577,12 @@
     <Compile Include="src\sd_comport.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\sd_events.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\sd_events.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\sd_globals.h">
       <SubType>compile</SubType>
     </Compile>

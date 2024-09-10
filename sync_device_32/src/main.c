@@ -9,6 +9,7 @@
 #include <string.h>
 #include "sd_globals.h"
 #include "sd_comport.h"
+#include "sd_events.h"
 
 // Declaration of function prototypes
 void sd_init_IO(void);
@@ -30,6 +31,7 @@ int main(void)
 	sd_tx_string("Sync device is ready. Firmware version: ");
     sd_tx_string(VERSION);
 	
+	activate_TC1();
 
 	while (1)
 	{
