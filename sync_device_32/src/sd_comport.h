@@ -19,7 +19,7 @@ typedef struct
 // Data packet for serial communication
 union Data
 {
-	struct
+	struct __attribute__((packed)) // disable structure padding on 32-bit architecture
 	{
 		uint8_t cmd;
 

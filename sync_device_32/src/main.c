@@ -35,7 +35,7 @@ int main(void)
 
 	while (1)
 	{
-		sd_poll_UART();
+		//sd_poll_UART();
 	}
 }
 

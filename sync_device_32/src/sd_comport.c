@@ -4,12 +4,15 @@
 
 // Memory buffer for DMA transmission
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
+static uint8_t rx_buffer[UART_BUFFER_SIZE];
 
 #define TC_CHAN 0
 
+// Function prototypes
 void _DMA_tx_wait(Pdc* p_uart_pdc);
 void parse_UART_command(const union Data data);
 void _init_UART_TC(void);
+void init_UART_DMA_rx(uint8_t size);
 
 void sd_init_UART(void)
 {
@@ -45,7 +48,12 @@ void sd_init_UART(void)
 	uart_enable_rx(UART);
 	
 	// Enable DMA for UART transmissions
-	pdc_enable_transfer(uart_get_pdc_base(UART), PERIPH_PTCR_TXTEN);
+	pdc_enable_transfer(uart_get_pdc_base(UART), PERIPH_PTCR_TXTEN | PERIPH_PTCR_RXTEN);
+	init_UART_DMA_rx(5);
+	
+	// Enable interrupts
+	uart_enable_interrupt(UART, UART_IER_RXRDY | UART_IER_ENDRX);
+	NVIC_EnableIRQ(UART_IRQn);
 	
 	// Initialize TC0 for timeout detection
 	_init_UART_TC();
@@ -78,9 +86,22 @@ void sd_tx_string(const char *cstring)
 	pdc_uart_tx_packet.ul_size = size;
 	
 	pdc_tx_init(p_uart_pdc, &pdc_uart_tx_packet, NULL);
-
 }
 
+// WIP
+void init_UART_DMA_rx(uint8_t size)
+{
+	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
+
+	// Configure PDC for reception
+	pdc_packet_t pdc_uart_rx_packet;
+	pdc_uart_rx_packet.ul_addr = (uint32_t)rx_buffer;
+	pdc_uart_rx_packet.ul_size = size;
+	
+	pdc_rx_init(p_uart_pdc, &pdc_uart_rx_packet, NULL);
+
+	pdc_enable_transfer(p_uart_pdc, PERIPH_PTCR_TXTEN | PERIPH_PTCR_RXTEN);
+}
 
 // Wait until DMA controller finishes data transmission
 void _DMA_tx_wait(Pdc* p_uart_pdc)
@@ -149,9 +170,37 @@ void _init_UART_TC(void)
 	// Enable the interrupt on RC compare
 	tc_enable_interrupt(TC0, TC_CHAN, TC_IER_CPCS);
 	
+	NVIC_EnableIRQ(TC0_IRQn);
+	
 	tc_start(TC0, TC_CHAN);
 }
 
+
+void TC0_Handler(void)
+{
+	uint32_t status = tc_get_status(TC0, TC_CHAN);
+	
+	if (status & TC_SR_CPCS) // Communication timeout
+	{
+		init_UART_DMA_rx(5); // Reset the receiver buffer
+	}
+}
+
+void UART_Handler(void)
+{
+	// A character arrived - reset the timer for communication timeout
+	tc_start(TC0, TC_CHAN);
+
+    // Check if the PDC transfer is complete
+    if (uart_get_status(UART) & UART_SR_ENDRX) {
+		union Data data;
+		memcpy(&data, &rx_buffer, 5);
+	    parse_UART_command(data);
+
+	    // Reinitialize PDC for the next transfer
+		init_UART_DMA_rx(5);
+    }
+}
 
 
 /************************************************************************/
@@ -212,11 +261,9 @@ void parse_UART_command(const union Data data)
 
 		// Start continuous acquisition
 		case 'C':
-			tc_write_rc(TC1, 0, tc_read_rc(TC1, 0) >> 1);
-		
-			//tc_write_rc(TC1, 0, data.uint32_value);
-			//TC1->TC_CHANNEL[0].TC_RC = data.uint32_value;
-			//tc_enable_interrupt(TC1, 0, TC_IER_CPCS);
+			tc_write_rc(TC1, 0, data.uint32_value);
+			TC1->TC_CHANNEL[0].TC_RC = data.uint32_value;
+			tc_enable_interrupt(TC1, 0, TC_IER_CPCS);
 
 			tc_start(TC1, 0);
 		break;

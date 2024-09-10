@@ -56,4 +56,4 @@ UART AND DMA CONFIGURATION
 
 #define UART_BUFFER_SIZE 100   // Size of DMA-controlled UART buffer
 #define UART_BAUDRATE 115200   // bits per second
-#define UART_TIMEOUT  25       // ms
+#define UART_TIMEOUT  1025       // ms
