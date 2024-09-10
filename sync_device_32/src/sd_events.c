@@ -14,11 +14,11 @@ void activate_TC1(void)
 	sysclk_enable_peripheral_clock(ID_TC3);
 	
 	tc_init(TC1, 0,
-			TC_CMR_TCCLKS_TIMER_CLOCK1 |   // Prescaler MCK/2
+			TC_CMR_TCCLKS_TIMER_CLOCK4 |   // Prescaler MCK/128
 			TC_CMR_WAVSEL_UP_RC            // Count up
 	);
 	
-	uint32_t rc_value = (sysclk_get_peripheral_hz() / 2 / 1000) * 250;
+	uint32_t rc_value = (sysclk_get_peripheral_hz() / 128 / 1000) * 250;
 	tc_write_rc(TC1, 0, rc_value);
 
 	// Enable the interrupt on RC compare

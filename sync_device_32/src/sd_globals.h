@@ -57,3 +57,20 @@ UART AND DMA CONFIGURATION
 #define UART_BUFFER_SIZE 100   // Size of DMA-controlled UART buffer
 #define UART_BAUDRATE 115200   // bits per second
 #define UART_TIMEOUT  25       // ms
+
+
+/***************
+TIME CONVERSIONS
+****************/
+// microseconds to counts (84MHz master clock, 128 pre-scaler)
+static inline uint32_t us2cts(uint32_t us) {
+	// Avoid overflow by using a larger intermediate type
+	uint64_t temp = (uint64_t) us * 656250;
+	return (uint32_t)(temp / 1000000);
+}
+
+// counts to microseconds (84MHz master clock, 128 pre-scaler)
+static inline uint32_t cts2us(uint32_t cts) {
+	uint64_t temp = (uint64_t) cts * 1000000;
+	return (uint32_t)(temp / 656250);
+}
