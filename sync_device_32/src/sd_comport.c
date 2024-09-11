@@ -124,7 +124,7 @@ void _init_UART_TC(void)
 	// Enable the interrupt on RC compare
 	tc_enable_interrupt(UART_TC, UART_TC_CH, TC_IER_CPCS);
 	
-	NVIC_EnableIRQ(TC0_IRQn);
+	NVIC_EnableIRQ(UART_TC_IRQn);
 	
 	tc_start(UART_TC, UART_TC_CH);
 }

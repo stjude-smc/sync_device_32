@@ -52,32 +52,32 @@ PulseTrainEntry pulseTrainTable[num_entries] = {
 	{ 2500000, f4 }
 };
 
-void activate_TC1(void)
+void start_ote_timer(void)
 {
-	sysclk_enable_peripheral_clock(ID_TC3);
+	sysclk_enable_peripheral_clock(ID_OTE_TC);
 	
-	tc_init(TC1, 0,
+	tc_init(OTE_TC, OTE_TC_CH,
 			TC_CMR_TCCLKS_TIMER_CLOCK4 | TC_CMR_WAVE
 	);
 	
-	tc_write_ra(TC1, 0, pulseTrainTable[0].timestamp);
+	tc_write_ra(OTE_TC, OTE_TC_CH, pulseTrainTable[0].timestamp);
 	// Enable the interrupt on register compare
-	tc_enable_interrupt(TC1, 0, TC_IER_CPAS);
+	tc_enable_interrupt(OTE_TC, OTE_TC_CH, TC_IER_CPAS);
 	
-	NVIC_EnableIRQ(TC3_IRQn);
+	NVIC_EnableIRQ(OTE_IRQn);
 	
-	tc_start(TC1, 0);
+	tc_start(OTE_TC, OTE_TC_CH);
 }
 
 // Index of the next event to trigger
 static uint32_t next_event_index = 0;
 
-void TC3_Handler(void)
+void OTE_Handler(void)
 {
     // Read Timer Counter Status to clear the interrupt flag
-    if (TC1->TC_CHANNEL[0].TC_SR & TC_SR_CPAS) {
+    if (tc_get_status(OTE_TC, OTE_TC_CH) & TC_SR_CPAS) {
 	    // Get the current time (microseconds)
-	    uint32_t currentTime = TC1->TC_CHANNEL[0].TC_CV;
+	    uint32_t currentTime = tc_read_cv(OTE_TC, OTE_TC_CH);
 
 	    // Handle back-to-back events by processing all events whose timestamps have passed
 	    while (next_event_index < num_entries && currentTime >= pulseTrainTable[next_event_index].timestamp) {
@@ -88,12 +88,12 @@ void TC3_Handler(void)
 		    next_event_index++;
 
 		    // Update the current time in case multiple events are very close together
-		    currentTime = TC1->TC_CHANNEL[0].TC_CV;
+		    currentTime = tc_read_cv(OTE_TC, OTE_TC_CH);
 	    }
 
 	    // If more events are left, set the next compare match
 	    if (next_event_index < num_entries) {
-		    TC1->TC_CHANNEL[0].TC_RA = pulseTrainTable[next_event_index].timestamp;
+			tc_write_ra(OTE_TC, OTE_TC_CH, pulseTrainTable[next_event_index].timestamp);
 	    }
     }
 	
@@ -101,7 +101,7 @@ void TC3_Handler(void)
 	{
 		// start over
 		next_event_index = 0;
-		tc_write_ra(TC1, 0, pulseTrainTable[0].timestamp);
-		tc_start(TC1, 0);
+		tc_write_ra(OTE_TC, OTE_TC_CH, pulseTrainTable[0].timestamp);
+		tc_start(OTE_TC, OTE_TC_CH);
 	}
 }

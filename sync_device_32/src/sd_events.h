@@ -10,4 +10,4 @@
 
 #include "sd_globals.h"
 
-void activate_TC1(void);
+void start_ote_timer(void);
