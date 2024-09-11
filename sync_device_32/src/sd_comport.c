@@ -165,6 +165,14 @@ void _parse_UART_command(const union Data data)
 {
 	switch (data.cmd)
 	{
+		// send pulse
+		case 'P':
+			ioport_set_pin_level(PIO_PA16_IDX, 1);
+			pulse_table[0].pending = true;
+			pulse_table[0].pin = PIO_PA16_IDX;
+			pulse_table[0].timestamp = tc_read_cv(OTE_TC, OTE_TC_CH) + us2cts(data.uint32_value);
+			pulse_table[0].polarity = 1;
+			break;
 		// Set laser shutters and ALEX
 		case 'L':
 		sd_tx("sys.lasers_in_use = data.lasers.lasers_in_use & SHUTTERS_MASK\n");

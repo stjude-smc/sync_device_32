@@ -31,3 +31,4 @@ uint8_t get_first_laser();
 // activates all enabled lasers if ALEX mode is off.
 void reset_lasers();
 */
+

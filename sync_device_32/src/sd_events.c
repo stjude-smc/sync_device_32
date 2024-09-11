@@ -10,6 +10,8 @@
 #include "sd_triggers.h"
 #include "sd_comport.h"
 
+Pulse pulse_table[10] = {0};
+
 void f1(void){set_lasers(0b0000);}
 void f2(void){set_lasers(0b0010);}
 void f3(void){set_lasers(0b0110);}
@@ -74,6 +76,8 @@ static uint32_t next_event_index = 0;
 
 void OTE_Handler(void)
 {
+	tc_get_status(OTE_TC, OTE_TC_CH);
+	return;
     // Read Timer Counter Status to clear the interrupt flag
     if (tc_get_status(OTE_TC, OTE_TC_CH) & TC_SR_CPAS) {
 	    // Get the current time (microseconds)

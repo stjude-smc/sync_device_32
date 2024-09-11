@@ -60,8 +60,10 @@ UART AND DMA CONFIGURATION
 // UART uses timer 8 (module TC2 channel 2)
 #define UART_TC              TC2
 #define UART_TC_CH           2
+// Compute timer id as <TC module number>*3 + <TC channel> and put below
 #define ID_UART_TC           ID_TC8
 #define UART_TIMEOUT_Handler TC8_Handler
+#define UART_TC_IRQn         TC8_IRQn
 
 
 
@@ -88,11 +90,15 @@ EVENT TIMERS
 // Timer/counter for one-time events (OTE)
 #define OTE_TC       TC0
 #define OTE_TC_CH    0
+// Compute timer id as <TC module number>*3 + <TC channel> and put below
 #define ID_OTE_TC    ID_TC0
 #define OTE_Handler  TC0_Handler
+#define OTE_IRQn     TC0_IRQn
 
 // Timer/counter for repeating events (RE)
 #define RE_TC        TC0
 #define RE_TC_CH     1
+// Compute timer id as <TC module number>*3 + <TC channel> and put below
 #define ID_RE_TC     ID_TC1
 #define RE_Handler	 TC1_Handler
+#define RE_IRQn      TC1_IRQn
