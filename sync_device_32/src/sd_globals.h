@@ -80,3 +80,19 @@ static inline uint32_t cts2us(uint32_t cts) {
 	uint64_t temp = (uint64_t) cts * 1000000;
 	return (uint32_t)(temp / 656250);
 }
+
+
+/***********
+EVENT TIMERS
+***********/
+// Timer/counter for one-time events (OTE)
+#define OTE_TC       TC0
+#define OTE_TC_CH    0
+#define ID_OTE_TC    ID_TC0
+#define OTE_Handler  TC0_Handler
+
+// Timer/counter for repeating events (RE)
+#define RE_TC        TC0
+#define RE_TC_CH     1
+#define ID_RE_TC     ID_TC1
+#define RE_Handler	 TC1_Handler
