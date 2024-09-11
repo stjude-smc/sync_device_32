@@ -7,7 +7,6 @@
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
 static uint8_t rx_buffer[UART_BUFFER_SIZE];
 
-#define TC_CHAN 0
 
 // Prototypes of internal functions
 void _DMA_tx_wait(Pdc* p_uart_pdc);
@@ -57,7 +56,7 @@ void sd_init_UART(void)
 	uart_enable_interrupt(UART, UART_IER_RXRDY | UART_IER_ENDRX);
 	NVIC_EnableIRQ(UART_IRQn);
 	
-	// Initialize TC0 for timeout detection
+	// Initialize TC for timeout detection
 	_init_UART_TC();
 }
 
@@ -109,32 +108,31 @@ void _DMA_tx_wait(Pdc* p_uart_pdc)
 }
 
 
-
-// Timer/counter 0 channel 0 is used for UART timeout
+// Timer/counter for UART timeout
 void _init_UART_TC(void)
 {
-	sysclk_enable_peripheral_clock(ID_TC0);
+	sysclk_enable_peripheral_clock(ID_UART_TC);
 	
-	tc_init(TC0, TC_CHAN,
+	tc_init(UART_TC, UART_TC_CH,
 			TC_CMR_TCCLKS_TIMER_CLOCK2 |   // Prescaler MCK/8
 			TC_CMR_WAVSEL_UP_RC            // Count up to TC_RC
 	);
 	
 	uint32_t rc_value = (sysclk_get_peripheral_hz() / 8 / 1000) * UART_TIMEOUT;
-	tc_write_rc(TC0, TC_CHAN, rc_value);
+	tc_write_rc(UART_TC, UART_TC_CH, rc_value);
 
 	// Enable the interrupt on RC compare
-	tc_enable_interrupt(TC0, TC_CHAN, TC_IER_CPCS);
+	tc_enable_interrupt(UART_TC, UART_TC_CH, TC_IER_CPCS);
 	
 	NVIC_EnableIRQ(TC0_IRQn);
 	
-	tc_start(TC0, TC_CHAN);
+	tc_start(UART_TC, UART_TC_CH);
 }
 
 
-void TC0_Handler(void)
+void UART_TIMEOUT_Handler(void)
 {
-	uint32_t status = tc_get_status(TC0, TC_CHAN);
+	uint32_t status = tc_get_status(UART_TC, UART_TC_CH);
 	
 	if (status & TC_SR_CPCS) // Communication timeout
 	{
@@ -145,7 +143,7 @@ void TC0_Handler(void)
 void UART_Handler(void)
 {
 	// A character arrived - reset the timer for communication timeout
-	tc_start(TC0, TC_CHAN);
+	tc_start(UART_TC, UART_TC_CH);
 
     // Check if the PDC transfer is complete
     if (uart_get_status(UART) & UART_SR_ENDRX) {

@@ -57,6 +57,12 @@ UART AND DMA CONFIGURATION
 #define UART_BUFFER_SIZE 100   // Size of DMA-controlled UART buffer
 #define UART_BAUDRATE 115200   // bits per second
 #define UART_TIMEOUT  25       // ms
+// UART uses timer 8 (module TC2 channel 2)
+#define UART_TC              TC2
+#define UART_TC_CH           2
+#define ID_UART_TC           ID_TC8
+#define UART_TIMEOUT_Handler TC8_Handler
+
 
 
 /***************
