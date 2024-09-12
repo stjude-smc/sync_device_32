@@ -17,23 +17,16 @@ typedef struct
 } LaserShutter;
 
 // Data packet for serial communication
-union Data
+typedef struct Data
 {
-	struct __attribute__((packed)) // disable structure padding on 32-bit architecture
-	{
-		uint8_t cmd;
-
-		// All members below share the same chunk of memory
-		union
-		{
-			LaserShutter lasers;
-			int32_t int32_value;
-			uint32_t uint32_value;
+	uint8_t  cmd[4];      // size=4 null-terminated 3 chr command
+	union {               // size=4
+		uint32_t arg1;
+		uint8_t pin[4];   // null-terminated 3 ch3 pin name
 		};
-	};
-
-	uint8_t bytes[5];
-};
+	uint32_t arg2;        // size=4
+	uint32_t timestamp;   // size=4
+} Data;
 
 void sd_init_UART(void);
 

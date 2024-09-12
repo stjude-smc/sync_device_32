@@ -559,6 +559,12 @@
     <Compile Include="src\ASF\sam\drivers\pdc\pdc.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\sd_pin_map.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\sd_pin_map.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\sd_triggers.c">
       <SubType>compile</SubType>
     </Compile>

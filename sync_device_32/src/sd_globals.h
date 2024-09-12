@@ -62,6 +62,7 @@ UART AND DMA CONFIGURATION
 #define UART_TC_CH           2
 #define ID_UART_TC           ID_TC8
 #define UART_TIMEOUT_Handler TC8_Handler
+#define UART_TC_IQRn	     TC8_IRQn
 
 
 

@@ -27,7 +27,7 @@ int main(void)
 	sd_tx("Sync device is ready. Firmware version: ");
     sd_tx(VERSION);
 	
-	activate_TC1();
+	//activate_TC1();
 
 	while (1)
 	{
