@@ -6,6 +6,7 @@
 
 // Memory buffer for DMA transmission
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
+static uint8_t tx_next_buffer[UART_BUFFER_SIZE];
 static uint8_t rx_buffer[UART_BUFFER_SIZE];
 
 
@@ -68,20 +69,28 @@ void sd_tx(const char *cstring)
 {
 	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
 	
-	// Wait if previous transmission didn't finish
-	// TODO MAYBE - use next transmission buffer. Maybe append data to it instead of waiting.
-	_DMA_tx_wait(p_uart_pdc);
-	
-	// Save provided string to the outgoing buffer because `cstring`
-	// will be destroyed once we exit this function
-	uint8_t size = strlen(cstring);
-	memcpy(tx_buffer, cstring, size);
-	
-	// Configure PDC for transmission
 	pdc_packet_t pdc_uart_tx_packet;
-	pdc_uart_tx_packet.ul_addr = (uint32_t)tx_buffer;
-	pdc_uart_tx_packet.ul_size = size;
+	size_t req_size = strlen(cstring);
+
+	if (pdc_read_tx_counter(p_uart_pdc) > 0)  // pending transmission, use next buffer
+	{
+		// If not enough space, wait until the next buffer clears
+		while (UART_BUFFER_SIZE - pdc_read_tx_next_counter(p_uart_pdc) < req_size)
+		{
+			;
+		}
+		// Append more data to the next outgoing buffer
+		memcpy(tx_next_buffer + pdc_read_tx_next_counter(p_uart_pdc), cstring, req_size);
+		pdc_uart_tx_packet.ul_addr = (uint32_t)tx_next_buffer;
+		pdc_uart_tx_packet.ul_size = pdc_read_tx_next_counter(p_uart_pdc) + req_size;
+		pdc_tx_init(p_uart_pdc, NULL, &pdc_uart_tx_packet);
+		return;
+	}
 	
+	// Copy provided string to the outgoing buffer
+	memcpy(tx_buffer, cstring, req_size);
+	pdc_uart_tx_packet.ul_addr = (uint32_t)tx_buffer;
+	pdc_uart_tx_packet.ul_size = req_size;	
 	pdc_tx_init(p_uart_pdc, &pdc_uart_tx_packet, NULL);
 }
 
@@ -98,15 +107,6 @@ void _init_UART_DMA_rx(uint8_t size)
 	pdc_rx_init(p_uart_pdc, &pdc_uart_rx_packet, NULL);
 
 	pdc_enable_transfer(p_uart_pdc, PERIPH_PTCR_TXTEN | PERIPH_PTCR_RXTEN);
-}
-
-// Wait until DMA controller finishes data transmission
-void _DMA_tx_wait(Pdc* p_uart_pdc)
-{
-	while (pdc_read_tx_counter(p_uart_pdc) > 0)
-	{
-		;
-	}
 }
 
 
