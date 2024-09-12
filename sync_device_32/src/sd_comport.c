@@ -69,6 +69,7 @@ void sd_tx(const char *cstring)
 	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
 	
 	// Wait if previous transmission didn't finish
+	// TODO MAYBE - use next transmission buffer. Maybe append data to it instead of waiting.
 	_DMA_tx_wait(p_uart_pdc);
 	
 	// Save provided string to the outgoing buffer because `cstring`
@@ -181,6 +182,14 @@ void _parse_UART_command(const Data data)
 	else if (strncasecmp((char*) data.cmd, "PUL", 3) == 0)
 	{
 		sd_tx("PUL command ");
+		uint32_t pin_idx = pin_name_to_ioport_id(data.pin);
+		ioport_set_pin_dir(pin_idx, IOPORT_DIR_OUTPUT);
+		
+		ioport_toggle_pin_level(pin_idx);
+		pulse_table[0].pending = true;
+		pulse_table[0].pin = pin_idx;
+		pulse_table[0].timestamp = tc_read_cv(OTE_TC, OTE_TC_CH) + us2cts(data.arg2);
+
 	}
 	else if (strncasecmp((char*) data.cmd, "CAM", 3) == 0)
 	{
@@ -191,5 +200,4 @@ void _parse_UART_command(const Data data)
 		sd_tx("unknown command ");
 		sd_tx(data.cmd);
 	}
-	sd_tx("\n");
 }

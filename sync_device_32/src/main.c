@@ -27,11 +27,20 @@ int main(void)
 	sd_tx("Sync device is ready. Firmware version: ");
     sd_tx(VERSION);
 	
-	//activate_TC1();
+	start_ote_timer();
 
+	uint32_t i = 0;
 	while (1)
 	{
 		;
+		Pulse* p_pulse = &pulse_table[i];
+		if (p_pulse->pending && tc_read_cv(OTE_TC, OTE_TC_CH) > p_pulse->timestamp)
+		{
+			ioport_toggle_pin_level(p_pulse->pin);
+			p_pulse->pending = false;
+		}
+		i++;
+		i = (i >= 10) ? 0 : i;
 	}
 }
 

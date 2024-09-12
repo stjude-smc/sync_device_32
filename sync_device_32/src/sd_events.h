@@ -10,4 +10,13 @@
 
 #include "sd_globals.h"
 
-void activate_TC1(void);
+typedef struct Pulse
+{
+	uint32_t	   timestamp;
+	ioport_pin_t   pin;
+	bool		   pending;
+} Pulse;
+
+extern Pulse pulse_table[10];
+
+void start_ote_timer(void);
