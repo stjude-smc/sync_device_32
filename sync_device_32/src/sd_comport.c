@@ -126,7 +126,7 @@ void _init_UART_TC(void)
 	// Enable the interrupt on RC compare
 	tc_enable_interrupt(UART_TC, UART_TC_CH, TC_IER_CPCS);
 	
-	NVIC_EnableIRQ(UART_TC_IQRn);
+	NVIC_EnableIRQ(UART_TC_IRQn);
 	
 	tc_start(UART_TC, UART_TC_CH);
 }
@@ -200,6 +200,6 @@ void _parse_UART_command(const Data data)
 	else
 	{
 		sd_tx("unknown command ");
-		sd_tx(data.cmd);
+		sd_tx((const char*) data.cmd);
 	}
 }

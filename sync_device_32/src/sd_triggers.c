@@ -1,5 +1,5 @@
 #include "sd_triggers.h"
-
+#include <stdlib.h>
 
 // Prototypes of local functions
 uint8_t get_lowest_bit(uint8_t v);

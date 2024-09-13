@@ -8,13 +8,13 @@
 #include "sd_pin_map.h"
 
 // Convert pin name (e.g., "D13" or "A0") to SAM3X I/O port pin ID
-uint32_t pin_name_to_ioport_id(uint8_t *pin_name) {
+uint32_t pin_name_to_ioport_id(const uint8_t *pin_name) {
 	//size_t map_size = sizeof(pin_map) / sizeof(pin_map[0]);
 	size_t map_size = 80;
 
 	// Iterate through the pin map to find the matching pin name
 	for (size_t i = 0; i < map_size; i++) {
-		if (strncasecmp(pin_name, pin_map[i].pin_name, 3) == 0) {
+		if (strncasecmp((const char*) pin_name, pin_map[i].pin_name, 3) == 0) {
 			// Return the PIO pin index
 			return pin_map[i].pin_idx;
 		}

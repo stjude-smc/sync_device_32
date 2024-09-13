@@ -13,7 +13,7 @@
 #include <string.h>
 
 // Function prototype
-uint32_t pin_name_to_ioport_id(uint8_t *pin_name);
+uint32_t pin_name_to_ioport_id(const uint8_t *pin_name);
 
 // Pin mapping for Arduino Due (Digital and Analog pins)
 typedef struct {

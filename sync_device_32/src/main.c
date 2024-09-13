@@ -40,6 +40,10 @@ void get_pio_and_id(uint32_t pin, Pio** pio, uint32_t* pio_id) {
 	}
 }
 
+
+void f(uint32_t a, uint32_t b);
+void f(uint32_t a, uint32_t b){set_lasers(a);}
+	
 // ENTRY POINT
 int main(void)
 {
@@ -101,10 +105,25 @@ int main(void)
 
 	
     // Notify the host that we are ready
-	sd_tx("Buttons are configured");
-    sd_tx(VERSION);
+	sd_tx("Buttons are configured\n");
+	
+	delay_ms(100);
 	
 	start_sys_timer();
+	tc_stop(SYS_TC, SYS_TC_CH);
+	// Schedule some test events. The sys timer has to be initialized	
+	Event e = {0};
+	e.func = f; e.arg1 = 0b0001; e.timestamp=25; schedule_event(e);
+	e.func = f; e.arg1 = 0b0010; e.timestamp=50; schedule_event(e);
+	e.func = f; e.arg1 = 0b0100; e.timestamp=75; schedule_event(e);
+	e.func = f; e.arg1 = 0b1001; e.timestamp=100; schedule_event(e);
+	e.func = f; e.arg1 = 0b0100; e.timestamp=125; schedule_event(e);
+	e.func = f; e.arg1 = 0b0010; e.timestamp=150; schedule_event(e);
+	e.func = f; e.arg1 = 0b0001; e.timestamp=175; schedule_event(e);
+	e.func = f; e.arg1 = 0b0000; e.timestamp=200; schedule_event(e);
+	
+	tc_start(SYS_TC, SYS_TC_CH);
+	
 
 	uint32_t i = 0;
 	while (1)
@@ -126,6 +145,13 @@ void my_pio_handler(uint32_t id, uint32_t mask) {
 	// Check if the interrupt is for the correct pins
 	if (mask == ioport_pin_to_mask(INPUT_PIN1)) {
 		sd_tx("Button 1 event\n");
+		
+		Event e = {0};
+		e.func = f; e.arg1 = 0b0001; e.timestamp=000000; schedule_event(e);
+		e.func = f; e.arg1 = 0b0010; e.timestamp=100000; schedule_event(e);
+		e.func = f; e.arg1 = 0b0100; e.timestamp=200000; schedule_event(e);
+		e.func = f; e.arg1 = 0b1000; e.timestamp=400000; schedule_event(e);
+		e.func = f; e.arg1 = 0b0000; e.timestamp=500000; schedule_event(e);
 	}
 }
 

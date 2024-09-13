@@ -18,7 +18,7 @@
 /***************/
 typedef signed char errcode;
 #define OK 0
-#define ERR_TIMEOUT -1
+//#define ERR_TIMEOUT -1
 
 /*********************************
 HELPFUL BIT MANIPULATION FUNCTIONS
@@ -53,7 +53,6 @@ PINOUT AND WIRING DEFINITIONS
 /*************************
 UART AND DMA CONFIGURATION
 *************************/
-
 #define UART_BUFFER_SIZE 100   // Size of DMA-controlled UART buffer
 #define UART_BAUDRATE 115200   // bits per second
 #define UART_TIMEOUT  25       // ms
@@ -62,8 +61,7 @@ UART AND DMA CONFIGURATION
 #define UART_TC_CH           2
 #define ID_UART_TC           ID_TC8
 #define UART_TIMEOUT_Handler TC8_Handler
-#define UART_TC_IQRn	     TC8_IRQn
-
+#define UART_TC_IRQn	     TC8_IRQn
 
 
 /***************
@@ -83,12 +81,14 @@ static inline uint32_t cts2us(uint32_t cts) {
 }
 
 
-/***********
-SYSTEM TIMER
-***********/
+/**********************
+SYSTEM TIMER AND EVENTS
+**********************/
 // Main timer/counter for events
 #define SYS_TC			TC0
 #define SYS_TC_CH		0
 #define ID_SYS_TC		ID_TC0
 #define SYS_TC_Handler  TC0_Handler
 #define SYS_TC_IRQn		TC0_IRQn
+
+#define MAX_N_EVENTS	300

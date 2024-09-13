@@ -10,24 +10,68 @@
 #include "sd_triggers.h"
 #include "sd_comport.h"
 
+static inline void disable_event_irq(void)
+{
+	tc_disable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_CPAS);
+}
+static inline void enable_event_irq(void)
+{
+	tc_enable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_CPAS);
+}
+
+// return current system time
+static inline uint32_t current_time(void)
+{
+	return tc_read_cv(SYS_TC, SYS_TC_CH);
+}
+
+
 Pulse pulse_table[10] = {0};
 size_t pulse_table_n_items = 0;
 
-int pulse_srt_pending_desc(const Pulse* p1, const Pulse* p2);
-int pulse_srt_ts_asc(const Pulse* p1, const Pulse* p2);
+Event event_table[MAX_N_EVENTS] = {0};
+size_t event_table_size = 0;
+
+int pulse_srt_pending_desc(const void* a, const void* b);
+int pulse_srt_ts_asc(const void* a, const void* b);
+int cmp_event_by_active(const void* a, const void* b);
+int cmp_event_by_ts(const void* a, const void* b);
 
 // Comparison functions
-int pulse_srt_pending_desc(const Pulse* p1, const Pulse* p2) {
-	return p2->pending - p1->pending;
+int pulse_srt_pending_desc(const void* a, const void* b)
+{
+	const Pulse* A = (const Pulse*) a;
+	const Pulse* B = (const Pulse*) b;
+	return B->pending - A->pending;
 }
 
-int pulse_srt_ts_asc(const Pulse* p1, const Pulse* p2) {
-	return p1->timestamp - p2->timestamp;
+int pulse_srt_ts_asc(const void* a, const void* b)
+{
+	const Pulse* A = (const Pulse*) a;
+	const Pulse* B = (const Pulse*) b;
+	return A->timestamp - B->timestamp;
 }
+
+int cmp_event_by_active(const void* a, const void* b)
+{
+	const Event* A = (const Event*) a;
+	const Event* B = (const Event*) b;
+	return B->active - A->active;
+}
+
+int cmp_event_by_ts(const void* a, const void* b)
+{
+	const Event* A = (const Event*) a;
+	const Event* B = (const Event*) b;
+	return A->timestamp - B->timestamp;
+}
+
 
 // this takes about 25us
 void update_pulse_table(void)
 {
+	disable_event_irq();
+	
 	// update size of the pulse_table
 	qsort(pulse_table, 10, sizeof(pulse_table[0]), pulse_srt_pending_desc);
 	for (int j = 0; j<=10; j++)
@@ -40,7 +84,110 @@ void update_pulse_table(void)
 	}
 	// sort by timestamp
 	qsort(pulse_table, pulse_table_n_items, sizeof(pulse_table[0]), pulse_srt_ts_asc);
+	
+	enable_event_irq();
 }
+
+
+// Purge any completed events, update table size
+// Sort table by the order of occurrence
+// This function blocks system timer interrupt to
+// avoid data corruption
+void update_event_table(void)
+{
+	disable_event_irq();
+	
+	// update size of the event_table
+	qsort(event_table, event_table_size, sizeof(Event), cmp_event_by_active);
+	for (int i = 0; i <= event_table_size; i++)
+	{
+		if (!(event_table[i].active))
+		{
+			event_table_size = i;  // update number of elements
+			break;
+		}
+	}
+	// sort by timestamp
+	qsort(event_table, event_table_size, sizeof(Event), cmp_event_by_ts);
+
+	// We might have missed	some events while sorting the table
+	process_pending_events();
+	
+	// Re-enable the system timer RA compare interrupt
+	enable_event_irq();	
+}
+
+
+// Process all events whose timestamps are current or have passed
+void process_pending_events(void)
+{
+	disable_event_irq();
+	
+	bool update_pending = false;
+	for (uint32_t event_idx = 0; event_idx < event_table_size ; event_idx++)
+	{
+		Event *e = &event_table[event_idx];
+		if (current_time() >= e->timestamp)
+		{
+			volatile uint32_t t = current_time();
+			
+			e->func(e->arg1, e->arg2);
+			// TODO: update event count and active status (see diagram). If event becomes inactive -> update table
+			e->active = false; // TODO - at the moment all events are one-time events
+			update_pending = true;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (update_pending)
+	{
+		update_event_table();	
+	}
+
+	// schedule SYS_TC interrupt for the timestamp of the next event
+	if (event_table_size > 0)
+	{
+		tc_write_ra(SYS_TC, SYS_TC_CH, event_table[0].timestamp);
+	}
+	
+	enable_event_irq();
+}
+
+
+void schedule_event(Event e)
+{
+	// Check if the event should be fired immediately, and that's it
+	if (e.timestamp <= 5)  // that is 5 us
+	{
+		e.func(e.arg1, e.arg2);
+		return;
+	}
+	
+	// Can we schedule it?
+	if (event_table_size >= MAX_N_EVENTS)
+	{
+		sd_tx("ERR: event table is full!\n");
+		return;
+	}
+
+	// Add event to the event table
+	e.active = true;
+	e.timestamp = us2cts(e.timestamp) + current_time();
+
+	disable_event_irq();
+	event_table[event_table_size++] = e;
+	
+	// The added event might be out of order. We need to sort the table.
+	qsort(event_table, event_table_size, sizeof(Event), cmp_event_by_ts);
+	
+	// It might be time to trigger the event. This also sets RA for SYS_TC
+	process_pending_events();
+
+	enable_event_irq();	
+}
+
 
 void send_pulse(ioport_pin_t pin, uint32_t duration)
 {
@@ -48,17 +195,10 @@ void send_pulse(ioport_pin_t pin, uint32_t duration)
 	Pulse* p_pulse = &pulse_table[pulse_table_n_items];
 	p_pulse->pending = true;
 	p_pulse->pin = pin;
-	p_pulse->timestamp = tc_read_cv(SYS_TC, SYS_TC_CH) + duration;
+	p_pulse->timestamp = current_time() + duration;
 	update_pulse_table();
 }
 
-// Define a structure for timestamp and corresponding function pointer
-typedef struct {
-	uint32_t timestamp;   // Time in counts
-	void (*func)(void);   // Function to call when time is reached
-} PulseTrainEntry;
-
-#define num_entries 20
 
 
 void start_sys_timer(void)
@@ -69,52 +209,24 @@ void start_sys_timer(void)
 			TC_CMR_TCCLKS_TIMER_CLOCK4 | TC_CMR_WAVE
 	);
 	
-	// tc_write_ra(TC1, 0, pulseTrainTable[0].timestamp);  // FIXME
 	// Enable the interrupt on register compare
-	tc_enable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_CPAS);
+	enable_event_irq();
 	
 	NVIC_EnableIRQ(SYS_TC_IRQn);
 	
 	tc_start(SYS_TC, SYS_TC_CH);
 }
 
-// Index of the next event to trigger
-//static uint32_t next_event_index = 0;
-
-
-// FIXME
-/*
-void TC3_Handler(void)
+// This interrupt runs when current time reaches the timestamp of the
+// element 0 in the event table. We might end up processing more than one
+// event. At the end of the interrupt, we need to purge completed events
+// from the table, sort it by timestamp, and schedule the next interrupt
+void SYS_TC_Handler(void)
 {
     // Read Timer Counter Status to clear the interrupt flag
-    if (TC1->TC_CHANNEL[0].TC_SR & TC_SR_CPAS) {
-	    // Get the current time (microseconds)
-	    uint32_t currentTime = TC1->TC_CHANNEL[0].TC_CV;
-
-	    // Handle back-to-back events by processing all events whose timestamps have passed
-	    while (next_event_index < num_entries && currentTime >= pulseTrainTable[next_event_index].timestamp) {
-		    // Call the corresponding function
-		    pulseTrainTable[next_event_index].func();
-
-		    // Move to the next event in the table
-		    next_event_index++;
-
-		    // Update the current time in case multiple events are very close together
-		    currentTime = TC1->TC_CHANNEL[0].TC_CV;
-	    }
-
-	    // If more events are left, set the next compare match
-	    if (next_event_index < num_entries) {
-		    TC1->TC_CHANNEL[0].TC_RA = pulseTrainTable[next_event_index].timestamp;
-	    }
-    }
+	uint32_t status = tc_get_status(SYS_TC, SYS_TC_CH);
 	
-	if (next_event_index >= num_entries)
-	{
-		// start over
-		next_event_index = 0;
-		tc_write_ra(TC1, 0, pulseTrainTable[0].timestamp);
-		tc_start(TC1, 0);
-	}
+    if (status & TC_SR_CPAS) {  // RA match
+		process_pending_events();
+    }
 }
-*/

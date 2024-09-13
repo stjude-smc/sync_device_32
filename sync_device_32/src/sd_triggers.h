@@ -9,6 +9,7 @@
 #pragma once
 
 #include "sd_globals.h"
+#include "sd_comport.h"
 
 // Initialize all I/O ports
 void sd_init_IO(void);
