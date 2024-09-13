@@ -18,5 +18,9 @@ typedef struct Pulse
 } Pulse;
 
 extern Pulse pulse_table[10];
+extern size_t pulse_table_n_items;
+
+void update_pulse_table(void);
+void send_pulse(ioport_pin_t pin, uint32_t duration);
 
 void start_ote_timer(void);

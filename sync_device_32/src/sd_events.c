@@ -11,6 +11,46 @@
 #include "sd_comport.h"
 
 Pulse pulse_table[10] = {0};
+size_t pulse_table_n_items = 0;
+
+int pulse_srt_pending_desc(const Pulse* p1, const Pulse* p2);
+int pulse_srt_ts_asc(const Pulse* p1, const Pulse* p2);
+
+// Comparison functions
+int pulse_srt_pending_desc(const Pulse* p1, const Pulse* p2) {
+	return p2->pending - p1->pending;
+}
+
+int pulse_srt_ts_asc(const Pulse* p1, const Pulse* p2) {
+	return p1->timestamp - p2->timestamp;
+}
+
+void update_pulse_table(void)
+{
+	// update size of the pulse_table
+	qsort(pulse_table, 10, sizeof(pulse_table[0]), pulse_srt_pending_desc);
+	for (int j = 0; j<=10; j++)
+	{
+		if (!(pulse_table[j].pending))
+		{
+			pulse_table_n_items = j;  // update number of elements
+			break;
+		}
+	}
+	// sort by timestamp
+	qsort(pulse_table, pulse_table_n_items, sizeof(pulse_table[0]), pulse_srt_ts_asc);
+}
+
+// this takes about 25us
+void send_pulse(ioport_pin_t pin, uint32_t duration)
+{
+	ioport_toggle_pin_level(pin);
+	Pulse* p_pulse = &pulse_table[pulse_table_n_items];
+	p_pulse->pending = true;
+	p_pulse->pin = pin;
+	p_pulse->timestamp = tc_read_cv(OTE_TC, OTE_TC_CH) + duration;
+	update_pulse_table();
+}
 
 // Define a structure for timestamp and corresponding function pointer
 typedef struct {

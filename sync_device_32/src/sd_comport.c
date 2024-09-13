@@ -185,10 +185,12 @@ void _parse_UART_command(const Data data)
 		uint32_t pin_idx = pin_name_to_ioport_id(data.pin);
 		ioport_set_pin_dir(pin_idx, IOPORT_DIR_OUTPUT);
 		
-		ioport_toggle_pin_level(pin_idx);
-		pulse_table[0].pending = true;
-		pulse_table[0].pin = pin_idx;
-		pulse_table[0].timestamp = tc_read_cv(OTE_TC, OTE_TC_CH) + us2cts(data.arg2);
+		send_pulse(pin_idx, us2cts(data.arg2));
+		send_pulse(CY2_PIN, 2*us2cts(data.arg2));
+		send_pulse(CY5_PIN, 3*us2cts(data.arg2));
+		send_pulse(CAMERA_PIN, 4*us2cts(data.arg2));
+		
+		
 
 	}
 	else if (strncasecmp((char*) data.cmd, "CAM", 3) == 0)

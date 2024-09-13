@@ -13,6 +13,7 @@
 #include "sd_triggers.h"
 
 
+
 // ENTRY POINT
 int main(void)
 {
@@ -32,15 +33,15 @@ int main(void)
 	uint32_t i = 0;
 	while (1)
 	{
-		;
 		Pulse* p_pulse = &pulse_table[i];
 		if (p_pulse->pending && tc_read_cv(OTE_TC, OTE_TC_CH) > p_pulse->timestamp)
 		{
 			ioport_toggle_pin_level(p_pulse->pin);
 			p_pulse->pending = false;
+			update_pulse_table();
 		}
 		i++;
-		i = (i >= 10) ? 0 : i;
+		i = (i >= pulse_table_n_items) ? 0 : i;
 	}
 }
 
