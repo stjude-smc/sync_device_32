@@ -45,3 +45,24 @@ int main(void)
 	}
 }
 
+/// WHAT'S NEXT?
+/*
+
+
+Implement scheduling for the future.
+ Start with scheduling a pin level event
+  - define event table
+  - activate R compare interrupt
+  - add correct table sorting by timestamp and removal of inactive elements
+ 
+ Add pin toggle event
+ Then add start/stop clock commands
+ 
+ Re-write pulse scheduling function
+  - Remove pulse table from main loop
+  - Scheduling a pulse also schedules pin toggle event
+ 
+ Finally, add automatic rescheduling of functions
+ based on N and interval logic
+
+*/

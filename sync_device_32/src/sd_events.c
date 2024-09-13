@@ -25,6 +25,7 @@ int pulse_srt_ts_asc(const Pulse* p1, const Pulse* p2) {
 	return p1->timestamp - p2->timestamp;
 }
 
+// this takes about 25us
 void update_pulse_table(void)
 {
 	// update size of the pulse_table
@@ -41,7 +42,6 @@ void update_pulse_table(void)
 	qsort(pulse_table, pulse_table_n_items, sizeof(pulse_table[0]), pulse_srt_ts_asc);
 }
 
-// this takes about 25us
 void send_pulse(ioport_pin_t pin, uint32_t duration)
 {
 	ioport_toggle_pin_level(pin);
