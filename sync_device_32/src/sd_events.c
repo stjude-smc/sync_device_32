@@ -123,35 +123,28 @@ void process_pending_events(void)
 {
 	disable_event_irq();
 	
-	bool update_pending = false;
+	// We iterate through the presorted table and fire all pending events
 	for (uint32_t event_idx = 0; event_idx < event_table_size ; event_idx++)
 	{
 		Event *e = &event_table[event_idx];
 		if (current_time() >= e->timestamp)
 		{
-			volatile uint32_t t = current_time();
-			
-			e->func(e->arg1, e->arg2);
-			// TODO: update event count and active status (see diagram). If event becomes inactive -> update table
-			e->active = false; // TODO - at the moment all events are one-time events
-			update_pending = true;
+			if (e->active)
+			{
+				e->func(e->arg1, e->arg2);
+				// TODO: update event count and active status (see diagram). If event becomes inactive -> update table
+				e->active = false; // TODO - at the moment all events are one-time events
+			}
 		}
+		// ...until we find the first future event
 		else
 		{
+			// Set interrupt for a future event
+			tc_write_ra(SYS_TC, SYS_TC_CH, e->timestamp);
 			break;
 		}
 	}
-	if (update_pending)
-	{
-		update_event_table();	
-	}
 
-	// schedule SYS_TC interrupt for the timestamp of the next event
-	if (event_table_size > 0)
-	{
-		tc_write_ra(SYS_TC, SYS_TC_CH, event_table[0].timestamp);
-	}
-	
 	enable_event_irq();
 }
 
@@ -179,11 +172,8 @@ void schedule_event(Event e)
 	disable_event_irq();
 	event_table[event_table_size++] = e;
 	
-	// The added event might be out of order. We need to sort the table.
-	qsort(event_table, event_table_size, sizeof(Event), cmp_event_by_ts);
-	
-	// It might be time to trigger the event. This also sets RA for SYS_TC
-	process_pending_events();
+	// Since we modified the event table, we have to update and sort it
+	update_event_table();
 
 	enable_event_irq();	
 }
