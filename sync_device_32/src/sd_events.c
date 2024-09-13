@@ -48,7 +48,7 @@ void send_pulse(ioport_pin_t pin, uint32_t duration)
 	Pulse* p_pulse = &pulse_table[pulse_table_n_items];
 	p_pulse->pending = true;
 	p_pulse->pin = pin;
-	p_pulse->timestamp = tc_read_cv(OTE_TC, OTE_TC_CH) + duration;
+	p_pulse->timestamp = tc_read_cv(SYS_TC, SYS_TC_CH) + duration;
 	update_pulse_table();
 }
 
@@ -61,21 +61,21 @@ typedef struct {
 #define num_entries 20
 
 
-void start_ote_timer(void)
+void start_sys_timer(void)
 {
-	sysclk_enable_peripheral_clock(ID_OTE_TC);
+	sysclk_enable_peripheral_clock(ID_SYS_TC);
 	
-	tc_init(OTE_TC, OTE_TC_CH,
+	tc_init(SYS_TC, SYS_TC_CH,
 			TC_CMR_TCCLKS_TIMER_CLOCK4 | TC_CMR_WAVE
 	);
 	
 	// tc_write_ra(TC1, 0, pulseTrainTable[0].timestamp);  // FIXME
 	// Enable the interrupt on register compare
-	tc_enable_interrupt(OTE_TC, OTE_TC_CH, TC_IER_CPAS);
+	tc_enable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_CPAS);
 	
-	NVIC_EnableIRQ(OTE_IRQn);
+	NVIC_EnableIRQ(SYS_TC_IRQn);
 	
-	tc_start(OTE_TC, OTE_TC_CH);
+	tc_start(SYS_TC, SYS_TC_CH);
 }
 
 // Index of the next event to trigger

@@ -104,13 +104,13 @@ int main(void)
 	sd_tx("Buttons are configured");
     sd_tx(VERSION);
 	
-	start_ote_timer();
+	start_sys_timer();
 
 	uint32_t i = 0;
 	while (1)
 	{
 		Pulse* p_pulse = &pulse_table[i];
-		if (p_pulse->pending && tc_read_cv(OTE_TC, OTE_TC_CH) > p_pulse->timestamp)
+		if (p_pulse->pending && tc_read_cv(SYS_TC, SYS_TC_CH) > p_pulse->timestamp)
 		{
 			ioport_toggle_pin_level(p_pulse->pin);
 			p_pulse->pending = false;
@@ -123,7 +123,7 @@ int main(void)
 
 
 void my_pio_handler(uint32_t id, uint32_t mask) {
-	// Check if the interrupt is for the correct pin
+	// Check if the interrupt is for the correct pins
 	if (mask == ioport_pin_to_mask(INPUT_PIN1)) {
 		sd_tx("Button 1 event\n");
 	}

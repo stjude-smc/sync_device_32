@@ -84,18 +84,11 @@ static inline uint32_t cts2us(uint32_t cts) {
 
 
 /***********
-EVENT TIMERS
+SYSTEM TIMER
 ***********/
-// Timer/counter for one-time events (OTE)
-#define OTE_TC       TC0
-#define OTE_TC_CH    0
-#define ID_OTE_TC    ID_TC0
-#define OTE_Handler  TC0_Handler
-#define OTE_IRQn	 TC0_IRQn
-
-// Timer/counter for repeating events (RE)
-#define RE_TC        TC0
-#define RE_TC_CH     1
-#define ID_RE_TC     ID_TC1
-#define RE_Handler	 TC1_Handler
-#define RE_IRQn	     TC1_IRQn
+// Main timer/counter for events
+#define SYS_TC			TC0
+#define SYS_TC_CH		0
+#define ID_SYS_TC		ID_TC0
+#define SYS_TC_Handler  TC0_Handler
+#define SYS_TC_IRQn		TC0_IRQn
