@@ -13,12 +13,6 @@
 
 #define VERSION "0.6.0\n"
 
-/***************/
-/* Error codes */
-/***************/
-typedef signed char errcode;
-#define OK 0
-//#define ERR_TIMEOUT -1
 
 /*********************************
 HELPFUL BIT MANIPULATION FUNCTIONS

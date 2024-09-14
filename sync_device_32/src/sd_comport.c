@@ -163,35 +163,43 @@ void UART_Handler(void)
 /************************************************************************/
 /* Implementation of the communication protocol                         */
 /************************************************************************/
-
+void f1(uint32_t a, uint32_t b);
+void f1(uint32_t a, uint32_t b){set_lasers(a);}
+void ft(uint32_t a, uint32_t b);
+void ft(uint32_t a, uint32_t b){ioport_toggle_pin_level(CY7_PIN);}
+	
 void _parse_UART_command(const Data data)
 {
 	if (strncasecmp((char*) data.cmd, "PIN", 3) == 0)
 	{
-		sd_tx("PIN command, pin_idx=");
-		uint32_t pin_idx = pin_name_to_ioport_id(data.pin);
-		ioport_set_pin_dir(pin_idx, IOPORT_DIR_OUTPUT);
-		ioport_set_pin_level(pin_idx, data.arg2);
-		
-		char txt[10];
-		itoa(pin_name_to_ioport_id(data.pin), txt, 10);
-		sd_tx(txt);
-		
-		ioport_toggle_pin_level(CAMERA_PIN);
+		schedule_pin(data);
+	}
+	if (strncasecmp((char*) data.cmd, "TGL", 3) == 0)
+	{
+		schedule_toggle(data);
 	}
 	else if (strncasecmp((char*) data.cmd, "PUL", 3) == 0)
 	{
-		sd_tx("PUL command ");
-		uint32_t pin_idx = pin_name_to_ioport_id(data.pin);
-		ioport_set_pin_dir(pin_idx, IOPORT_DIR_OUTPUT);
-		
-		send_pulse(pin_idx, us2cts(data.arg2));
-		send_pulse(CY2_PIN, 2*us2cts(data.arg2));
-		send_pulse(CY5_PIN, 3*us2cts(data.arg2));
-		send_pulse(CAMERA_PIN, 4*us2cts(data.arg2));
-		
-		
+		schedule_pulse(data);
+	}
+	else if (strncasecmp((char*) data.cmd, "TST", 3) == 0)
+	{
+		pause_sys_timer();
+		uint32_t m = data.arg1;
+		Event e = {0};
+		e.func = f1; e.arg1 = 0b0001; e.timestamp=0*m + 1; schedule_event(e);
+		e.func = f1; e.arg1 = 0b0010; e.timestamp=1*m + 1; schedule_event(e);
+		e.func = f1; e.arg1 = 0b0100; e.timestamp=2*m + 1; schedule_event(e);
+		e.func = f1; e.arg1 = 0b1001; e.timestamp=3*m + 1; schedule_event(e);
+		e.func = f1; e.arg1 = 0b0100; e.timestamp=4*m + 1; schedule_event(e);
+		e.func = f1; e.arg1 = 0b0010; e.timestamp=5*m + 1; schedule_event(e);
+		e.func = f1; e.arg1 = 0b0001; e.timestamp=6*m + 1; schedule_event(e);
+		e.func = f1; e.arg1 = 0b0000; e.timestamp=7*m + 1; schedule_event(e);
 
+		e.func = ft; e.timestamp=4.5*m + 1; schedule_event(e);
+		e.func = ft; e.timestamp=5.5*m + 1; schedule_event(e);
+		e.func = ft; e.timestamp=6.5*m + 1; schedule_event(e);
+		start_sys_timer();
 	}
 	else if (strncasecmp((char*) data.cmd, "CAM", 3) == 0)
 	{

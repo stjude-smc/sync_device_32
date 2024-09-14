@@ -9,19 +9,13 @@
 #pragma once
 
 #include "sd_globals.h"
+#include "sd_comport.h"
+#include "sd_pin_map.h"
 
-typedef struct Pulse
-{
-	uint32_t	   timestamp;
-	ioport_pin_t   pin;
-	bool		   pending;
-} Pulse;
-extern Pulse pulse_table[10];
-extern size_t pulse_table_n_items;
 
-void update_pulse_table(void);
-void send_pulse(ioport_pin_t pin, uint32_t duration);
-
+void schedule_pulse(const Data data);
+void schedule_pin(const Data data);
+void schedule_toggle(const Data data);
 
 
 typedef struct Event
@@ -35,11 +29,18 @@ typedef struct Event
 	bool		  active;
 } Event;
 extern Event event_table[MAX_N_EVENTS];
-extern size_t event_table_size;
 
 void update_event_table(void);
-void schedule_event(Event event);
+void schedule_event(const Event event);
+void schedule_event_abs_time(const Event event);
 
 
+extern bool sys_timer_running;
 void start_sys_timer(void);
+void init_sys_timer(void);
+void pause_sys_timer(void);
 void process_pending_events(void);
+
+// Housekeeping - ensure that if there are pending events in the future
+// the RA is set for system timer
+void verify_ra_is_set(void);
