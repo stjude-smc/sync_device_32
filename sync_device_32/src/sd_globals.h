@@ -61,17 +61,17 @@ UART AND DMA CONFIGURATION
 /***************
 TIME CONVERSIONS
 ****************/
-// microseconds to counts (84MHz master clock, 128 pre-scaler)
+// microseconds to counts (84MHz master clock, 32 pre-scaler)
 static inline uint32_t us2cts(uint32_t us) {
 	// Avoid overflow by using a larger intermediate type
-	uint64_t temp = (uint64_t) us * 656250;
-	return (uint32_t)(temp / 1000000);
+	uint64_t temp = (uint64_t) us * 2625;
+	return (uint32_t)(temp / 1000);
 }
 
-// counts to microseconds (84MHz master clock, 128 pre-scaler)
+// counts to microseconds (84MHz master clock, 32 pre-scaler)
 static inline uint32_t cts2us(uint32_t cts) {
-	uint64_t temp = (uint64_t) cts * 1000000;
-	return (uint32_t)(temp / 656250);
+	uint64_t temp = (uint64_t) cts * 2625;
+	return (uint32_t)(temp / 1000);
 }
 
 

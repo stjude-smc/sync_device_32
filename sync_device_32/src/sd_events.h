@@ -28,7 +28,10 @@ typedef struct Event
 	uint32_t	  interval;
 	bool		  active;
 } Event;
+
 extern Event event_table[MAX_N_EVENTS];
+extern Event event_table_copy[MAX_N_EVENTS];
+extern volatile bool event_table_copy_valid;
 
 void update_event_table(void);
 void schedule_event(const Event event);

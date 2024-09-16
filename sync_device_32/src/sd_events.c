@@ -28,8 +28,10 @@ static inline uint32_t current_time(void)
 
 
 Event event_table[MAX_N_EVENTS] = {0};
-uint32_t event_table_start = 0;  // Pointer to the next pending event
-uint32_t event_table_end = 0;    // Pointer to the last pending event
+Event event_table_copy[MAX_N_EVENTS] = {0};
+volatile uint32_t event_table_start = 0;  // Pointer to the next pending event
+volatile uint32_t event_table_end = 0;    // Pointer to the last pending event
+volatile bool event_table_copy_valid = false;
 
 bool sys_timer_running = 0;
 
@@ -51,6 +53,8 @@ int cmp_event_by_ts(const void* a, const void* b)
 
 
 
+// This function attempts to update the event table but may
+// be interrupted by timer. In this case, it has to start over.
 
 // Purge any completed events, update table size
 // Sort table by the order of occurrence
@@ -58,27 +62,37 @@ int cmp_event_by_ts(const void* a, const void* b)
 // avoid data corruption
 void update_event_table(void)
 {
-	disable_event_irq();
+	if (event_table_copy_valid)
+		return;
+
+	// Make a copy of the event table if necessary
+	memcpy(event_table_copy, event_table, sizeof(Event)*event_table_end);
+	event_table_copy_valid = true;
 	
 	// update size of the event_table
-	qsort(event_table, event_table_end, sizeof(Event), cmp_event_by_active);
+	size_t event_table_new_end = event_table_end;
+	qsort(event_table_copy, event_table_end, sizeof(Event), cmp_event_by_active);
 	for (uint32_t i = 0; i <= event_table_end; i++)
 	{
-		if (!(event_table[i].active))
+		if (!(event_table_copy[i].active))
 		{
-			event_table_start = 0;  // first element is the next pending event
-			event_table_end = i;    // update total number of pending elements
+			event_table_new_end = i;    // total number of pending elements
 			break;
 		}
 	}
 	// sort by timestamp
-	qsort(event_table, event_table_end, sizeof(Event), cmp_event_by_ts);
+	qsort(event_table_copy, event_table_new_end, sizeof(Event), cmp_event_by_ts);
 
-	// We might have missed	some events while sorting the table
-	process_pending_events();
-	
-	// Re-enable the system timer RA compare interrupt
-	enable_event_irq();	
+
+	disable_event_irq();    // prevent race condition
+	if (event_table_copy_valid)
+	{
+		// Swap the original event table with it's copy
+		event_table_start = 0;  // first element is the next pending event
+		event_table_end = event_table_new_end;  // Update number of events
+		memcpy(event_table, event_table_copy, sizeof(Event)*event_table_end);  // Swap the table
+	}
+	enable_event_irq();
 }
 
 
@@ -88,7 +102,7 @@ void process_pending_events(void)
 	disable_event_irq();
 	
 	// We iterate through the presorted table and fire all pending events
-	for (uint32_t event_idx = event_table_start; event_idx < event_table_end ; event_idx++)
+	for (uint32_t event_idx = event_table_start; event_idx < event_table_end; event_idx++)
 	{
 		Event *e = &event_table[event_idx];
 		if (current_time() >= e->timestamp)
@@ -96,6 +110,7 @@ void process_pending_events(void)
 			if (e->active)
 			{
 				e->func(e->arg1, e->arg2);
+				event_table_copy_valid = false;
 				// TODO: update event count and active status (see diagram). If event becomes inactive -> update table
 				e->active = false; // TODO - at the moment all events are one-time events
 			}
@@ -116,13 +131,20 @@ void process_pending_events(void)
 
 void verify_ra_is_set(void)
 {
-	// Check if RA lies in the past
+	uint32_t new_RA = 0xffffffff;
+	for (uint32_t event_idx = event_table_start; event_idx < event_table_end; event_idx++)
+	{
+		Event *e = &event_table[event_idx];
+		if (e->active)
+		{
+			new_RA = min(new_RA, e->timestamp);
+		}
+    }
+	tc_write_ra(SYS_TC, SYS_TC_CH, new_RA);
+	
 	if (current_time() > tc_read_ra(SYS_TC, SYS_TC_CH))
 	{
-		if (event_table_end - event_table_start > 1)
-		{
-			process_pending_events();  // me must have missed something
-		}
+		process_pending_events();
 	}
 }
 
@@ -151,8 +173,9 @@ void schedule_event_abs_time(const Event event)
 	p_event->timestamp = us2cts(event.timestamp) + 1;
 	
 	// Since we modified the event table, we have to update and sort it
+	event_table_copy_valid = false;
 	update_event_table();
-
+	
 	enable_event_irq();
 }
 
@@ -237,7 +260,7 @@ void init_sys_timer(void)
 	sysclk_enable_peripheral_clock(ID_SYS_TC);
 	
 	tc_init(SYS_TC, SYS_TC_CH,
-			TC_CMR_TCCLKS_TIMER_CLOCK4 | TC_CMR_WAVE
+			TC_CMR_TCCLKS_TIMER_CLOCK3 | TC_CMR_WAVE
 	);
 	
 	// Enable the interrupt on register compare

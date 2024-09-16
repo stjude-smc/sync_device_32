@@ -33,8 +33,11 @@ void set_lasers(uint8_t laser)
 	uint32_t cy7 = laser & 8 ? ioport_pin_to_mask(CY7_PIN) : 0;
 	
 	uint32_t active_pins = cy2 | cy3 | cy5 | cy7;
-	ioport_set_port_level(SHUTTERS_PORT, SHUTTERS_MASK & active_pins, 1);  // activate pins
+	ioport_set_port_level(SHUTTERS_PORT, SHUTTERS_MASK & active_pins, 1);  // activate pins	
 	ioport_set_port_level(SHUTTERS_PORT, SHUTTERS_MASK & ~active_pins, 0); // deactivate pins
+	
+	// TODO to enable/disable lasers - separate function?
+	// make the pin input and pull it down
 }
 
 void lasers_off(void)

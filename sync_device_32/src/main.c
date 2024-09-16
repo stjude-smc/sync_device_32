@@ -64,18 +64,19 @@ int main(void)
 	init_buttons();
 
 	Event e = {0};
-	e.func = f; e.arg1 = 0b0001; e.timestamp=00000; schedule_event(e);
+/*	e.func = f; e.arg1 = 0b0001; e.timestamp=00000; schedule_event(e);
 	e.func = f; e.arg1 = 0b0010; e.timestamp=10000; schedule_event(e);
 	e.func = f; e.arg1 = 0b0100; e.timestamp=20000; schedule_event(e);
 	e.func = f; e.arg1 = 0b1000; e.timestamp=40000; schedule_event(e);
 	e.func = f; e.arg1 = 0b0000; e.timestamp=50000; schedule_event(e);	
-
+*/
 	start_sys_timer();
 
 	while (1)
 	{
 		// Housekeeping functions go here
 		verify_ra_is_set();
+		update_event_table();
 	}
 }
 

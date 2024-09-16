@@ -199,6 +199,7 @@ void _parse_UART_command(const Data data)
 		e.func = ft; e.timestamp=4.5*m + 1; schedule_event(e);
 		e.func = ft; e.timestamp=5.5*m + 1; schedule_event(e);
 		e.func = ft; e.timestamp=6.5*m + 1; schedule_event(e);
+
 		start_sys_timer();
 	}
 	else if (strncasecmp((char*) data.cmd, "CAM", 3) == 0)
