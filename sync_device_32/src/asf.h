@@ -87,6 +87,9 @@
 // From module: System Clock Control - SAM3X/A implementation
 #include <sysclk.h>
 
+// From module: TRNG - True Random Number Generator Register
+#include <trng.h>
+
 // From module: UART - Univ. Async Rec/Trans
 #include <uart.h>
 

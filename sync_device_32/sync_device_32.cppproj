@@ -32,11 +32,12 @@
       <framework-data>
   <options>
     <option id="common.boards" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.basic.gpio" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.ioport" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.pio" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.uart" value="Add" config="" content-id="Atmel.ASF" />
-    <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="sam.drivers.trng" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.applications.user_application" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.utils.cmsis.sam3x.source.template" value="Add" config="" content-id="Atmel.ASF" />
   </options>
@@ -196,6 +197,8 @@
     <file path="src/ASF/common/services/delay/sam/cycle_counter.c" framework="" version="3.52.0" source="common\services\delay\sam\cycle_counter.c" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/common/services/delay/sam/cycle_counter.h" framework="" version="3.52.0" source="common\services\delay\sam\cycle_counter.h" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/common/services/delay/delay.h" framework="" version="3.52.0" source="common\services\delay\delay.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/sam/drivers/trng/trng.c" framework="" version="3.52.0" source="sam\drivers\trng\trng.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/sam/drivers/trng/trng.h" framework="" version="3.52.0" source="sam\drivers\trng\trng.h" changed="False" content-id="Atmel.ASF" />
   </files>
   <documentation help="https://asf.microchip.com/docs/3.52.0/common.applications.user_application.arduino_due_x/html/index.html" />
   <offline-documentation help="" />
@@ -263,6 +266,7 @@
       <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/uart</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/sam/drivers/trng</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -300,6 +304,7 @@
       <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/uart</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/sam/drivers/trng</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -346,6 +351,7 @@
       <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/uart</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/sam/drivers/trng</Value>
     </ListValues>
   </armgcccpp.assembler.general.IncludePaths>
   <armgcccpp.preprocessingassembler.general.IncludePaths>
@@ -372,6 +378,7 @@
       <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/uart</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/sam/drivers/trng</Value>
     </ListValues>
   </armgcccpp.preprocessingassembler.general.IncludePaths>
 </ArmGccCpp>
@@ -417,6 +424,7 @@
       <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/uart</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/sam/drivers/trng</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -455,6 +463,7 @@
       <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/uart</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/sam/drivers/trng</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize debugging experience (-Og)</armgcccpp.compiler.optimization.level>
@@ -508,6 +517,7 @@
       <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/uart</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/sam/drivers/trng</Value>
     </ListValues>
   </armgcccpp.assembler.general.IncludePaths>
   <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
@@ -535,6 +545,7 @@
       <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/uart</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/sam/drivers/trng</Value>
     </ListValues>
   </armgcccpp.preprocessingassembler.general.IncludePaths>
   <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
@@ -552,6 +563,12 @@
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\ASF\common\services\delay\sam\cycle_counter.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\sam\drivers\trng\trng.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\trng\trng.h">
       <SubType>compile</SubType>
     </None>
     <Compile Include="src\ASF\sam\drivers\uart\uart.c">
@@ -1016,6 +1033,7 @@
     <Folder Include="src\ASF\sam\drivers\" />
     <Folder Include="src\ASF\sam\drivers\pio\" />
     <Folder Include="src\ASF\sam\drivers\pmc\" />
+    <Folder Include="src\ASF\sam\drivers\trng\" />
     <Folder Include="src\ASF\sam\drivers\uart\" />
     <Folder Include="src\ASF\sam\utils\" />
     <Folder Include="src\ASF\sam\utils\cmsis\" />

@@ -23,6 +23,17 @@ extern "C" {
 #include <vector>
 #include <functional>
 
+#include <new>
+#include <cstdio>
+
+void my_new_handler() {
+	// Handle out-of-memory error here
+	printf("Out of memory!\n");
+	// You can abort or take other actions
+	std::abort();
+}
+
+
 extern "C" {
 // Implementation of _write function for printf
 int _write(int file, char *ptr, int len) {
@@ -41,6 +52,24 @@ int _read(int file, char *ptr, int len) {
 }
 
 }
+
+
+typedef struct Event
+{
+	void		  (*func)(uint32_t arg1, uint32_t arg2);
+	uint32_t	  arg1;
+	uint32_t	  arg2;
+	uint32_t	  timestamp;
+	uint32_t	  N;
+	uint32_t	  interval;
+	bool		  active;
+
+	bool operator<(const Event& other) const {
+		return this->timestamp > other.timestamp;
+	}
+} Event;  // 28 bytes
+
+
 
 void setup_uart() {
 	// Enable clock for PIOA
@@ -79,65 +108,64 @@ void setup_uart() {
 //	std::cout.rdbuf(&uartStream);
 }
 
-void tp(void){
-	ioport_toggle_pin_level(PIO_PA16_IDX);
+void send_pulse(void){
+	ioport_set_pin_level(PIO_PA16_IDX, 1);
+	ioport_set_pin_level(PIO_PA16_IDX, 0);
 }
 
+
+
 int main() {
+	std::set_new_handler(my_new_handler);
 	// Initialize ASF, board, and UART
 	sysclk_init();
 	board_init();
 	setup_uart();
 
+	pmc_enable_periph_clk(ID_TRNG);
+	trng_enable(TRNG);
 
 	printf("Hello, SAM3X!\n");
 
-	int address = 0xDEADBEEF;
-	printf("The address is 0x%X\n", address);
-
-	float pi = 3.14159;
-	printf("The value of pi is '%.2f'\n", pi);
-
-	const char* message = "UART communication established!";
-	printf("%s\n", message);
-
-
-	int number = 42;
-	printf("The number is %d\n", number);
-
-    int count = 10;
-    float average = 5.75;
-    printf("Count: %d, Average: '%.2f'\n", count, average);
-
-
-    // Create a priority queue (max heap by default)
-    std::priority_queue<int> maxHeap;
-
-    // Insert elements into the max heap
+    // Create a table of events
+    std::priority_queue<Event> EventTable;
 	
+
 	ioport_set_pin_dir(PIO_PA16_IDX, IOPORT_DIR_OUTPUT);
 	delay_ms(5);
 	
-    maxHeap.push(10); tp();
-    maxHeap.push(30); tp();
-    maxHeap.push(20); tp();
-    maxHeap.push(5); tp();
-    maxHeap.push(92); tp();
-    maxHeap.push(11); tp();
-    maxHeap.push(17); tp();
-    maxHeap.push(53); tp();
-    maxHeap.push(6); tp();
-    maxHeap.push(2); tp();
-    maxHeap.push(13); tp();
-
-	int i = 0;
-    while (!maxHeap.empty()) {
-	    printf("Element %d = %d\n", i++, maxHeap.top());     // Access the top (largest) element
-	    maxHeap.pop();                     // Remove the top element
-    }
 
 	while (1) {
-		// Your main loop
+
+		uint32_t N = 0;
+		while(!uart_is_rx_ready(UART)){}
+
+		uint8_t data;
+		uart_read(UART, &data);
+		N = ((uint32_t) data) << 3;
+
+		
+		printf("N = %lu\n", N);
+
+		Event e;
+		for (uint32_t i = 0; i < N; i++){
+			e.interval = i;
+			e.timestamp = trng_read_output_data(TRNG) >> 20;
+			EventTable.push(e);
+			send_pulse();
+		}
+		ioport_set_pin_level(PIO_PA16_IDX, IOPORT_PIN_LEVEL_LOW);
+
+		int i = 0;
+		while (!EventTable.empty()) {
+			Event retrieved_event = EventTable.top();
+			printf(" Element %d = %lu\n", i++, retrieved_event.timestamp);     // Access the top (largest) element
+			EventTable.pop();                     // Remove the top element
+		}
+
+
+
+
 	}
 }
 
