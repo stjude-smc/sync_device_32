@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include "globals.h"
+#include "uart_comm.h"
 
 #ifdef min
 #undef min
@@ -36,22 +37,21 @@ void out_of_memory_handler() {
 
 
 extern "C" {
-// Implementation of _write function for printf
-int _write(int file, char *ptr, int len) {
-	for (int i = 0; i < len; i++) {
-		// Wait until UART is ready to transmit
-		while (!uart_is_tx_ready(UART)) {}
-		uart_write(UART, ptr[i]);
+	// Implementation of _write function for printf
+	int _write(int file, char *ptr, int len) {
+		for (int i = 0; i < len; i++) {
+			// Wait until UART is ready to transmit
+			while (!uart_is_tx_ready(UART)) {}
+			uart_write(UART, ptr[i]);
+		}
+		return len;
 	}
-	return len;
-}
 
-int _read(int file, char *ptr, int len) {
-	// This is a minimal implementation; it doesn't actually read any data.
-	// It needs to return the number of bytes read (0 in this case).
-	return 0;
-}
-
+	int _read(int file, char *ptr, int len) {
+		// This is a minimal implementation; it doesn't actually read any data.
+		// It needs to return the number of bytes read (0 in this case).
+		return 0;
+	}
 }
 
 
@@ -71,7 +71,7 @@ typedef struct Event
 } Event;  // 28 bytes
 
 
-
+/*
 void setup_uart() {
 	
 	// Enable clock for PIOA
@@ -108,7 +108,7 @@ void setup_uart() {
 
 	// Set the custom stream buffer for std::cout
 //	std::cout.rdbuf(&uartStream);
-}
+}*/
 
 void send_pulse(void){
 	ioport_set_pin_level(PIO_PA16_IDX, 1);
@@ -128,7 +128,8 @@ int main() {
 	// Initialize ASF, board, and UART
 	sysclk_init();
 	board_init();
-	setup_uart();
+	
+	uart_comm_init();
 	//setup_gpio();
 
 	pmc_enable_periph_clk(ID_TRNG);
@@ -145,36 +146,7 @@ int main() {
 	
 
 	while (1) {
-
-		uint32_t N = 0;
-		while(!uart_is_rx_ready(UART)){}
-
-		uint8_t data;
-		uart_read(UART, &data);
-		N = ((uint32_t) data) << 3;
-
-		
-		printf("N = %lu\n", N);
-
-		Event e;
-		for (uint32_t i = 0; i < N; i++){
-			e.interval = i;
-			e.timestamp = trng_read_output_data(TRNG) >> 20;
-			event_table.push(e);
-			send_pulse();
-		}
-		ioport_set_pin_level(PIO_PA16_IDX, IOPORT_PIN_LEVEL_LOW);
-
-		int i = 0;
-		while (!event_table.empty()) {
-			Event retrieved_event = event_table.top();
-			printf(" Element %d = %lu\n", i++, retrieved_event.timestamp);     // Access the top (largest) element
-			event_table.pop();                     // Remove the top element
-		}
-
-
-
-
+		;
 	}
 }
 

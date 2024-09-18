@@ -29,11 +29,11 @@ def c32(value):
     return c_int32(value)
 
 
-def pad(data: bytearray, length=16):
+def pad(data: bytearray, length=24):
     return bytearray(data + bytearray([0] * (length - len(data))))
 
 
-def w(command, arg1, arg2=0, ts=0):
+def w(command, arg1, arg2=0, ts=0, N=0, interval=0):
     _command = pad(command.encode(), 4)
     if type(arg1) is str:
         _arg1 = pad(arg1.encode(), 4)
@@ -41,13 +41,25 @@ def w(command, arg1, arg2=0, ts=0):
         _arg1 = bytearray(cu32(arg1))
     _arg2 = bytearray(cu32(arg2))
     _ts = bytearray(cu32(ts))
-    c.write(pad(_command + _arg1 + _arg2 + _ts))
+    _N = bytearray(cu32(N))
+    _interval = bytearray(cu32(interval))
+    c.write(pad(_command + _arg1 + _arg2 + _ts + _N + _interval))
     print(
         f"""command: {_command}
 arg1:    {_arg1}\t({arg1})
 arg2:    {_arg2}\t({arg2})
-ts:      {_ts}\t({ts}us = {int(ts*656250/1000000)}cts)"""
+ts:      {_ts}\t({ts}us = {int(ts*656250/1000000)}cts)
+N:       {_N}\t({N})
+interval:{_interval}\t({interval}us)
+"""
     )
+    response = c.readall()
+    if response:
+        print(f"RESPONSE: {response.decode()}")
+
+
+def u(N):
+    c.write(cu8(N))
     response = c.readall()
     if response:
         print(f"RESPONSE: {response.decode()}")
