@@ -10,6 +10,7 @@ extern "C" {
 	#include "asf.h"
 }
 
+#include "globals.h"
 
 #ifdef min
 #undef min
@@ -28,7 +29,7 @@ extern "C" {
 
 void out_of_memory_handler() {
 	// Handle out-of-memory error here
-	printf("Out of memory!\n");
+	printf("ERR: out of memory!\n");
 	// You can abort or take other actions
 	std::abort();
 }
@@ -72,6 +73,7 @@ typedef struct Event
 
 
 void setup_uart() {
+	
 	// Enable clock for PIOA
 	pmc_enable_periph_clk(ID_PIOA);
 	
@@ -115,12 +117,19 @@ void send_pulse(void){
 
 
 
+/************************************************************************/
+/*                       ENTRY POINT                                    */
+/************************************************************************/
 int main() {
+	// Set out of memory handler for `new` operator. This will send error
+	// message over UART
 	std::set_new_handler(out_of_memory_handler);
+
 	// Initialize ASF, board, and UART
 	sysclk_init();
 	board_init();
 	setup_uart();
+	//setup_gpio();
 
 	pmc_enable_periph_clk(ID_TRNG);
 	trng_enable(TRNG);
