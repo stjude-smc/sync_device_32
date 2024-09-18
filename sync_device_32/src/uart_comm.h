@@ -12,7 +12,7 @@
 // Data packet for serial communication
 typedef struct DataPacket
 {
-	uint8_t  cmd[4];      // 3-character command, null-terminated
+	char     cmd[4];  // 3-character command, null-terminated
 	uint32_t arg1;
 	uint32_t arg2;
 	uint32_t timestamp;
@@ -24,3 +24,4 @@ void uart_comm_init(void);
 
 // Send data to the host
 void sd_tx(const char *cstring);
+void sd_tx(const char *buf, uint32_t len);

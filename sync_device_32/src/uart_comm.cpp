@@ -66,30 +66,34 @@ void uart_comm_init(void)
 // Send data to host using DMA controller
 void sd_tx(const char *cstring)
 {
+	sd_tx(cstring, strlen(cstring));
+}
+
+void sd_tx(const char *buf, uint32_t len)
+{
 	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
 	
 	pdc_packet_t pdc_uart_tx_packet;
-	size_t req_size = strlen(cstring);
 
 	if (pdc_read_tx_counter(p_uart_pdc) > 0)  // pending transmission, use next buffer
 	{
 		// If not enough space, wait until the next buffer clears
-		while (UART_BUFFER_SIZE - pdc_read_tx_next_counter(p_uart_pdc) < req_size)
+		while (UART_BUFFER_SIZE - pdc_read_tx_next_counter(p_uart_pdc) < len)
 		{
 			;
 		}
 		// Append more data to the next outgoing buffer
-		memcpy(tx_next_buffer + pdc_read_tx_next_counter(p_uart_pdc), cstring, req_size);
+		memcpy(tx_next_buffer + pdc_read_tx_next_counter(p_uart_pdc), buf, len);
 		pdc_uart_tx_packet.ul_addr = (uint32_t)tx_next_buffer;
-		pdc_uart_tx_packet.ul_size = pdc_read_tx_next_counter(p_uart_pdc) + req_size;
+		pdc_uart_tx_packet.ul_size = pdc_read_tx_next_counter(p_uart_pdc) + len;
 		pdc_tx_init(p_uart_pdc, NULL, &pdc_uart_tx_packet);
 		return;
 	}
 	
 	// Copy provided string to the outgoing buffer
-	memcpy(tx_buffer, cstring, req_size);
+	memcpy(tx_buffer, buf, len);
 	pdc_uart_tx_packet.ul_addr = (uint32_t)tx_buffer;
-	pdc_uart_tx_packet.ul_size = req_size;	
+	pdc_uart_tx_packet.ul_size = len;
 	pdc_tx_init(p_uart_pdc, &pdc_uart_tx_packet, NULL);
 }
 
@@ -139,19 +143,18 @@ void _init_UART_TC(void)
 /************************************************************************/
 void _parse_UART_command(const DataPacket data)
 {
-	if (strncasecmp((char*) data.cmd, "PIN", 3) == 0)
+	if (strncasecmp(data.cmd, "PIN", 3) == 0)
 	{
-		sd_tx("PIN command ");
+		printf("PIN command, arg1 = %lu, arg2 = %lu, ts=%lu\n", data.arg1, data.arg2, data.timestamp);
 	}
 
-	else if (strncasecmp((char*) data.cmd, "CAM", 3) == 0)
+	else if (strncasecmp(data.cmd, "CAM", 3) == 0)
 	{
-		sd_tx("CAM command ");
+		printf("CAM command, pi=%f\n", 3.14159);
 	}
 	else
 	{
-		sd_tx("unknown command ");
-		sd_tx((const char*) data.cmd);
+		printf("unknown command %.3s\n", data.cmd);
 	}
 }
 

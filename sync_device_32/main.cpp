@@ -38,12 +38,9 @@ void out_of_memory_handler() {
 
 extern "C" {
 	// Implementation of _write function for printf
+	// NOTE: printf is buffered and sends data out after \n symbol
 	int _write(int file, char *ptr, int len) {
-		for (int i = 0; i < len; i++) {
-			// Wait until UART is ready to transmit
-			while (!uart_is_tx_ready(UART)) {}
-			uart_write(UART, ptr[i]);
-		}
+		sd_tx(ptr, len);
 		return len;
 	}
 
@@ -124,6 +121,9 @@ int main() {
 	// Set out of memory handler for `new` operator. This will send error
 	// message over UART
 	std::set_new_handler(out_of_memory_handler);
+	
+	// Set buffer size for printf
+	setvbuf(stdout, NULL, _IOLBF, UART_BUFFER_SIZE);
 
 	// Initialize ASF, board, and UART
 	sysclk_init();
