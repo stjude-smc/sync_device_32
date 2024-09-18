@@ -26,7 +26,7 @@ extern "C" {
 #include <new>
 #include <cstdio>
 
-void my_new_handler() {
+void out_of_memory_handler() {
 	// Handle out-of-memory error here
 	printf("Out of memory!\n");
 	// You can abort or take other actions
@@ -116,7 +116,7 @@ void send_pulse(void){
 
 
 int main() {
-	std::set_new_handler(my_new_handler);
+	std::set_new_handler(out_of_memory_handler);
 	// Initialize ASF, board, and UART
 	sysclk_init();
 	board_init();
@@ -128,7 +128,7 @@ int main() {
 	printf("Hello, SAM3X!\n");
 
     // Create a table of events
-    std::priority_queue<Event> EventTable;
+    std::priority_queue<Event> event_table;
 	
 
 	ioport_set_pin_dir(PIO_PA16_IDX, IOPORT_DIR_OUTPUT);
@@ -151,16 +151,16 @@ int main() {
 		for (uint32_t i = 0; i < N; i++){
 			e.interval = i;
 			e.timestamp = trng_read_output_data(TRNG) >> 20;
-			EventTable.push(e);
+			event_table.push(e);
 			send_pulse();
 		}
 		ioport_set_pin_level(PIO_PA16_IDX, IOPORT_PIN_LEVEL_LOW);
 
 		int i = 0;
-		while (!EventTable.empty()) {
-			Event retrieved_event = EventTable.top();
+		while (!event_table.empty()) {
+			Event retrieved_event = event_table.top();
 			printf(" Element %d = %lu\n", i++, retrieved_event.timestamp);     // Access the top (largest) element
-			EventTable.pop();                     // Remove the top element
+			event_table.pop();                     // Remove the top element
 		}
 
 
