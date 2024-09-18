@@ -50,7 +50,7 @@ extern "C" {
 #undef errno
 extern int errno;
 extern int _end;
-extern int __ram_end__;
+extern int _ram_end_;
 
 extern caddr_t _sbrk(int incr);
 extern int link(char *old, char *new);
@@ -66,7 +66,7 @@ extern caddr_t _sbrk(int incr)
 {
 	static unsigned char *heap = NULL;
 	unsigned char *prev_heap;
-	int ramend = (int)&__ram_end__;
+	int ramend = (int)&_ram_end_;
 
 	if (heap == NULL) {
 		heap = (unsigned char *)&_end;
