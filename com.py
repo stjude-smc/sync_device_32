@@ -58,8 +58,8 @@ interval:{_interval}\t({interval}us)
         print(f"RESPONSE: {response.decode()}")
 
 
-def u(N):
-    c.write(cu8(N))
+def s():
+    c.write(pad("STA".encode()))
     response = c.readall()
     if response:
-        print(f"RESPONSE: {response.decode()}")
+        print(response.decode())

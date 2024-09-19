@@ -1,6 +1,9 @@
-#include "uart_comm.h"
 #include <string.h>
 #include <strings.h>
+
+#include "uart_comm.h"
+#include "events.h"
+
 
 // Memory buffer for DMA transmission
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
@@ -9,17 +12,19 @@ static uint8_t rx_buffer[UART_BUFFER_SIZE];
 //static uint8_t rx_next_buffer[UART_BUFFER_SIZE];
 
 
-// Prototypes of internal functions
+/************************************************************************/
+/*                  INTERNAL FUNCTION PROTOTYPES                        */
+/************************************************************************/
 void _DMA_tx_wait(Pdc* p_uart_pdc);
 void _parse_UART_command(const DataPacket data);
 void _init_UART_TC(void);
 void _init_UART_DMA_rx(uint8_t size);
+void _print_event_status(Event event);
 
-
-void uart_comm_init(void)
+void init_uart_comm(void)
 {
 	// Enable clock for PIOA
-	pmc_enable_periph_clk(ID_PIOA);
+	sysclk_enable_peripheral_clock(ID_PIOA);
 	
 	// Give control over pins from PIO to UART
 	pio_set_peripheral(PIOA, PIO_PERIPH_A, PIO_PA8A_URXD | PIO_PA9A_UTXD);
@@ -137,7 +142,6 @@ void _init_UART_TC(void)
 
 
 
-
 /************************************************************************/
 /* Implementation of the communication protocol                         */
 /************************************************************************/
@@ -146,16 +150,42 @@ void _parse_UART_command(const DataPacket data)
 	if (strncasecmp(data.cmd, "PIN", 3) == 0)
 	{
 		printf("PIN command, arg1 = %lu, arg2 = %lu, ts=%lu\n", data.arg1, data.arg2, data.timestamp);
+		schedule_pin(data);
 	}
-
-	else if (strncasecmp(data.cmd, "CAM", 3) == 0)
+	else if (strncasecmp(data.cmd, "PUL", 3) == 0)
 	{
-		printf("CAM command, pi=%f\n", 3.14159);
+		printf("PUL command\n");
+		schedule_pulse(data);
+	}
+	else if (strncasecmp(data.cmd, "TGL", 3) == 0)
+	{
+		printf("TGL command\n");
+		schedule_toggle(data);
+	}
+	else if (strncasecmp(data.cmd, "STA", 3) == 0)
+	{
+		printf("-- SYSTEM STATUS --\n");
+		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
+    	printf("Current time:         %lu cts\n", current_time_cts());
+		if (!event_queue.empty())
+		{
+			_print_event_status(event_queue.top());
+
+		}
 	}
 	else
 	{
 		printf("unknown command %.3s\n", data.cmd);
 	}
+}
+
+void _print_event_status(Event event)
+{
+	printf("Next event timestamp: %lu cts\n", event.timestamp);
+	printf("Next event arg1: %lu\n", event.arg1);
+	printf("Next event arg2: %lu\n", event.arg2);
+	printf("Next event N:    %lu\n", event.N);
+	printf("Next event intev:%lu\n", event.interval);
 }
 
 

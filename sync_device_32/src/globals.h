@@ -6,7 +6,7 @@
 #pragma once
 #include <ioport.h>
 
-#define VERSION "0.6.0\n"
+#define VERSION "0.6.0"
 
 
 /************************************************************************/
@@ -44,6 +44,23 @@
 #define UART_TIMEOUT_Handler TC8_Handler
 #define UART_TC_IRQn	     TC8_IRQn
 
+
+/************************************************************************/
+/*                      EVENT HANDLING                                  */
+/************************************************************************/
+// Maximum allowed number of events in the event table
+#define MAX_N_EVENTS	1024
+
+// Uniform time delay added to every single scheduled event, us
+// It should be long enough to ensure correct event processing
+// under any circumstance
+#define UNIFORM_TIME_DELAY 500
+
+// Minimal interval between two subsequent runs of the same events, us
+#define MIN_EVENT_INTERVAL 25
+
+// Default pulse duration, us
+#define DFL_PULSE_DURATION 100
 
 /************************************************************************/
 /*    SYSTEM TIMER CONFIGURATION AND TIME CONVERSION FUNCTIONS          */
@@ -92,6 +109,3 @@ static inline uint32_t cts2us(uint32_t cts) {
 #define ID_SYS_TC		ID_TC0
 #define SYS_TC_Handler  TC0_Handler
 #define SYS_TC_IRQn		TC0_IRQn
-
-// Maximum allowed number of events in the event table
-#define MAX_N_EVENTS	1024

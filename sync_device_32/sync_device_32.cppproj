@@ -602,7 +602,19 @@
     <None Include="src\ASF\sam\drivers\tc\tc.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\events.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\events.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\globals.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\pins.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\pins.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\uart_comm.cpp">

@@ -20,7 +20,7 @@ typedef struct DataPacket
 	uint32_t interval;
 } DataPacket;
 
-void uart_comm_init(void);
+void init_uart_comm(void);
 
 // Send data to the host
 void sd_tx(const char *cstring);
