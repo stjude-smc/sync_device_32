@@ -81,7 +81,11 @@ int main() {
 
 
 	while (1) {
-		;
+		if (is_sys_timer_running() && current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH))
+		{
+			// we must have missed an event
+			process_events();  // <- internally updates RA
+		}
 	}
 }
 

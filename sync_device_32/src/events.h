@@ -49,6 +49,8 @@ void schedule_pulse(DataPacket data);
 void schedule_pin(DataPacket data);
 void schedule_toggle(DataPacket data);
 
+void process_events();
+
 void init_sys_timer();
 void start_sys_timer();
 void pause_sys_timer();

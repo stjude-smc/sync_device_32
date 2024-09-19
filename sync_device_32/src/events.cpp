@@ -23,7 +23,6 @@ void _toggle_pin_func(uint32_t pin_idx, uint32_t arg2);
 void _set_pin_func(uint32_t pin_idx, uint32_t arg2);
 static inline void _enable_event_irq();
 static inline void _disable_event_irq();
-void process_events();
 
 /************************************************************************/
 /*                 EVENT HANDLING AND PROCESSING                        */
@@ -186,7 +185,7 @@ void init_sys_timer()
 void pause_sys_timer()
 {
 	tc_stop(SYS_TC, SYS_TC_CH);
-	uint32_t stopped_at = tc_read_cv(SYS_TC, SYS_TC_CH);
+	//uint32_t stopped_at = tc_read_cv(SYS_TC, SYS_TC_CH);
 	
 	// update all pending events in the event table
 	printf("ERR: pause_sys_timer() - NOT IMPLEMENTED");
@@ -225,7 +224,7 @@ void process_events()
 	Event event;
 	while (!event_queue.empty()) {
 		// Keep processing events from the queue while they are pending
-		event = event_queue.top();		if (current_time_cts() >= event.timestamp)		{			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue							// Process the event metadata			if (event.interval > 0) // repeating event			{				event.timestamp += event.interval;				if (event.N == 0){  // infinite event					event_queue.push(event);				}				// if N == 1, it was a last call, and we drop it				if (event.N > 1) {  // reschedule the event					event.N--;					event_queue.push(event);				}			}		}		else  // This is a future event		{			tc_write_ra(SYS_TC, SYS_TC_CH, event.timestamp);			break;		}	}
+		event = event_queue.top();		if (current_time_cts() >= event.timestamp)		{			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue							// Process the event metadata			if (event.interval > 0) // repeating event			{				event.timestamp += us2cts(event.interval);				if (event.N == 0){  // infinite event					event_queue.push(event);				}				// if N == 1, it was a last call, and we drop it				if (event.N > 1) {  // reschedule the event					event.N--;					event_queue.push(event);				}			}		}		else  // This is a future event		{			tc_write_ra(SYS_TC, SYS_TC_CH, event.timestamp);			break;		}	}
 	_enable_event_irq();
 }
 
