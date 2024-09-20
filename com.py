@@ -4,6 +4,9 @@ from ctypes import c_uint8
 from ctypes import c_uint16
 from ctypes import c_uint32
 from ctypes import c_int32
+from time import sleep
+
+c = serial.Serial("COM4", baudrate=115200, timeout=0.1)
 
 
 def cu8(value):
@@ -26,17 +29,37 @@ def c32(value):
     return c_int32(value)
 
 
-def pad(data: bytearray, length=5):
-    return data + bytearray([0] * (length - len(data)))
+def pad(data: bytearray, length=24):
+    return bytearray(data + bytearray([0] * (length - len(data))))
 
 
-c = serial.Serial("COM4", baudrate=115200, timeout=0.1)
+def w(command, arg1, arg2=0, ts=0, N=0, interval=0):
+    _command = pad(command.encode(), 4)
+    if type(arg1) is str:
+        _arg1 = pad(arg1.encode(), 4)
+    else:
+        _arg1 = bytearray(cu32(arg1))
+    _arg2 = bytearray(cu32(arg2))
+    _ts = bytearray(cu32(ts))
+    _N = bytearray(cu32(N))
+    _interval = bytearray(cu32(interval))
+    c.write(pad(_command + _arg1 + _arg2 + _ts + _N + _interval))
+    print(
+        f"""command: {_command}
+arg1:    {_arg1}\t({arg1})
+arg2:    {_arg2}\t({arg2})
+ts:      {_ts}\t({ts}us = {int(ts*656250/1000000)}cts)
+N:       {_N}\t({N})
+interval:{_interval}\t({interval}us)
+"""
+    )
+    response = c.readall()
+    if response:
+        print(f"RESPONSE: {response.decode()}")
 
 
-def w(command, uni32_val):
-    data = pad(command.encode() + c32(uni32_val))
-    c.write(data)
-    print(data)
-
-
-r = lambda: c.readall()
+def s():
+    c.write(pad("STA".encode()))
+    response = c.readall()
+    if response:
+        print(response.decode())

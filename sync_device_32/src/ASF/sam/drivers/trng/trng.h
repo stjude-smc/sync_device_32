@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief Serial USART service configuration.
+ * \brief API for SAM TRNG.
  *
  * Copyright (c) 2011-2018 Microchip Technology Inc. and its subsidiaries.
  *
@@ -34,28 +34,38 @@
  * Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip Support</a>
  */
 
-#ifndef CONF_USART_SERIAL_H
-#define CONF_USART_SERIAL_H
+#ifndef TRNG_H_INCLUDED
+#define TRNG_H_INCLUDED
 
-/* A reference setting for UART */
-/** UART Interface */
-//#define CONF_UART            CONSOLE_UART
-/** Baudrate setting */
-//#define CONF_UART_BAUDRATE   115200
-/** Parity setting */
-//#define CONF_UART_PARITY     UART_MR_PAR_NO
+#include "compiler.h"
 
+/// @cond 0
+/**INDENT-OFF**/
+#ifdef __cplusplus
+extern "C" {
+#endif
+/**INDENT-ON**/
+/// @endcond
 
-/* A reference setting for USART */
-/** USART Interface */
-//#define CONF_UART              USART1
-/** Baudrate setting */
-//#define CONF_UART_BAUDRATE     115200
-/** Character length setting */
-//#define CONF_UART_CHAR_LENGTH  US_MR_CHRL_8_BIT
-/** Parity setting */
-//#define CONF_UART_PARITY       US_MR_PAR_NO
-/** Stop bits setting */
-//#define CONF_UART_STOP_BITS    US_MR_NBSTOP_1_BIT
+/** Key to unlock TRNG_CR register */
+#ifndef TRNG_CR_KEY_PASSWD
+#define TRNG_CR_KEY_PASSWD    TRNG_CR_KEY(0x524E47)
+#endif
 
-#endif/* CONF_USART_SERIAL_H_INCLUDED */
+void trng_enable(Trng *p_trng);
+void trng_disable(Trng *p_trng);
+void trng_enable_interrupt(Trng *p_trng);
+void trng_disable_interrupt(Trng *p_trng);
+uint32_t trng_get_interrupt_mask(Trng *p_trng);
+uint32_t trng_get_interrupt_status(Trng *p_trng);
+uint32_t trng_read_output_data(Trng *p_trng);
+
+/// @cond 0
+/**INDENT-OFF**/
+#ifdef __cplusplus
+}
+#endif
+/**INDENT-ON**/
+/// @endcond
+
+#endif /* TRNG_H_INCLUDED */

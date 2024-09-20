@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief Syscalls for SAM (GCC).
+ * \brief TRNG driver for SAM.
  *
  * Copyright (c) 2011-2018 Microchip Technology Inc. and its subsidiaries.
  *
@@ -30,14 +30,20 @@
  * \asf_license_stop
  *
  */
+
+/**
+ * \defgroup group_sam_drivers_trng TRNG - True Random Number Generator
+ *
+ * Driver for the TRNG (True Random Number Generator). This driver provides access
+ * to the main features of the TRNG controller.
+ *
+ * \{
+ */
 /*
  * Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip Support</a>
  */
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "trng.h"
 
 /// @cond 0
 /**INDENT-OFF**/
@@ -47,82 +53,84 @@ extern "C" {
 /**INDENT-ON**/
 /// @endcond
 
-#undef errno
-extern int errno;
-extern int _end;
-extern int _ram_end_;
-
-extern caddr_t _sbrk(int incr);
-extern int link(char *old, char *new);
-extern int _close(int file);
-extern int _fstat(int file, struct stat *st);
-extern int _isatty(int file);
-extern int _lseek(int file, int ptr, int dir);
-extern void _exit(int status);
-extern void _kill(int pid, int sig);
-extern int _getpid(void);
-
-extern caddr_t _sbrk(int incr)
+/**
+ * \brief Enable TRNG.
+ *
+ * \param p_trng  Pointer to a TRNG instance.
+ *
+ */
+void trng_enable(Trng *p_trng)
 {
-	static unsigned char *heap = NULL;
-	unsigned char *prev_heap;
-	int ramend = (int)&_ram_end_;
-
-	if (heap == NULL) {
-		heap = (unsigned char *)&_end;
-	}
-	prev_heap = heap;
-
-	if (((int)prev_heap + incr) > ramend) {
-		return (caddr_t) -1;	
-	}
-
-	heap += incr;
-
-	return (caddr_t) prev_heap;
+	p_trng->TRNG_CR = TRNG_CR_ENABLE | TRNG_CR_KEY_PASSWD;
 }
 
-extern int link(char *old, char *new)
+/**
+ * \brief Disable TRNG.
+ *
+ * \param p_trng  Pointer to a TRNG instance.
+ *
+ */
+void trng_disable(Trng *p_trng)
 {
-	return -1;
+	p_trng->TRNG_CR = TRNG_CR_KEY_PASSWD;
 }
 
-extern int _close(int file)
+/**
+ * \brief Enable TRNG interrupt.
+ *
+ * \param p_trng  Pointer to a TRNG instance.
+ *
+ */
+void trng_enable_interrupt(Trng *p_trng)
 {
-	return -1;
+	p_trng->TRNG_IER = TRNG_IER_DATRDY;
 }
 
-extern int _fstat(int file, struct stat *st)
+/**
+ * \brief Disable TRNG interrupt.
+ *
+ * \param p_trng  Pointer to a TRNG instance.
+ *
+ */
+void trng_disable_interrupt(Trng *p_trng)
 {
-	st->st_mode = S_IFCHR;
-
-	return 0;
+	p_trng->TRNG_IDR = TRNG_IER_DATRDY;
 }
 
-extern int _isatty(int file)
+/**
+ * \brief Get TRNG interrupt mask.
+ *
+ * \param p_trng  Pointer to a TRNG instance.
+ *
+ * \retval The interrupt mask value.
+ */
+uint32_t trng_get_interrupt_mask(Trng *p_trng)
 {
-	return 1;
+	return p_trng->TRNG_IMR;
 }
 
-extern int _lseek(int file, int ptr, int dir)
+/**
+ * \brief Get TRNG interrupt status.
+ *
+ * \param p_trng  Pointer to a TRNG instance.
+ *
+ * \retval The interrupt status value.
+ */
+uint32_t trng_get_interrupt_status(Trng *p_trng)
 {
-	return 0;
+	return p_trng->TRNG_ISR;
 }
 
-extern void _exit(int status)
+/**
+ * \brief Read TRNG output data.
+ *
+ * \param p_trng  Pointer to a TRNG instance.
+ *
+ * \retval The output data value.
+ */
+uint32_t trng_read_output_data(Trng *p_trng)
 {
-	asm("BKPT #0");
-	for (;;);
-}
-
-extern void _kill(int pid, int sig)
-{
-	return;
-}
-
-extern int _getpid(void)
-{
-	return -1;
+	return p_trng->TRNG_ODATA;
 }
 
 /// @cond 0
@@ -132,3 +140,7 @@ extern int _getpid(void)
 #endif
 /**INDENT-ON**/
 /// @endcond
+
+/**
+ * \}
+ */
