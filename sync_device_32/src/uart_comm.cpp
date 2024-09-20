@@ -61,6 +61,7 @@ void init_uart_comm(void)
 	// Enable interrupts
 	uart_enable_interrupt(UART, UART_IER_RXRDY | UART_IER_ENDRX);
 	NVIC_EnableIRQ(UART_IRQn);
+	NVIC_SetPriority(UART_IRQn, 1);
 	
 	// Initialize TC for timeout detection
 	_init_UART_TC();
@@ -135,6 +136,7 @@ void _init_UART_TC(void)
 	tc_enable_interrupt(UART_TC, UART_TC_CH, TC_IER_CPCS);
 	
 	NVIC_EnableIRQ(UART_TC_IRQn);
+	NVIC_SetPriority(UART_TC_IRQn, 0); // low priority
 	
 	tc_start(UART_TC, UART_TC_CH);
 }
@@ -166,12 +168,28 @@ void _parse_UART_command(const DataPacket data)
 	{
 		printf("-- SYSTEM STATUS --\n");
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
-    	printf("Current time:         %lu cts\n", current_time_cts());
+		printf("Current system time:  %lu cts\n", current_time_cts());
 		if (!event_queue.empty())
 		{
 			_print_event_status(event_queue.top());
 
 		}
+	}
+	else if (strncasecmp(data.cmd, "INT", 3) == 0)
+	{
+		// Check the default priority of Timer/Counter 0 interrupt
+		uint32_t sys_tc_priority = NVIC_GetPriority(SYS_TC_IRQn);
+
+		// Check the default priority of Timer/Counter 0 interrupt
+		uint32_t uart_tc_priority = NVIC_GetPriority(UART_TC_IRQn);
+
+		// Check the default priority of UART interrupt
+		uint32_t uart_priority = NVIC_GetPriority(UART_IRQn);
+		
+		printf("-- SYSTEM INTERRUPT PRIORITIES --\n");
+		printf("System timer: %lu\n", sys_tc_priority);
+		printf("UART:         %lu\n", uart_priority);
+		printf("UART timer:   %lu\n", uart_tc_priority);
 	}
 	else
 	{
@@ -208,7 +226,7 @@ void UART_Handler(void)
 	uint32_t status = uart_get_status(UART);
 	// A character arrived - reset the timer for communication timeout
 	tc_start(UART_TC, UART_TC_CH);
-
+	
 	// Check if the PDC transfer is complete
 	if (status & UART_SR_ENDRX) {
 		DataPacket data;
@@ -217,5 +235,3 @@ void UART_Handler(void)
 
 		// Reinitialize PDC for the next transfer
 		_init_UART_DMA_rx(sizeof(DataPacket));
-	}
-}
