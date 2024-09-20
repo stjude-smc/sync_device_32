@@ -139,6 +139,15 @@ void schedule_toggle(DataPacket data)
 }
 
 
+void process_events()
+{
+	_disable_event_irq();
+	Event event;
+	while (!event_queue.empty()) {
+		// Keep processing events from the queue while they are pending
+		event = event_queue.top();		if (current_time_cts() >= event.timestamp)		{			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue						// Process the event metadata			if (event.interval > 0) // repeating event			{				event.timestamp += us2cts(event.interval);				if (event.N == 0){  // infinite event					event_queue.push(event);				}				// if N == 1, it was a last call, and we drop it				if (event.N > 1) {  // reschedule the event					event.N--;					event_queue.push(event);				}			}		}		else  // This is a future event		{			tc_write_ra(SYS_TC, SYS_TC_CH, event.timestamp);			break;		}	}
+	_enable_event_irq();
+}
 
 /************************************************************************/
 /*                       SYSTEM TIMER CONTROL                           */
@@ -218,16 +227,6 @@ void SYS_TC_Handler()
 /************************************************************************/
 /*                           INTERNAL FUNCTIONS                         */
 /************************************************************************/
-
-void process_events()
-{
-	_disable_event_irq();
-	Event event;
-	while (!event_queue.empty()) {
-		// Keep processing events from the queue while they are pending
-		event = event_queue.top();		if (current_time_cts() >= event.timestamp)		{			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue							// Process the event metadata			if (event.interval > 0) // repeating event			{				event.timestamp += us2cts(event.interval);				if (event.N == 0){  // infinite event					event_queue.push(event);				}				// if N == 1, it was a last call, and we drop it				if (event.N > 1) {  // reschedule the event					event.N--;					event_queue.push(event);				}			}		}		else  // This is a future event		{			tc_write_ra(SYS_TC, SYS_TC_CH, event.timestamp);			break;		}	}
-	_enable_event_irq();
-}
 
 static inline void _disable_event_irq()
 {
