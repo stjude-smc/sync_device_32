@@ -6,6 +6,8 @@
 #pragma once
 #include <ioport.h>
 
+#include "pins.h"
+
 #define VERSION "0.6.0"
 
 
@@ -13,22 +15,22 @@
 /*                    PINOUT AND WIRING DEFINITIONS                     */
 /************************************************************************/
 // Camera trigger
-#define CAMERA_PIN	"D13"
+#define CAMERA_PIN	"D13" // PIO_PB27_IDX
 
 // Fluidics trigger
-#define FLUIDIC_PIN "D2"
+#define FLUIDIC_PIN "D2"  // PIO_PB25_IDX
 
 // Laser shutters (see pio_sam3x8e.h for pin names) - these have to be on the same port!
-#define CY2_PIN		"A0"
-#define CY3_PIN		"A1"
-#define CY5_PIN		"A2"
-#define CY7_PIN		"A3"
+#define CY2_PIN		"A0"  // PIO_PA16_IDX
+#define CY3_PIN		"A1"  // PIO_PA24_IDX
+#define CY5_PIN		"A2"  // PIO_PA23_IDX
+#define CY7_PIN		"A3"  // PIO_PA22_IDX
 
-#define SHUTTERS_MASK (ioport_pin_to_mask(CY2_PIN) | \
-                       ioport_pin_to_mask(CY3_PIN) | \
-					   ioport_pin_to_mask(CY5_PIN) | \
-					   ioport_pin_to_mask(CY7_PIN))
-#define SHUTTERS_PORT ioport_pin_to_port_id(CY2_PIN)
+#define SHUTTERS_MASK (ioport_pin_to_mask(pin_name_to_ioport_id(CY2_PIN)) | \
+                       ioport_pin_to_mask(pin_name_to_ioport_id(CY3_PIN)) | \
+					   ioport_pin_to_mask(pin_name_to_ioport_id(CY5_PIN)) | \
+					   ioport_pin_to_mask(pin_name_to_ioport_id(CY7_PIN)))
+#define SHUTTERS_PORT ioport_pin_to_port_id(pin_name_to_ioport_id(CY2_PIN))
 
 
 /************************************************************************/
@@ -68,7 +70,7 @@
 
 // Timer prescaler configuration. See SAM3X TC_CMR register, datasheet p883
 // Options are 2, 8, 32, and 128
-#define PRESC32
+#define PRESC128
 
 #ifdef PRESC2    // 1ct = 24ns, overflow after 102s  (1min 42s)
 #define SYS_TC_PRESCALER 2

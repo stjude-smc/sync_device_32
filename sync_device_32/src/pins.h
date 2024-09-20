@@ -14,6 +14,7 @@
 
 // Pin mapping for Arduino Due (Digital and Analog pins)
 uint32_t pin_name_to_ioport_id(const uint32_t pin_name);
+uint32_t pin_name_to_ioport_id(const char* pin_name);
 
 typedef struct {
 	const char *pin_name;
