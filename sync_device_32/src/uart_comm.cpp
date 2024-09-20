@@ -167,6 +167,7 @@ void _parse_UART_command(const DataPacket data)
 	else if (strncasecmp(data.cmd, "STA", 3) == 0)
 	{
 		printf("-- SYSTEM STATUS --\n");
+		printf("System timer prescaler=%d (1ct=%luns)\n", SYS_TC_PRESCALER, cts2us(1000));
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("Current system time:  %lu cts\n", current_time_cts());
 		if (!event_queue.empty())
@@ -235,3 +236,5 @@ void UART_Handler(void)
 
 		// Reinitialize PDC for the next transfer
 		_init_UART_DMA_rx(sizeof(DataPacket));
+	}
+}

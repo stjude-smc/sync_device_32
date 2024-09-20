@@ -172,7 +172,7 @@ void init_sys_timer()
 	sysclk_enable_peripheral_clock(ID_SYS_TC);
 	
 	tc_init(SYS_TC, SYS_TC_CH,
-			TC_CMR_TCCLKS_TIMER_CLOCK3 | TC_CMR_WAVE
+			SYS_TC_CMR_TCCLKS_TIMER_CLOCK | TC_CMR_WAVE
 	);
 	
 	// Enable the interrupt on register compare

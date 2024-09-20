@@ -66,40 +66,45 @@
 /*    SYSTEM TIMER CONFIGURATION AND TIME CONVERSION FUNCTIONS          */
 /************************************************************************/
 
-// 16bit timer prescaler configuration. See SAM3X TC_CMR register, datasheet p883
+// Timer prescaler configuration. See SAM3X TC_CMR register, datasheet p883
+// Options are 2, 8, 32, and 128
 #define PRESC32
 
 #ifdef PRESC2    // 1ct = 24ns, overflow after 102s  (1min 42s)
-#define TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK1 
-#define TC_CONVERSION_MULTIPLIER 420000
+#define SYS_TC_PRESCALER 2
+#define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK1
+#define SYS_TC_CONVERSION_MULTIPLIER 4200000
 #endif
 
 #ifdef PRESC8    // 1ct = 95ns, overflow after 409s  (6min 49s)
-#define TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK2
-#define TC_CONVERSION_MULTIPLIER 105000
+#define SYS_TC_PRESCALER 8
+#define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK2
+#define SYS_TC_CONVERSION_MULTIPLIER 1050000
 #endif
 
 #ifdef PRESC32   // 1ct = 381ns, overflow after 1636s (27min 16s)
-#define TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK3
-#define TC_CONVERSION_MULTIPLIER 26520
+#define SYS_TC_PRESCALER 32
+#define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK3
+#define SYS_TC_CONVERSION_MULTIPLIER 265200
 #endif
 
 #ifdef PRESC128  // 1ct = 1524ns, overflow after 6544s (1h 49min)
-#define TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK4
-#define TC_CONVERSION_MULTIPLIER 65625
+#define SYS_TC_PRESCALER 128
+#define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK4
+#define SYS_TC_CONVERSION_MULTIPLIER 65625
 #endif
 
 // microseconds to counts
 static inline uint32_t us2cts(uint32_t us) {
 	// Avoid overflow by using a larger intermediate type
-	uint64_t temp = (uint64_t) us * TC_CONVERSION_MULTIPLIER;
-	return (uint32_t)(temp / 10000);
+	uint64_t temp = (uint64_t) us * SYS_TC_CONVERSION_MULTIPLIER;
+	return (uint32_t)(temp / 100000);
 }
 
 // counts to microseconds
 static inline uint32_t cts2us(uint32_t cts) {
-	uint64_t temp = (uint64_t) cts * 10000;
-	return (uint32_t)(temp / TC_CONVERSION_MULTIPLIER);
+	uint64_t temp = (uint64_t) cts * 100000;
+	return (uint32_t)(temp / SYS_TC_CONVERSION_MULTIPLIER);
 }
 
 
