@@ -58,8 +58,8 @@ interval:{_interval}\t({interval}us)
         print(f"RESPONSE: {response.decode()}")
 
 
-def s():
-    c.write(pad("STA".encode()))
+def s(command="STA"):
+    c.write(pad(command.encode()))
     response = c.readall()
     if response:
         print(response.decode())

@@ -145,7 +145,9 @@ void process_events()
 	Event event;
 	while (!event_queue.empty()) {
 		// Keep processing events from the queue while they are pending
-		event = event_queue.top();		if (current_time_cts() >= event.timestamp)		{			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue						// Process the event metadata			if (event.interval > 0) // repeating event			{				event.timestamp += us2cts(event.interval);				if (event.N == 0){  // infinite event					event_queue.push(event);				}				// if N == 1, it was a last call, and we drop it				if (event.N > 1) {  // reschedule the event					event.N--;					event_queue.push(event);				}			}		}		else  // This is a future event		{			tc_write_ra(SYS_TC, SYS_TC_CH, event.timestamp);			break;		}	}
+		event = event_queue.top();		if (current_time_cts() >= event.timestamp)		{		ioport_toggle_pin_level(PIO_PA24_IDX);			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue						// Process the event metadata			if (event.interval > 0) // repeating event			{				event.timestamp += us2cts(event.interval);				if (event.N == 0){  // infinite event					event_queue.push(event);				}				// if N == 1, it was a last call, and we drop it				if (event.N > 1) {  // reschedule the event					event.N--;		ioport_toggle_pin_level(PIO_PA24_IDX);
+					event_queue.push(event);				}			}		}		else  // This is a future event		{		ioport_toggle_pin_level(PIO_PA22_IDX);
+			tc_write_ra(SYS_TC, SYS_TC_CH, event.timestamp);			break;		}	}
 	_enable_event_irq();
 }
 
@@ -215,7 +217,9 @@ void SYS_TC_Handler()
 	uint32_t status = tc_get_status(SYS_TC, SYS_TC_CH);
 	
     if (status & TC_SR_CPAS) {  // RA match
+		ioport_toggle_pin_level(PIO_PA24_IDX);
 		process_events();
+		ioport_toggle_pin_level(PIO_PA24_IDX);
     }
 
 

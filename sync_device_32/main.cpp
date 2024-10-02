@@ -71,6 +71,8 @@ int main() {
 	sysclk_enable_peripheral_clock(ID_PIOB);
 	sysclk_enable_peripheral_clock(ID_PIOC);
 	sysclk_enable_peripheral_clock(ID_PIOD);
+	
+	ioport_set_port_dir(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_DIR_OUTPUT);
 
 	//init_pins();
 
@@ -81,9 +83,10 @@ int main() {
 
 
 	while (1) {
-		if (is_sys_timer_running() && current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH))
+		if (!event_queue.empty() && is_sys_timer_running() && current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH))
 		{
 			// we must have missed an event
+			ioport_toggle_pin_level(PIO_PA23_IDX);
 			process_events();  // <- internally updates RA
 		}
 	}

@@ -13,6 +13,9 @@
 /************************************************************************/
 
 // Convert pin name (e.g., "D13" or "A0") to SAM3X I/O port pin ID
+uint32_t pin_name_to_ioport_id(const char* pin_name) {
+	pin_name_to_ioport_id(*((uint32_t*) pin_name));
+}
 uint32_t pin_name_to_ioport_id(const uint32_t pin_name) {
 	//size_t map_size = sizeof(pin_map) / sizeof(pin_map[0]);
 	size_t map_size = 80;
