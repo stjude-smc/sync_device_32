@@ -42,6 +42,25 @@ extern "C" {
 }
 
 
+// Initialize predefined pins for camera and laser shutters
+void init_pins()
+{
+	// Initialize all gpio controllers
+	sysclk_enable_peripheral_clock(ID_PIOA);
+	sysclk_enable_peripheral_clock(ID_PIOB);
+	sysclk_enable_peripheral_clock(ID_PIOC);
+	sysclk_enable_peripheral_clock(ID_PIOD);
+	
+	ioport_set_port_level(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_PIN_LEVEL_LOW);
+	ioport_set_port_dir(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_DIR_OUTPUT);
+
+	ioport_set_pin_level(pin_name_to_ioport_id(CAMERA_PIN), IOPORT_PIN_LEVEL_LOW);
+	ioport_set_pin_dir(pin_name_to_ioport_id(CAMERA_PIN), IOPORT_DIR_OUTPUT);
+
+	ioport_set_pin_level(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_PIN_LEVEL_LOW);
+	ioport_set_pin_dir(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_DIR_OUTPUT);
+}
+
 
 /************************************************************************/
 /*                       ENTRY POINT                                    */
@@ -54,23 +73,13 @@ int main() {
 	// Set buffer size for printf
 	setvbuf(stdout, NULL, _IOLBF, UART_BUFFER_SIZE);
 
-	// Initialize ASF, board, and UART
+	// Initialize all peripheral systems
 	sysclk_init();
 	board_init();
-	
 	init_uart_comm();
-	
-	// Initialize gpio
-	sysclk_enable_peripheral_clock(ID_PIOA);
-	sysclk_enable_peripheral_clock(ID_PIOB);
-	sysclk_enable_peripheral_clock(ID_PIOC);
-	sysclk_enable_peripheral_clock(ID_PIOD);
-	
-	ioport_set_port_dir(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_DIR_OUTPUT);
-
-	//init_pins();
-
+	init_pins();	
 	init_sys_timer();
+	
 	start_sys_timer();
 
 	while (1) {
