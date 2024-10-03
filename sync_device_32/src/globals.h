@@ -36,7 +36,7 @@
 /************************************************************************/
 /*                    UART AND DMA CONFIGURATION                        */
 /************************************************************************/
-#define UART_BUFFER_SIZE 256   // Size of DMA-controlled UART buffers
+#define UART_BUFFER_SIZE 512   // Size of DMA-controlled UART buffers
 #define UART_BAUDRATE 115200   // bits per second
 #define UART_TIMEOUT  25       // ms
 // UART uses timer 8 (module TC2 channel 2)

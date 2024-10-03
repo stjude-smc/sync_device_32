@@ -21,15 +21,17 @@
 #include "globals.h"
 #include "uart_comm.h"
 
+// An event function expects two uint32_t arguments
+using EventFunc = void (*)(uint32_t, uint32_t);
 
 typedef struct Event
 {
-	void		  (*func)(uint32_t arg1, uint32_t arg2);
-	uint32_t	  arg1;
-	uint32_t	  arg2;
-	uint32_t	  timestamp;
-	uint32_t	  N;
-	uint32_t	  interval;
+	EventFunc     func;		 // pointer to function to coll
+	uint32_t	  arg1;      // first function argument
+	uint32_t	  arg2;      // second function argument
+	uint32_t	  timestamp; // timestamp for function call
+	uint32_t	  N;         // number of remaining calls
+	uint32_t	  interval;  // interval between the calls
 
 	bool operator<(const Event& other) const {
 		return this->timestamp > other.timestamp;

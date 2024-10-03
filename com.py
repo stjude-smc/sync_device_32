@@ -33,7 +33,7 @@ def pad(data: bytearray, length=24):
     return bytearray(data + bytearray([0] * (length - len(data))))
 
 
-def w(command, arg1, arg2=0, ts=0, N=0, interval=0):
+def w(command, arg1=0, arg2=0, ts=0, N=0, interval=0):
     _command = pad(command.encode(), 4)
     if type(arg1) is str:
         _arg1 = pad(arg1.encode(), 4)

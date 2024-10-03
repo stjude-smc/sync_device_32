@@ -10,7 +10,7 @@ extern "C" {
 	#include "asf.h"
 }
 
-#include <new>  // to set custom out of memory handler
+#include <new>  // to set custom out-of-memory handler
 
 #include "globals.h"
 #include "uart_comm.h"
@@ -42,12 +42,6 @@ extern "C" {
 }
 
 
-void send_pulse(void){
-	ioport_set_pin_level(PIO_PA16_IDX, 1);
-	ioport_set_pin_level(PIO_PA16_IDX, 0);
-}
-
-
 
 /************************************************************************/
 /*                       ENTRY POINT                                    */
@@ -76,18 +70,15 @@ int main() {
 
 	//init_pins();
 
-	printf("Sync device initialized. Firmware version %s\n", VERSION);
-
 	init_sys_timer();
 	start_sys_timer();
-
 
 	while (1) {
 		if (!event_queue.empty() && is_sys_timer_running() && current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH))
 		{
 			// we must have missed an event
 			ioport_toggle_pin_level(PIO_PA23_IDX);
-			process_events();  // <- internally updates RA
+			process_events();  // <- internally sets RA to timestamp of the next event
 		}
 	}
 }

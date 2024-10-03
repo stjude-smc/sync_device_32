@@ -19,7 +19,7 @@ void _DMA_tx_wait(Pdc* p_uart_pdc);
 void _parse_UART_command(const DataPacket data);
 void _init_UART_TC(void);
 void _init_UART_DMA_rx(uint8_t size);
-void _print_event_status(Event event);
+void _print_event_queue();
 
 void init_uart_comm(void)
 {
@@ -149,19 +149,20 @@ void _init_UART_TC(void)
 /************************************************************************/
 void _parse_UART_command(const DataPacket data)
 {
-	if (strncasecmp(data.cmd, "PIN", 3) == 0)
+	if (strncasecmp(data.cmd, "???", 3) == 0)
 	{
-		printf("PIN command, arg1 = %lu, arg2 = %lu, ts=%lu\n", data.arg1, data.arg2, data.timestamp);
+		printf("-- SYNC DEVICE v%s --\n", VERSION);
+	}
+	else if (strncasecmp(data.cmd, "PIN", 3) == 0)
+	{
 		schedule_pin(data);
 	}
 	else if (strncasecmp(data.cmd, "PUL", 3) == 0)
 	{
-		printf("PUL command\n");
 		schedule_pulse(data);
 	}
 	else if (strncasecmp(data.cmd, "TGL", 3) == 0)
 	{
-		printf("TGL command\n");
 		schedule_toggle(data);
 	}
 	else if (strncasecmp(data.cmd, "STA", 3) == 0)
@@ -170,11 +171,9 @@ void _parse_UART_command(const DataPacket data)
 		printf("System timer prescaler=%d (1ct=%luns)\n", SYS_TC_PRESCALER, cts2us(1000));
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("Current system time:  %lu cts\n", current_time_cts());
-		if (!event_queue.empty())
-		{
-			_print_event_status(event_queue.top());
 
-		}
+		delay_ms(10);
+		_print_event_queue();
 	}
 	else if (strncasecmp(data.cmd, "INT", 3) == 0)
 	{
@@ -198,13 +197,23 @@ void _parse_UART_command(const DataPacket data)
 	}
 }
 
-void _print_event_status(Event event)
+void _print_event_queue()
 {
-	printf("Next event timestamp: %lu cts\n", event.timestamp);
-	printf("Next event arg1: %lu\n", event.arg1);
-	printf("Next event arg2: %lu\n", event.arg2);
-	printf("Next event N:    %lu\n", event.N);
-	printf("Next event intev:%lu\n", event.interval);
+	std::priority_queue<Event> event_queue_copy = event_queue;
+
+	uint32_t i = 0;
+	while (!event_queue_copy.empty())
+	{
+		Event event = event_queue_copy.top();
+		event_queue_copy.pop();
+		i++;
+		
+		printf("Event %d ts:     %lucts\n", i, event.timestamp);
+		printf("Event %d arg1:   %lu\n", i, event.arg1);
+		printf("Event %d arg2:   %lu\n", i, event.arg2);
+		printf("Event %d N:      %lu\n", i, event.N);
+		printf("Event %d interv: %lu\n\n", i, event.interval);
+	}
 }
 
 
