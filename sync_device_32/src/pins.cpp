@@ -12,26 +12,6 @@
 /*                    PIN MAPPING                                       */
 /************************************************************************/
 
-// Convert pin name (e.g., "D13" or "A0") to SAM3X I/O port pin ID
-uint32_t pin_name_to_ioport_id(const char* pin_name) {
-	pin_name_to_ioport_id(*((uint32_t*) pin_name));
-}
-uint32_t pin_name_to_ioport_id(const uint32_t pin_name) {
-	//size_t map_size = sizeof(pin_map) / sizeof(pin_map[0]);
-	size_t map_size = 80;
-
-	// Iterate through the pin map to find the matching pin name
-	for (size_t i = 0; i < map_size; i++) {
-		if (strncasecmp((const char*) &pin_name, pin_map[i].pin_name, 3) == 0) {
-			// Return the PIO pin index
-			return pin_map[i].pin_idx;
-		}
-	}
-
-	// Return 0 if pin name is not found
-	return 0;
-}
-
 // Arduino Due pin mapping table (digital and analog pins)
 const pin_map_t pin_map[] = {
 	{"D0", PIO_PA8_IDX},     // Digital pin D0 -> PA8
@@ -116,3 +96,28 @@ const pin_map_t pin_map[] = {
 	{"A10", PIO_PB19_IDX},
 	{"A11", PIO_PB20_IDX},
 };
+
+
+// Convert pin name (e.g., "D13" or "A0") to SAM3X I/O port pin ID
+uint32_t pin_name_to_ioport_id(const char* pin_name) {
+	return pin_name_to_ioport_id(*((uint32_t*) pin_name));
+}
+
+
+uint32_t pin_name_to_ioport_id(const uint32_t pin_name_uint32) {
+	size_t map_size = sizeof(pin_map) / sizeof(pin_map[0]);
+	
+	const char* pin_name = (const char*) &pin_name_uint32;
+
+	// Iterate through the pin map to find the matching pin name
+	for (size_t i = 0; i < map_size; i++) {
+		if (strncasecmp(pin_name, pin_map[i].pin_name, 3) == 0) {
+			// Return the PIO pin index
+			return pin_map[i].pin_idx;
+		}
+	}
+
+	// Return 0 if pin name is not found
+	printf("Could not find pin %s", pin_name);
+	return 0;
+}

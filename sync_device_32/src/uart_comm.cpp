@@ -4,6 +4,7 @@
 #include "uart_comm.h"
 #include "events.h"
 
+#define RSTC_KEY  0xA5000000  // password for reset controller
 
 // Memory buffer for DMA transmission
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
@@ -149,13 +150,18 @@ void _init_UART_TC(void)
 /************************************************************************/
 void _parse_UART_command(const DataPacket data)
 {
-	if (strncasecmp(data.cmd, "???", 3) == 0)
+	if (strncasecmp(data.cmd, "VER", 3) == 0)
 	{
-		printf("-- SYNC DEVICE v%s --\n", VERSION);
+		printf("SYNC DEVICE v%s\n", VERSION);
+		printf("System timer prescaler=%d (1ct=%luns)\n", SYS_TC_PRESCALER, cts2us(1000));
 	}
 	else if (strncasecmp(data.cmd, "GO!", 3) == 0)
 	{
 		start_sys_timer();
+	}
+	else if (strncasecmp(data.cmd, "RST", 3) == 0)
+	{
+		RSTC->RSTC_CR = RSTC_KEY | RSTC_CR_PROCRST;  // processor reset
 	}
 	else if (strncasecmp(data.cmd, "PIN", 3) == 0)
 	{
@@ -172,12 +178,12 @@ void _parse_UART_command(const DataPacket data)
 	else if (strncasecmp(data.cmd, "STA", 3) == 0)
 	{
 		printf("-- SYSTEM STATUS --\n");
-		printf("System timer prescaler=%d (1ct=%luns)\n", SYS_TC_PRESCALER, cts2us(1000));
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("Current system time:  %lu cts\n", current_time_cts());
+		printf("System timer is %s\n", is_sys_timer_running() ? "running" : "stopped");
 
-		delay_ms(10);
-		_print_event_queue();
+//		delay_ms(10);
+//		_print_event_queue();
 	}
 	else if (strncasecmp(data.cmd, "INT", 3) == 0)
 	{
@@ -212,11 +218,11 @@ void _print_event_queue()
 		event_queue_copy.pop();
 		i++;
 		
-		printf("Event %d ts:     %lucts\n", i, event.timestamp);
-		printf("Event %d arg1:   %lu\n", i, event.arg1);
-		printf("Event %d arg2:   %lu\n", i, event.arg2);
-		printf("Event %d N:      %lu\n", i, event.N);
-		printf("Event %d interv: %lu\n\n", i, event.interval);
+		printf("Event %lu ts:     %lucts\n", i, event.timestamp);
+		printf("Event %lu arg1:   %lu\n", i, event.arg1);
+		printf("Event %lu arg2:   %lu\n", i, event.arg2);
+		printf("Event %lu N:      %lu\n", i, event.N);
+		printf("Event %lu interv: %lu\n\n", i, event.interval);
 	}
 }
 
