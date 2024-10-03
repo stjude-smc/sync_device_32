@@ -186,6 +186,11 @@ void _parse_UART_command(const DataPacket data)
 	{
 		_send_event_queue();
 	}
+	else if (strncasecmp(data.cmd, "FUN", 3) == 0)
+	{
+		printf("%lu TGL\n", (uint32_t) &tgl_pin_event_func);
+		printf("%lu PIN\n", (uint32_t) &set_pin_event_func);
+	}
 	else if (strncasecmp(data.cmd, "INT", 3) == 0)
 	{
 		// Check the default priority of Timer/Counter 0 interrupt

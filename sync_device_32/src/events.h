@@ -26,15 +26,15 @@ using EventFunc = void (*)(uint32_t, uint32_t);
 
 typedef struct Event
 {
-	EventFunc     func;		 // pointer to function to coll
-	uint32_t	  arg1;      // first function argument
-	uint32_t	  arg2;      // second function argument
-	uint32_t	  timestamp; // timestamp for function call
-	uint32_t	  N;         // number of remaining calls
-	uint32_t	  interval;  // interval between the calls
+	EventFunc     func;		   // pointer to a function to call
+	uint32_t	  arg1;        // first function argument
+	uint32_t	  arg2;        // second function argument
+	uint32_t	  ts_cts;      // timestamp for function call
+	uint32_t	  N;           // number of remaining calls
+	uint32_t	  interv_cts;  // interval between the calls
 
 	bool operator<(const Event& other) const {
-		return this->timestamp > other.timestamp;
+		return this->ts_cts > other.ts_cts;
 	}
 } Event;  // 24 bytes
 
@@ -61,5 +61,6 @@ bool is_sys_timer_running();
 uint32_t current_time_cts();
 uint32_t current_time_us();
 
-// Housekeeping - ensure that if there are pending events in the future
-// the RA is set for system timer
+// Functions to use within Event structure
+void tgl_pin_event_func(uint32_t pin_idx, uint32_t arg2);
+void set_pin_event_func(uint32_t pin_idx, uint32_t arg2);

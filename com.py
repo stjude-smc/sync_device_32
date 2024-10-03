@@ -1,5 +1,6 @@
 import serial
 
+import re
 import ctypes
 from ctypes import c_uint8
 from ctypes import c_uint16
@@ -7,7 +8,7 @@ from ctypes import c_uint32
 from ctypes import c_int32
 from time import sleep
 
-c = serial.Serial("COM4", baudrate=115200, timeout=0.1)
+c = serial.Serial("COM4", baudrate=115200, timeout=0.01)
 
 
 def cu8(value):
@@ -66,28 +67,13 @@ def s(command="STA"):
         print(response.decode())
 
 
-
-
-typedef struct Event
-{
-    EventFunc     func;      // pointer to function to coll
-    uint32_t      arg1;      // first function argument
-    uint32_t      arg2;      // second function argument
-    uint32_t      timestamp; // timestamp for function call
-    uint32_t      N;         // number of remaining calls
-    uint32_t      interval;  // interval between the calls
-
-    bool operator<(const Event& other) const {
-        return this->timestamp > other.timestamp;
-    }
-} Event;  // 24 bytes
-
-
 class UInt32(ctypes.LittleEndianStructure):
     _fields_ = [("value", ctypes.c_uint32)]
 
+
 def uint32_to_py(buf: bytearray):
     return ctypes.cast(buf, ctypes.POINTER(UInt32)).contents.value
+
 
 class Event:
     def __init__(self, c_struct_data):
@@ -97,7 +83,59 @@ class Event:
         self.timestamp = uint32_to_py(c_struct_data[12:16])
         self.N = uint32_to_py(c_struct_data[16:20])
         self.interval = uint32_to_py(c_struct_data[20:24])
+        self.unit = "cts"
+
+    def __repr__(self):
+        return f"{self.func}({self.arg1}, {self.arg2}) at t={self.timestamp}{self.unit}. Call {self.N} times every {self.interval} {self.unit}"
+
+    def map_func(self, func_map):
+        self.func = func_map[str(self.func)]
 
 
-        
-        
+def get_function_addr():
+    c.flushInput()
+    c.write(pad("FUN".encode()))
+    return {k: v for k, v in [l.split() for l in c.readall().decode().splitlines()]}
+
+
+def get_prescaler():
+    c.flushInput()
+    c.write(pad("VER".encode()))
+    c.readline()
+    r = c.readline().decode()
+    return int(re.findall(r"prescaler=(\d+)", r)[0])
+
+
+def get_events(unit="us"):
+    func_map = get_function_addr()
+
+    if unit == "us":
+        prescaler = get_prescaler()
+
+    c.flushInput()
+    c.write(pad("QUE".encode()))
+    r = c.readall()
+    events = []
+    for offset in range(0, len(r), 24):  # Event is 24 bytes
+        e = Event(r[offset : offset + 24])
+        e.map_func(func_map)
+        if unit == "us":
+            e.unit = "us"
+            e.timestamp = cts2us(e.timestamp)
+            e.interval = cts2us(e.interval)
+        events.append(e)
+    return events
+
+
+def us2cts(us, prescaler=0):
+    if prescaler == 0:
+        prescaler = get_prescaler()
+
+    return us * 84_000_000 // prescaler // 1_000_000
+
+
+def cts2us(cts, prescaler=0):
+    if prescaler == 0:
+        prescaler = get_prescaler()
+
+    return cts * 1_000_000 * prescaler // 84_000_000

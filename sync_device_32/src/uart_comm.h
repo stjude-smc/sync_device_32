@@ -12,12 +12,12 @@
 // Data packet for serial communication
 typedef struct DataPacket
 {
-	char     cmd[4];  // 3-character command, null-terminated
-	uint32_t arg1;
-	uint32_t arg2;
-	uint32_t timestamp;
-	uint32_t N;
-	uint32_t interval;
+	char     cmd[4];    // 3-character command, null-terminated
+	uint32_t arg1;      // first argument for the command
+	uint32_t arg2;      // second argument for the command
+	uint32_t ts_us;     // timestamp for command execution in us
+	uint32_t N;         // number of times to run command (0 = forever)
+	uint32_t interv_us; // interval between command executions, in us
 } DataPacket;
 
 void init_uart_comm(void);
