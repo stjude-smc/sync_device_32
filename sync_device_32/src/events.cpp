@@ -76,7 +76,6 @@ void schedule_event_abs_time(Event event)
 void schedule_event(Event event)
 {
 	event.timestamp += current_time_us();
-	printf(" actual timestamp is %lu\n", event.timestamp);
 	schedule_event_abs_time(event);
 }
 

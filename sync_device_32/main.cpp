@@ -80,8 +80,6 @@ int main() {
 	init_pins();	
 	init_sys_timer();
 	
-	start_sys_timer();
-
 	while (1) {
 		if (!event_queue.empty() && is_sys_timer_running() && current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH))
 		{

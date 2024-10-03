@@ -153,6 +153,10 @@ void _parse_UART_command(const DataPacket data)
 	{
 		printf("-- SYNC DEVICE v%s --\n", VERSION);
 	}
+	else if (strncasecmp(data.cmd, "GO!", 3) == 0)
+	{
+		start_sys_timer();
+	}
 	else if (strncasecmp(data.cmd, "PIN", 3) == 0)
 	{
 		schedule_pin(data);
