@@ -1,5 +1,6 @@
 import serial
 
+import ctypes
 from ctypes import c_uint8
 from ctypes import c_uint16
 from ctypes import c_uint32
@@ -63,3 +64,40 @@ def s(command="STA"):
     response = c.readall()
     if response:
         print(response.decode())
+
+
+
+
+typedef struct Event
+{
+    EventFunc     func;      // pointer to function to coll
+    uint32_t      arg1;      // first function argument
+    uint32_t      arg2;      // second function argument
+    uint32_t      timestamp; // timestamp for function call
+    uint32_t      N;         // number of remaining calls
+    uint32_t      interval;  // interval between the calls
+
+    bool operator<(const Event& other) const {
+        return this->timestamp > other.timestamp;
+    }
+} Event;  // 24 bytes
+
+
+class UInt32(ctypes.LittleEndianStructure):
+    _fields_ = [("value", ctypes.c_uint32)]
+
+def uint32_to_py(buf: bytearray):
+    return ctypes.cast(buf, ctypes.POINTER(UInt32)).contents.value
+
+class Event:
+    def __init__(self, c_struct_data):
+        self.func = uint32_to_py(c_struct_data[0:4])
+        self.arg1 = uint32_to_py(c_struct_data[4:8])
+        self.arg2 = uint32_to_py(c_struct_data[8:12])
+        self.timestamp = uint32_to_py(c_struct_data[12:16])
+        self.N = uint32_to_py(c_struct_data[16:20])
+        self.interval = uint32_to_py(c_struct_data[20:24])
+
+
+        
+        

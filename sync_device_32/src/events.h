@@ -36,7 +36,7 @@ typedef struct Event
 	bool operator<(const Event& other) const {
 		return this->timestamp > other.timestamp;
 	}
-} Event;  // 28 bytes
+} Event;  // 24 bytes
 
 
 extern Event event_table_OLD[MAX_N_EVENTS];

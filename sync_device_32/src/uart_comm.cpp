@@ -20,7 +20,7 @@ void _DMA_tx_wait(Pdc* p_uart_pdc);
 void _parse_UART_command(const DataPacket data);
 void _init_UART_TC(void);
 void _init_UART_DMA_rx(uint8_t size);
-void _print_event_queue();
+void _send_event_queue();
 
 void init_uart_comm(void)
 {
@@ -181,9 +181,10 @@ void _parse_UART_command(const DataPacket data)
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("Current system time:  %lu cts\n", current_time_cts());
 		printf("System timer is %s\n", is_sys_timer_running() ? "running" : "stopped");
-
-//		delay_ms(10);
-//		_print_event_queue();
+	}
+	else if (strncasecmp(data.cmd, "QUE", 3) == 0)
+	{
+		_send_event_queue();
 	}
 	else if (strncasecmp(data.cmd, "INT", 3) == 0)
 	{
@@ -207,23 +208,22 @@ void _parse_UART_command(const DataPacket data)
 	}
 }
 
-void _print_event_queue()
+void _send_event_queue()
 {
 	std::priority_queue<Event> event_queue_copy = event_queue;
+
+	char *buf = new char[sizeof(Event)*event_queue_copy.size()];
 
 	uint32_t i = 0;
 	while (!event_queue_copy.empty())
 	{
 		Event event = event_queue_copy.top();
 		event_queue_copy.pop();
-		i++;
 		
-		printf("Event %lu ts:     %lucts\n", i, event.timestamp);
-		printf("Event %lu arg1:   %lu\n", i, event.arg1);
-		printf("Event %lu arg2:   %lu\n", i, event.arg2);
-		printf("Event %lu N:      %lu\n", i, event.N);
-		printf("Event %lu interv: %lu\n\n", i, event.interval);
+		memcpy(buf + sizeof(Event)*i++, &event, sizeof(Event));
+		
 	}
+	sd_tx(buf, sizeof(Event)*i);
 }
 
 
