@@ -89,7 +89,7 @@
 #ifdef PRESC32   // 1ct = 381ns, overflow after 1636s (27min 16s)
 #define SYS_TC_PRESCALER 32
 #define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK3
-#define SYS_TC_CONVERSION_MULTIPLIER 265200
+#define SYS_TC_CONVERSION_MULTIPLIER 262500
 #endif
 
 #ifdef PRESC128  // 1ct = 1524ns, overflow after 6544s (1h 49min)
