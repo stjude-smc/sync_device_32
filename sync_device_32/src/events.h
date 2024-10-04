@@ -18,6 +18,11 @@
 
 #include <queue>          // priority queue
 
+#ifndef UNIT_TEST
+#include <asf.h>
+#include "pins.h"
+#endif
+
 #include "globals.h"
 #include "uart_comm.h"
 

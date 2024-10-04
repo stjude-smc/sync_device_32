@@ -5,9 +5,9 @@
  *  Author: rkiselev
  */ 
 
-#include <asf.h>
+
+
 #include "events.h"
-#include "pins.h"
 
 // Create a table of events
 std::priority_queue<Event> event_queue;
@@ -21,6 +21,7 @@ volatile uint32_t event_table_end = 0;    // Pointer to the last pending event
 /************************************************************************/
 static inline void _enable_event_irq();
 static inline void _disable_event_irq();
+static inline bool _update_event(Event *event);
 
 /************************************************************************/
 /*                 EVENT HANDLING AND PROCESSING                        */
@@ -137,8 +138,14 @@ void process_events()
 	Event event;
 	while (!event_queue.empty()) {
 		// Keep processing events from the queue while they are pending
-		event = event_queue.top();		if (current_time_cts() >= event.ts_cts)		{			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue						// Process the event metadata			if (event.interv_cts > 0) // repeating event			{				event.ts_cts += event.interv_cts;				if (event.N == 0){  // infinite event					event_queue.push(event);				}				// if N == 1, it was a last call, and we drop it				if (event.N > 1) {  // reschedule the event					event.N--;					event_queue.push(event);				}			}		}		else  // This is a future event		{			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_cts);			break;		}	}
+		event = event_queue.top();		if (current_time_cts() >= event.ts_cts)		{			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue			if (_update_event(&event))			{				event_queue.push(event);			}		}		else  // This is a future event		{			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_cts);			break;		}	}
 	_enable_event_irq();
+}
+
+
+// Process the event metadatastatic inline bool _update_event(Event *event)
+{
+	if (event->interv_cts >= MIN_EVENT_INTERVAL) // repeating event	{		event->ts_cts += event->interv_cts;		if (event->N == 0){  // infinite event - reschedule			return true;		}		// if (N == 1), it was a last call, and we drop it		if (event->N > 1) {  // reschedule the event			event->N--;			return true;		}	}	return false;
 }
 
 /************************************************************************/

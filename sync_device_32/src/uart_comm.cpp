@@ -1,6 +1,3 @@
-#include <string.h>
-#include <strings.h>
-
 #include "uart_comm.h"
 #include "events.h"
 

@@ -6,7 +6,13 @@
  */ 
 
 #pragma once
+
+#ifndef UNIT_TEST
 #include <asf.h>
+#include <string.h>
+#include <strings.h>
+#endif
+
 #include "globals.h"
 
 // Data packet for serial communication
