@@ -3,6 +3,7 @@ Debug/
 Release/
 obj/
 bin/
+build/
 
 # Ignore generated files from the build process
 *.elf
