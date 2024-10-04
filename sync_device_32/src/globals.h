@@ -4,9 +4,11 @@
  * @brief Global system definitions: pinouts and settings.
  */
 #pragma once
-#include <ioport.h>
 
+#ifndef UNIT_TEST
+#include <ioport.h>
 #include "pins.h"
+#endif
 
 #define VERSION "0.6.0"
 
