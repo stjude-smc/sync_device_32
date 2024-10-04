@@ -116,3 +116,6 @@ static inline uint32_t cts2us(uint32_t cts) {
 #define ID_SYS_TC		ID_TC0
 #define SYS_TC_Handler  TC0_Handler
 #define SYS_TC_IRQn		TC0_IRQn
+
+
+#define UNIFORM_TIME_DELAY_CTS (UNIFORM_TIME_DELAY * SYS_TC_CONVERSION_MULTIPLIER / 100000)

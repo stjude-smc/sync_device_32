@@ -22,28 +22,35 @@ volatile uint32_t event_table_end = 0;    // Pointer to the last pending event
 static inline void _enable_event_irq();
 static inline void _disable_event_irq();
 static inline bool _update_event(Event *event);
+static inline void _enqueue_event(const Event* event);  // thread-safe
+static inline void _remove_event();               // thread-safe
 
 /************************************************************************/
 /*                 EVENT HANDLING AND PROCESSING                        */
 /************************************************************************/
 
-// Populate an Event with data from a DataPacket. You still have to assign a function!
+// Create an Event with data from a DataPacket.
 // All timestamps are converted from microseconds to SYS_TC counts
-void event_from_datapacket(const DataPacket* packet, Event* new_event)
+// NOTE: you will have to deallocate memory yourself!
+Event* event_from_datapacket(const DataPacket* packet, EventFunc func)
 {
+	Event* new_event = new Event();
 	// Copy fields from DataPacket to Event
+	new_event->func = func;
 	new_event->arg1 = packet->arg1;
 	new_event->arg2 = packet->arg2;
-	new_event->ts_cts = us2cts(packet->ts_us);
+	new_event->ts_cts = us2cts(packet->ts_us) + UNIFORM_TIME_DELAY_CTS;
 	
 	// N is 1 (one-time event) if interval is too small
 	new_event->N = (packet->interv_us < MIN_EVENT_INTERVAL) ? 1 : packet->N;
 	new_event->interv_cts = us2cts(packet->interv_us);
+	
+	return new_event;
 }
 
 
 // Schedule event relative to t=0
-void schedule_event_abs_time(Event event)
+void schedule_event(const Event *event, bool relative)
 {
 	// Do we have enough memory?
 	if (event_queue.size() >= MAX_N_EVENTS)
@@ -51,101 +58,145 @@ void schedule_event_abs_time(Event event)
 		sd_tx("ERR: event table is full!\n");
 		return;
 	}
-
-	event.ts_cts = event.ts_cts + us2cts(UNIFORM_TIME_DELAY);
-
-	// Lock the event table and add a new event. Update RA register
-	_disable_event_irq();
-		event_queue.push(event);
 	
-		// grab the next event
-		Event retrieved_event = event_queue.top();
-		// Update the RA register for compare interrupt
-		tc_write_ra(SYS_TC, SYS_TC_CH, retrieved_event.ts_cts);
+	if (relative)
+	{
+		Event relative_event = *event;
+		relative_event.ts_cts += current_time_cts();
+		_enqueue_event(&relative_event);
+	}
+	else
+	{
+		_enqueue_event(event);
+	}
 
-		if (is_sys_timer_running() && current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH))
-		{
-			// we must have missed an event while fucking with the event_queue
-			process_events();  // <- internally updates RA
-		}
+	update_ra();
+}
+
+inline void update_ra()
+{
+	// grab the next event
+	_disable_event_irq();
+	Event retrieved_event = event_queue.top();
+	_enable_event_irq();
+	// Update the RA register for compare interrupt
+	tc_write_ra(SYS_TC, SYS_TC_CH, retrieved_event.ts_cts);
+}
+
+static inline void _enqueue_event(const Event* event)
+{
+	_disable_event_irq();
+	event_queue.push(*event);
+	_enable_event_irq();
+}
+
+static inline void _remove_event()
+{
+	_disable_event_irq();
+	event_queue.pop();
 	_enable_event_irq();
 }
 
 
-// Schedule event relative to the current time
-void schedule_event(Event event)
+// Schedule an electric level event on a given pin
+// data->arg1 is the pin name (e.g. "A3")
+// data->arg2 is polarity (0 or 1)
+void schedule_pin(const DataPacket *data)
 {
-	event.ts_cts += current_time_cts();
-	schedule_event_abs_time(event);
+	Event* event_p = event_from_datapacket(data, set_pin_event_func);
+
+	// Convert pin name to ioport index for the event function
+	event_p->arg1 = pin_name_to_ioport_id(data->arg1);
+
+	schedule_event(event_p);
+	delete event_p;
 }
 
 
-void schedule_pulse(DataPacket data, bool is_positive)
+// Schedule an electric pulse event on a given pin
+// data->arg1 is the pin name (e.g. "A3")
+// data->arg2 is the pulse duration in us
+void schedule_pulse(const DataPacket *data, bool is_positive)
 {
-	// Activate this output pin
-	data.arg1 = pin_name_to_ioport_id(data.arg1);
-	ioport_set_pin_dir(data.arg1, IOPORT_DIR_OUTPUT);
+	Event* event_p = event_from_datapacket(data, set_pin_event_func);
 
-	Event event;
-	event_from_datapacket(&data, &event);
-	event.arg2 = is_positive ? 1 : 0;
-	event.func = set_pin_event_func;
+	// Convert pin name to ioport index for the event function
+	event_p->arg1 = pin_name_to_ioport_id(data->arg1);
+	event_p->arg2 = is_positive ? 1 : 0;
 
 	// Schedule front of the pulse
-	event.ts_cts += current_time_cts();
-	schedule_event_abs_time(event);
+	event_p->ts_cts += current_time_cts();   // TODO - check for uniform time delay
+	schedule_event(event_p, false);
 
-	// Schedule back of the pulse. arg2 is the pulse duration		
-	event.ts_cts += us2cts((data.arg2 > 0) ? data.arg2 : DFL_PULSE_DURATION);
-	event.arg2 = is_positive ? 0 : 1;
-	schedule_event_abs_time(event);
+	// Schedule back of the pulse
+	event_p->ts_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFL_PULSE_DURATION);
+	event_p->arg2 = is_positive ? 0 : 1;
+	schedule_event(event_p, false);
+
+	delete event_p;
 }
 
-
-void schedule_pin(DataPacket data)
+// Schedule an electric level change event on a given pin
+// data->arg1 is the pin name (e.g. "A3")
+// data->arg2 is ignored
+void schedule_toggle(const DataPacket *data)
 {
-	// Activate this output pin
-	data.arg1 = pin_name_to_ioport_id(data.arg1);
-	ioport_set_pin_dir(data.arg1, IOPORT_DIR_OUTPUT);
+	Event* event_p = event_from_datapacket(data, tgl_pin_event_func);
 
-	Event event;
-	event_from_datapacket(&data, &event);
-	event.func = set_pin_event_func;
+	// Convert pin name to ioport index for the event function
+	event_p->arg1 = pin_name_to_ioport_id(data->arg1);
 
-	printf("PIN: requested timestamp = %lu us", event.ts_cts);
-
-	schedule_event(event);
-}
-
-void schedule_toggle(DataPacket data)
-{
-	// Activate this output pin
-	data.arg1 = pin_name_to_ioport_id(data.arg1);
-	ioport_set_pin_dir(data.arg1, IOPORT_DIR_OUTPUT);
-
-	Event event;
-	event_from_datapacket(&data, &event);
-	event.func = tgl_pin_event_func;
-
-	schedule_event(event);
-
+	schedule_event(event_p);
+	delete event_p;
 }
 
 
 void process_events()
 {
-	_disable_event_irq();
-	Event event;
-	while (!event_queue.empty()) {
+	Event event;	
+	while (!event_queue.empty())	{
 		// Keep processing events from the queue while they are pending
-		event = event_queue.top();		if (current_time_cts() >= event.ts_cts)		{			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue			if (_update_event(&event))			{				event_queue.push(event);			}		}		else  // This is a future event		{			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_cts);			break;		}	}
-	_enable_event_irq();
+		event = get_next_event();				if (event.ts_cts > current_time_cts())  // it's a future event		{			update_ra();			return;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		_remove_event();  // remove the event from the queue, preserving order		if (_update_event(&event))  // Needs to be rescheduled?		{			_enqueue_event(&event); // Put updated event back, preserving order of the queue		}	}
 }
 
+Event get_next_event()
+{
+	_disable_event_irq();
+	Event event = event_queue.top();
+	_enable_event_irq();
+	return event;
+}
+
+
+bool is_event_missed()
+{
+	if (is_sys_timer_running() && !event_queue.empty())
+	{
+		return current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH);
+	}
+	return false;
+}
 
 // Process the event metadatastatic inline bool _update_event(Event *event)
 {
 	if (event->interv_cts >= MIN_EVENT_INTERVAL) // repeating event	{		event->ts_cts += event->interv_cts;		if (event->N == 0){  // infinite event - reschedule			return true;		}		// if (N == 1), it was a last call, and we drop it		if (event->N > 1) {  // reschedule the event			event->N--;			return true;		}	}	return false;
+}
+
+
+/************************************************************************/
+/*                 FUNCTION TO USE WITHIN EVENTS                        */
+/************************************************************************/
+
+void tgl_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2_unused)
+{
+	ioport_set_pin_dir(arg1_pin_idx, IOPORT_DIR_OUTPUT);
+	ioport_toggle_pin_level(arg1_pin_idx);
+}
+
+void set_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2_level)
+{
+	ioport_set_pin_dir(arg1_pin_idx, IOPORT_DIR_OUTPUT);
+	ioport_set_pin_level(arg1_pin_idx, arg2_level);
 }
 
 /************************************************************************/
@@ -234,15 +285,4 @@ static inline void _disable_event_irq()
 static inline void _enable_event_irq()
 {
 	tc_enable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_CPAS);
-}
-
-
-void tgl_pin_event_func(uint32_t pin_idx, uint32_t arg2)
-{
-	ioport_toggle_pin_level(pin_idx);
-}
-
-void set_pin_event_func(uint32_t pin_idx, uint32_t arg2)
-{
-	ioport_set_pin_level(pin_idx, arg2);
 }

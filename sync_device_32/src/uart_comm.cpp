@@ -14,7 +14,7 @@ static uint8_t rx_buffer[UART_BUFFER_SIZE];
 /*                  INTERNAL FUNCTION PROTOTYPES                        */
 /************************************************************************/
 void _DMA_tx_wait(Pdc* p_uart_pdc);
-void _parse_UART_command(const DataPacket data);
+void _parse_UART_command(const DataPacket *data);
 void _init_UART_TC(void);
 void _init_UART_DMA_rx(uint8_t size);
 void _send_event_queue();
@@ -105,6 +105,8 @@ void _init_UART_DMA_rx(uint8_t size)
 	pdc_uart_rx_packet.ul_addr = (uint32_t)rx_buffer;
 	pdc_uart_rx_packet.ul_size = size;
 	
+	// TODO - implement double-buffering
+	
 	pdc_rx_init(p_uart_pdc, &pdc_uart_rx_packet, NULL);
 
 	pdc_enable_transfer(p_uart_pdc, PERIPH_PTCR_TXTEN | PERIPH_PTCR_RXTEN);
@@ -139,54 +141,54 @@ void _init_UART_TC(void)
 /************************************************************************/
 /* Implementation of the communication protocol                         */
 /************************************************************************/
-void _parse_UART_command(const DataPacket data)
+void _parse_UART_command(const DataPacket *data)
 {
-	if (strncasecmp(data.cmd, "VER", 3) == 0)
+	if (strncasecmp(data->cmd, "VER", 3) == 0)
 	{
 		printf("SYNC DEVICE v%s\n", VERSION);
 		printf("System timer prescaler=%d (1ct=%luns)\n", SYS_TC_PRESCALER, cts2us(1000));
 	}
-	else if (strncasecmp(data.cmd, "GO!", 3) == 0)
+	else if (strncasecmp(data->cmd, "GO!", 3) == 0)
 	{
 		start_sys_timer();
 	}
-	else if (strncasecmp(data.cmd, "RST", 3) == 0)
+	else if (strncasecmp(data->cmd, "RST", 3) == 0)
 	{
 		RSTC->RSTC_CR = RSTC_KEY | RSTC_CR_PROCRST;  // processor reset
 	}
-	else if (strncasecmp(data.cmd, "PIN", 3) == 0)
+	else if (strncasecmp(data->cmd, "PIN", 3) == 0)
 	{
 		schedule_pin(data);
 	}
-	else if (strncasecmp(data.cmd, "PPL", 3) == 0)
+	else if (strncasecmp(data->cmd, "PPL", 3) == 0)
 	{
 		schedule_pulse(data, true);
 	}
-	else if (strncasecmp(data.cmd, "NPL", 3) == 0)
+	else if (strncasecmp(data->cmd, "NPL", 3) == 0)
 	{
 		schedule_pulse(data, false);
 	}
-	else if (strncasecmp(data.cmd, "TGL", 3) == 0)
+	else if (strncasecmp(data->cmd, "TGL", 3) == 0)
 	{
 		schedule_toggle(data);
 	}
-	else if (strncasecmp(data.cmd, "STA", 3) == 0)
+	else if (strncasecmp(data->cmd, "STA", 3) == 0)
 	{
 		printf("-- SYSTEM STATUS --\n");
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("Current system time:  %lu cts\n", current_time_cts());
 		printf("System timer is %s\n", is_sys_timer_running() ? "running" : "stopped");
 	}
-	else if (strncasecmp(data.cmd, "QUE", 3) == 0)
+	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
 	{
 		_send_event_queue();
 	}
-	else if (strncasecmp(data.cmd, "FUN", 3) == 0)
+	else if (strncasecmp(data->cmd, "FUN", 3) == 0)
 	{
 		printf("%lu TGL\n", (uint32_t) &tgl_pin_event_func);
 		printf("%lu PIN\n", (uint32_t) &set_pin_event_func);
 	}
-	else if (strncasecmp(data.cmd, "INT", 3) == 0)
+	else if (strncasecmp(data->cmd, "INT", 3) == 0)
 	{
 		// Check the default priority of Timer/Counter 0 interrupt
 		uint32_t sys_tc_priority = NVIC_GetPriority(SYS_TC_IRQn);
@@ -204,7 +206,7 @@ void _parse_UART_command(const DataPacket data)
 	}
 	else
 	{
-		printf("unknown command %.3s\n", data.cmd);
+		printf("unknown command %.3s\n", data->cmd);
 	}
 }
 
@@ -249,10 +251,9 @@ void UART_Handler(void)
 	
 	// Check if the PDC transfer is complete
 	if (status & UART_SR_ENDRX) {
-		DataPacket data;
-		memcpy(&data, &rx_buffer, sizeof(DataPacket));
-		_parse_UART_command(data);
-
+		// Parse the content of rx_buffer, which contains a DataPacket
+		_parse_UART_command((DataPacket *) &rx_buffer);
+		
 		// Reinitialize PDC for the next transfer
 		_init_UART_DMA_rx(sizeof(DataPacket));
 	}

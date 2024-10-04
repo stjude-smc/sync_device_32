@@ -83,9 +83,9 @@ int main() {
 	printf("SYNC DEVICE READY\n");
 
 	while (1) {
-		if (!event_queue.empty() && is_sys_timer_running() && current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH))
+		if (is_event_missed())
 		{
-			// we must have missed an event
+			ioport_toggle_pin_level(pin_name_to_ioport_id(FLUIDIC_PIN));
 			process_events();  // <- internally sets RA to timestamp of the next event
 		}
 	}

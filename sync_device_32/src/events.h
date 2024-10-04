@@ -47,16 +47,19 @@ typedef struct Event
 extern Event event_table_OLD[MAX_N_EVENTS];
 extern std::priority_queue<Event> event_queue;
 
-void event_from_datapacket(const DataPacket* packet, Event* new_event);
+// Allocate memory and create an event from data packet
+Event* event_from_datapacket(const DataPacket* packet, EventFunc func=nullptr);
 
-void schedule_event(Event event);
-void schedule_event_abs_time(Event event);
+void schedule_event(const Event *event, bool relative = true);
 
-void schedule_pulse(DataPacket data, bool is_positive);
-void schedule_pin(DataPacket data);
-void schedule_toggle(DataPacket data);
+void schedule_pulse(const DataPacket *data, bool is_positive);
+void schedule_pin(const DataPacket *data);
+void schedule_toggle(const DataPacket *data);
 
 void process_events();
+bool is_event_missed();
+Event get_next_event(); // returns the next event, thread-safe
+inline void update_ra();
 
 void init_sys_timer();
 void start_sys_timer();

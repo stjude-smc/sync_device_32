@@ -8,6 +8,8 @@ from ctypes import c_uint32
 from ctypes import c_int32
 from time import sleep
 
+UNIFORM_TIME_DELAY = 500
+
 c = serial.Serial("COM4", baudrate=115200, timeout=0.01)
 
 
@@ -56,8 +58,10 @@ interval:{_interval}\t({interval}us)
 """
     )
     response = c.readall()
-    if response:
-        print(f"RESPONSE: {response.decode()}")
+    try:
+        return response.decode()
+    except UnicodeDecodeError:
+        return response
 
 
 def s(command="STA"):
@@ -86,7 +90,7 @@ class Event:
         self.unit = "cts"
 
     def __repr__(self):
-        return f"{self.func}({self.arg1}, {self.arg2}) at t={self.timestamp}{self.unit}. Call {self.N} times every {self.interval} {self.unit}"
+        return f"{self.func}({self.arg1:<3}, {self.arg2}) at t={self.timestamp:>11}{self.unit}. Call {self.N:>4} times every {self.interval:>10} {self.unit}"
 
     def map_func(self, func_map):
         self.func = func_map[str(self.func)]
@@ -106,27 +110,6 @@ def get_prescaler():
     return int(re.findall(r"prescaler=(\d+)", r)[0])
 
 
-def get_events(unit="us"):
-    func_map = get_function_addr()
-
-    if unit == "us":
-        prescaler = get_prescaler()
-
-    c.flushInput()
-    c.write(pad("QUE".encode()))
-    r = c.readall()
-    events = []
-    for offset in range(0, len(r), 24):  # Event is 24 bytes
-        e = Event(r[offset : offset + 24])
-        e.map_func(func_map)
-        if unit == "us":
-            e.unit = "us"
-            e.timestamp = cts2us(e.timestamp)
-            e.interval = cts2us(e.interval)
-        events.append(e)
-    return events
-
-
 def us2cts(us, prescaler=0):
     if prescaler == 0:
         prescaler = get_prescaler()
@@ -141,36 +124,76 @@ def cts2us(cts, prescaler=0):
     return cts * 1_000_000 * prescaler // 84_000_000
 
 
+def get_events(unit="ms"):
+    func_map = get_function_addr()
+
+    if unit in ["us", "ms"]:
+        prescaler = get_prescaler()
+
+    c.flushInput()
+    c.write(pad("QUE".encode()))
+    r = c.readall()
+    events = []
+    for offset in range(0, len(r), 24):  # Event is 24 bytes
+        e = Event(r[offset : offset + 24])
+        e.map_func(func_map)
+        e.timestamp -= us2cts(UNIFORM_TIME_DELAY)
+        if unit in ["us", "ms"]:
+            e.unit = unit
+            e.timestamp = round(cts2us(e.timestamp) * (0.001 if unit == "ms" else 1))
+            e.interval = round(cts2us(e.interval) * (0.001 if unit == "ms" else 1))
+        events.append(e)
+    return events
+
+
+def go():
+    c.write(pad("GO!".encode()))
+
+
+def rst():
+    c.write(pad("rst".encode()))
+
+
+def r():
+    return c.readall().decode()
+
+
 # here "lasers" is a list with Arduino pin names, like ["A1", "A2"] for Cy3, Cy5
 def run_ALEX(
-    exposure_time, lasers, N_bursts, cam_readout=12_000, shutter_delay=1_000, fluidics=0
+    exposure_time,
+    lasers,
+    N_bursts,
+    cam_readout=12_000,
+    shutter_delay=1_000,
+    interburst_pause=0,
+    fluidics=0,
 ):
     offset = 0 if fluidics >= 0 else -fluidics
 
     N_ch = len(lasers)
-    N_frames = N_bursts * N_ch
     frame_period = exposure_time + shutter_delay + cam_readout
 
     for i, laser in enumerate(lasers):
         start_ts = i * frame_period
-        print(laser, start_ts)
+
+        # shutter
         w(
             "PPL",
             arg1=laser,
             arg2=exposure_time,
             ts=start_ts + offset,
             N=N_bursts,
-            interval=frame_period * N_ch,
+            interval=frame_period * N_ch + interburst_pause,
         )
-
-    w(
-        "PPL",
-        arg1="D12",
-        arg2=exposure_time,
-        ts=shutter_delay + offset,
-        N=N_frames,
-        interval=frame_period,
-    )
+        # camera
+        w(
+            "PPL",
+            arg1="D12",
+            arg2=exposure_time,
+            ts=start_ts + offset + shutter_delay,
+            N=N_bursts,
+            interval=frame_period * N_ch + interburst_pause,
+        )
 
     if fluidics > 0:
         w("PPL", arg1="D2", arg2=250_000, ts=fluidics, N=1, interval=0)
@@ -181,11 +204,17 @@ def run_ALEX(
 w("rst")
 sleep(0.1)
 run_ALEX(
-    exposure_time=20_000,
+    exposure_time=200_000,
     lasers=["A0", "A1", "A2", "A3"],
-    N_bursts=1,
-    cam_readout=12_000,
-    shutter_delay=1_000,
+    N_bursts=7,
+    cam_readout=52_000,
+    shutter_delay=10_000,
+    interburst_pause=500_000,
     fluidics=0,
 )
+sleep(0.1)
+s()
+sleep(0.1)
+get_events("cts")
+sleep(0.1)
 w("GO!")
