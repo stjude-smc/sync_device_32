@@ -139,3 +139,53 @@ def cts2us(cts, prescaler=0):
         prescaler = get_prescaler()
 
     return cts * 1_000_000 * prescaler // 84_000_000
+
+
+# here "lasers" is a list with Arduino pin names, like ["A1", "A2"] for Cy3, Cy5
+def run_ALEX(
+    exposure_time, lasers, N_bursts, cam_readout=12_000, shutter_delay=1_000, fluidics=0
+):
+    offset = 0 if fluidics >= 0 else -fluidics
+
+    N_ch = len(lasers)
+    N_frames = N_bursts * N_ch
+    frame_period = exposure_time + shutter_delay + cam_readout
+
+    for i, laser in enumerate(lasers):
+        start_ts = i * frame_period
+        print(laser, start_ts)
+        w(
+            "PPL",
+            arg1=laser,
+            arg2=exposure_time,
+            ts=start_ts + offset,
+            N=N_bursts,
+            interval=frame_period * N_ch,
+        )
+
+    w(
+        "PPL",
+        arg1="D12",
+        arg2=exposure_time,
+        ts=shutter_delay + offset,
+        N=N_frames,
+        interval=frame_period,
+    )
+
+    if fluidics > 0:
+        w("PPL", arg1="D2", arg2=250_000, ts=fluidics, N=1, interval=0)
+    elif fluidics < 0:
+        w("PPL", arg1="D2", arg2=250_000, ts=0, N=1, interval=0)
+
+
+w("rst")
+sleep(0.1)
+run_ALEX(
+    exposure_time=20_000,
+    lasers=["A0", "A1", "A2", "A3"],
+    N_bursts=1,
+    cam_readout=12_000,
+    shutter_delay=1_000,
+    fluidics=0,
+)
+w("GO!")

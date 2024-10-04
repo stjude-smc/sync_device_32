@@ -44,13 +44,7 @@ void init_uart_comm(void)
 	};
 		
 	// Init UART and enable receiver and transmitter
-	uint32_t status = uart_init(UART, &uart_settings);
-	
-	if (status == 0) {
-		ioport_set_pin_level(PIO_PB27_IDX, true);
-	} else {
-		ioport_set_pin_level(PIO_PB27_IDX, false);
-	}
+	uart_init(UART, &uart_settings);
 	
 	uart_enable_tx(UART);
 	uart_enable_rx(UART);
@@ -167,9 +161,13 @@ void _parse_UART_command(const DataPacket data)
 	{
 		schedule_pin(data);
 	}
-	else if (strncasecmp(data.cmd, "PUL", 3) == 0)
+	else if (strncasecmp(data.cmd, "PPL", 3) == 0)
 	{
-		schedule_pulse(data);
+		schedule_pulse(data, true);
+	}
+	else if (strncasecmp(data.cmd, "NPL", 3) == 0)
+	{
+		schedule_pulse(data, false);
 	}
 	else if (strncasecmp(data.cmd, "TGL", 3) == 0)
 	{

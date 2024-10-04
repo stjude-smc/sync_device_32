@@ -47,7 +47,7 @@ void event_from_datapacket(const DataPacket* packet, Event* new_event);
 void schedule_event(Event event);
 void schedule_event_abs_time(Event event);
 
-void schedule_pulse(DataPacket data);
+void schedule_pulse(DataPacket data, bool is_positive);
 void schedule_pin(DataPacket data);
 void schedule_toggle(DataPacket data);
 

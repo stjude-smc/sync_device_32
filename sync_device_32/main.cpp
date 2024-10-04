@@ -51,14 +51,14 @@ void init_pins()
 	sysclk_enable_peripheral_clock(ID_PIOC);
 	sysclk_enable_peripheral_clock(ID_PIOD);
 	
-	ioport_set_port_level(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_PIN_LEVEL_LOW);
 	ioport_set_port_dir(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_DIR_OUTPUT);
+	ioport_set_port_level(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_PIN_LEVEL_LOW);
 
-	ioport_set_pin_level(pin_name_to_ioport_id(CAMERA_PIN), IOPORT_PIN_LEVEL_LOW);
 	ioport_set_pin_dir(pin_name_to_ioport_id(CAMERA_PIN), IOPORT_DIR_OUTPUT);
+	ioport_set_pin_level(pin_name_to_ioport_id(CAMERA_PIN), IOPORT_PIN_LEVEL_LOW);
 
-	ioport_set_pin_level(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_PIN_LEVEL_LOW);
 	ioport_set_pin_dir(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_DIR_OUTPUT);
+	ioport_set_pin_level(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_PIN_LEVEL_LOW);
 }
 
 
@@ -86,7 +86,6 @@ int main() {
 		if (!event_queue.empty() && is_sys_timer_running() && current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH))
 		{
 			// we must have missed an event
-			ioport_toggle_pin_level(PIO_PA23_IDX);
 			process_events();  // <- internally sets RA to timestamp of the next event
 		}
 	}

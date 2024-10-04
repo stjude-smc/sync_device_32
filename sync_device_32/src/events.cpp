@@ -79,26 +79,24 @@ void schedule_event(Event event)
 }
 
 
-void schedule_pulse(DataPacket data)
+void schedule_pulse(DataPacket data, bool is_positive)
 {
 	// Activate this output pin
 	data.arg1 = pin_name_to_ioport_id(data.arg1);
-	bool lvl = ioport_get_pin_level(data.arg1);
-
 	ioport_set_pin_dir(data.arg1, IOPORT_DIR_OUTPUT);
 
 	Event event;
 	event_from_datapacket(&data, &event);
-	event.arg2 = lvl ? 0 : 1;
+	event.arg2 = is_positive ? 1 : 0;
 	event.func = set_pin_event_func;
 
 	// Schedule front of the pulse
-	event.ts_cts += current_time_us();
+	event.ts_cts += current_time_cts();
 	schedule_event_abs_time(event);
 
 	// Schedule back of the pulse. arg2 is the pulse duration		
-	event.ts_cts += (data.arg2 > 0) ? data.arg2 : DFL_PULSE_DURATION;
-	event.arg2 = lvl ? 1 : 0;
+	event.ts_cts += us2cts((data.arg2 > 0) ? data.arg2 : DFL_PULSE_DURATION);
+	event.arg2 = is_positive ? 0 : 1;
 	schedule_event_abs_time(event);
 }
 
