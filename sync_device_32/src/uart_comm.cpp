@@ -141,6 +141,7 @@ void _init_UART_TC(void)
 /************************************************************************/
 /* Implementation of the communication protocol                         */
 /************************************************************************/
+// This takes about 280-360 us
 void _parse_UART_command(const DataPacket *data)
 {
 	if (strncasecmp(data->cmd, "VER", 3) == 0)
@@ -249,7 +250,7 @@ void UART_Handler(void)
 	// A character arrived - reset the timer for communication timeout
 	tc_start(UART_TC, UART_TC_CH);
 	
-	// Check if the PDC transfer is complete
+	// Check if the PDC transfer is complete - happens ~120us after end of transmission
 	if (status & UART_SR_ENDRX) {
 		// Parse the content of rx_buffer, which contains a DataPacket
 		_parse_UART_command((DataPacket *) &rx_buffer);
