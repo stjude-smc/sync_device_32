@@ -218,12 +218,12 @@ def run_ALEX(
 
 
 m = run_ALEX(
-    exposure_time=10_000,
-    lasers=["A0", "A1", "A2", "A3"],
-    N_bursts=2,
-    cam_readout=12_000,
-    shutter_delay=1_000,
-    interburst_pause=50_000,
+    exposure_time=100,
+    lasers=["A0", "A1"],
+    N_bursts=0,
+    cam_readout=150,
+    shutter_delay=20,
+    interburst_pause=100,
     fluidics=0,
 )
 c.write(m)
