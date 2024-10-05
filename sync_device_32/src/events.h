@@ -59,10 +59,12 @@ void schedule_toggle(const DataPacket *data);
 void process_events();
 bool is_event_missed();
 Event get_next_event(); // returns the next event, thread-safe
+
 inline void update_ra();
 
 void init_sys_timer();
 void start_sys_timer();
+void stop_sys_timer();
 void pause_sys_timer();
 
 bool is_sys_timer_running();

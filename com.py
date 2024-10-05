@@ -64,6 +64,19 @@ interval:{_interval}\t({interval}us)
         return response
 
 
+def w_buf(command, arg1=0, arg2=0, ts=0, N=0, interval=0):
+    _command = pad(command.encode(), 4)
+    if type(arg1) is str:
+        _arg1 = pad(arg1.encode(), 4)
+    else:
+        _arg1 = bytearray(cu32(arg1))
+    _arg2 = bytearray(cu32(arg2))
+    _ts = bytearray(cu32(ts))
+    _N = bytearray(cu32(N))
+    _interval = bytearray(cu32(interval))
+    return pad(_command + _arg1 + _arg2 + _ts + _N + _interval)
+
+
 def s(command="STA"):
     c.write(pad(command.encode()))
     response = c.readall()
@@ -173,11 +186,13 @@ def run_ALEX(
     N_ch = len(lasers)
     frame_period = exposure_time + shutter_delay + cam_readout
 
+    b = w_buf("STP")  # clear event queue
+
     for i, laser in enumerate(lasers):
         start_ts = i * frame_period
 
         # shutter
-        w(
+        b += w_buf(
             "PPL",
             arg1=laser,
             arg2=exposure_time,
@@ -186,7 +201,7 @@ def run_ALEX(
             interval=frame_period * N_ch + interburst_pause,
         )
         # camera
-        w(
+        b += w_buf(
             "PPL",
             arg1="D12",
             arg2=exposure_time,
@@ -196,25 +211,19 @@ def run_ALEX(
         )
 
     if fluidics > 0:
-        w("PPL", arg1="D2", arg2=250_000, ts=fluidics, N=1, interval=0)
+        b += w_buf("PPL", arg1="D2", arg2=250_000, ts=fluidics, N=1, interval=0)
     elif fluidics < 0:
-        w("PPL", arg1="D2", arg2=250_000, ts=0, N=1, interval=0)
+        b += w_buf("PPL", arg1="D2", arg2=250_000, ts=0, N=1, interval=0)
+    return b + w_buf("GO!")
 
 
-w("rst")
-sleep(0.1)
-run_ALEX(
-    exposure_time=200_000,
+m = run_ALEX(
+    exposure_time=10_000,
     lasers=["A0", "A1", "A2", "A3"],
-    N_bursts=7,
-    cam_readout=52_000,
-    shutter_delay=10_000,
-    interburst_pause=500_000,
+    N_bursts=2,
+    cam_readout=12_000,
+    shutter_delay=1_000,
+    interburst_pause=50_000,
     fluidics=0,
 )
-sleep(0.1)
-s()
-sleep(0.1)
-get_events("cts")
-sleep(0.1)
-w("GO!")
+c.write(m)

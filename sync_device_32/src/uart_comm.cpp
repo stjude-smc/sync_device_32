@@ -172,6 +172,11 @@ void _parse_UART_command(const DataPacket *data)
 	{
 		RSTC->RSTC_CR = RSTC_KEY | RSTC_CR_PROCRST;  // processor reset
 	}
+	else if (strncasecmp(data->cmd, "STP", 3) == 0)  // stop system timer and delete event queue
+	{
+		stop_sys_timer();
+		std::priority_queue<Event>().swap(event_queue);
+	}
 	else if (strncasecmp(data->cmd, "PIN", 3) == 0)
 	{
 		schedule_pin(data);

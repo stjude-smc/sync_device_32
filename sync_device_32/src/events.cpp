@@ -226,6 +226,13 @@ void start_sys_timer()
 	tc_start(SYS_TC, SYS_TC_CH);
 }
 
+// Stop system timer
+void stop_sys_timer()
+{
+	tc_stop(SYS_TC, SYS_TC_CH);
+}
+
+
 void init_sys_timer()
 {
 	sysclk_enable_peripheral_clock(ID_SYS_TC);
