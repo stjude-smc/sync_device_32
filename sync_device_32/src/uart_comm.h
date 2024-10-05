@@ -31,3 +31,5 @@ void init_uart_comm(void);
 // Send data to the host
 void sd_tx(const char *cstring);
 void sd_tx(const char *buf, uint32_t len);
+
+void poll_uart();

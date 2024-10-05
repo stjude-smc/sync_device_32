@@ -6,9 +6,10 @@
 // Memory buffer for DMA transmission
 static uint8_t tx_buffer[UART_BUFFER_SIZE];
 static uint8_t tx_next_buffer[UART_BUFFER_SIZE];
-static uint8_t rx_buffer[UART_BUFFER_SIZE];
-//static uint8_t rx_next_buffer[UART_BUFFER_SIZE];
-
+static volatile uint8_t rx_buffer_A[UART_BUFFER_SIZE];
+static volatile uint8_t rx_buffer_B[UART_BUFFER_SIZE];
+volatile bool rx_buffer_ready = false;
+volatile uint8_t *rx_filled_buffer_p = NULL;
 
 /************************************************************************/
 /*                  INTERNAL FUNCTION PROTOTYPES                        */
@@ -16,7 +17,7 @@ static uint8_t rx_buffer[UART_BUFFER_SIZE];
 void _DMA_tx_wait(Pdc* p_uart_pdc);
 void _parse_UART_command(const DataPacket *data);
 void _init_UART_TC(void);
-void _init_UART_DMA_rx(uint8_t size);
+inline void _init_UART_DMA_rx(size_t size);
 void _send_event_queue();
 
 void init_uart_comm(void)
@@ -47,7 +48,6 @@ void init_uart_comm(void)
 	uart_enable_rx(UART);
 	
 	// Enable DMA for UART transmissions
-	pdc_enable_transfer(uart_get_pdc_base(UART), PERIPH_PTCR_TXTEN | PERIPH_PTCR_RXTEN);
 	_init_UART_DMA_rx(sizeof(DataPacket));
 	
 	// Enable interrupts
@@ -96,20 +96,35 @@ void sd_tx(const char *buf, uint32_t len)
 }
 
 
-void _init_UART_DMA_rx(uint8_t size)
+void poll_uart()
 {
-	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
+	if (rx_buffer_ready)
+	{
+		// Parse the content of rx_filled_buffer_p, which contains a DataPacket
+		_parse_UART_command((DataPacket *) rx_filled_buffer_p);
+		rx_buffer_ready = false;
+	}
+}
 
-	// Configure PDC for reception
-	pdc_packet_t pdc_uart_rx_packet;
-	pdc_uart_rx_packet.ul_addr = (uint32_t)rx_buffer;
-	pdc_uart_rx_packet.ul_size = size;
-	
-	// TODO - implement double-buffering
-	
-	pdc_rx_init(p_uart_pdc, &pdc_uart_rx_packet, NULL);
 
-	pdc_enable_transfer(p_uart_pdc, PERIPH_PTCR_TXTEN | PERIPH_PTCR_RXTEN);
+inline void _init_UART_DMA_rx(size_t size)
+{
+	// Configure PDC for double-buffered reception
+	pdc_packet_t pdc_buf;
+	pdc_buf.ul_size = size;
+
+	// Swap buffers
+	if (rx_filled_buffer_p == rx_buffer_A){
+		rx_filled_buffer_p = rx_buffer_B;
+		pdc_buf.ul_addr = (uint32_t) rx_buffer_A;
+	}else{
+		rx_filled_buffer_p = rx_buffer_A;
+		pdc_buf.ul_addr = (uint32_t) rx_buffer_B;
+	}
+
+	Pdc *pdc_uart_p = uart_get_pdc_base(UART);
+	pdc_rx_init(pdc_uart_p, &pdc_buf, NULL);
+	pdc_enable_transfer(pdc_uart_p, PERIPH_PTCR_RXTEN | PERIPH_PTCR_TXTEN);
 }
 
 
@@ -251,11 +266,12 @@ void UART_Handler(void)
 	tc_start(UART_TC, UART_TC_CH);
 	
 	// Check if the PDC transfer is complete - happens ~120us after end of transmission
+	// The current buffer is full, and DMA controller might be blasting data to the next buffer
 	if (status & UART_SR_ENDRX) {
-		// Parse the content of rx_buffer, which contains a DataPacket
-		_parse_UART_command((DataPacket *) &rx_buffer);
+		// tell the main event loop to process rx_filled_buffer_p
+		rx_buffer_ready = true;
 		
-		// Reinitialize PDC for the next transfer
+		// Swap DMA buffers and get ready for the next reception
 		_init_UART_DMA_rx(sizeof(DataPacket));
 	}
 }

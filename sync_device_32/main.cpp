@@ -88,6 +88,8 @@ int main() {
 			ioport_toggle_pin_level(pin_name_to_ioport_id(FLUIDIC_PIN));
 			process_events();  // <- internally sets RA to timestamp of the next event
 		}
+		poll_uart();
+
 	}
 }
 
