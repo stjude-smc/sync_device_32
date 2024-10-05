@@ -178,13 +178,16 @@ def run_ALEX(
     N_bursts,
     cam_readout=12_000,
     shutter_delay=1_000,
-    interburst_pause=0,
+    burst_duration=0,
     fluidics=0,
 ):
     offset = 0 if fluidics >= 0 else -fluidics
 
     N_ch = len(lasers)
     frame_period = exposure_time + shutter_delay + cam_readout
+
+    if burst_duration < frame_period:
+        burst_duration = frame_period * N_ch
 
     b = w_buf("STP")  # clear event queue
 
@@ -198,7 +201,7 @@ def run_ALEX(
             arg2=exposure_time,
             ts=start_ts + offset,
             N=N_bursts,
-            interval=frame_period * N_ch + interburst_pause,
+            interval=burst_duration,
         )
         # camera
         b += w_buf(
@@ -207,7 +210,7 @@ def run_ALEX(
             arg2=exposure_time,
             ts=start_ts + offset + shutter_delay,
             N=N_bursts,
-            interval=frame_period * N_ch + interburst_pause,
+            interval=burst_duration,
         )
 
     if fluidics > 0:
