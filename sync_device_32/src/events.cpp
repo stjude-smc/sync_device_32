@@ -15,6 +15,7 @@ std::priority_queue<Event> event_queue;
 Event event_table_OLD[MAX_N_EVENTS] = {0};
 volatile uint32_t event_table_start = 0;  // Pointer to the next pending event
 volatile uint32_t event_table_end = 0;    // Pointer to the last pending event
+volatile bool sys_timer_running = false;
 
 /************************************************************************/
 /*                  INTERNAL FUNCTION PROTOTYPES                        */
@@ -170,7 +171,7 @@ Event get_next_event()
 
 bool is_event_missed()
 {
-	if (is_sys_timer_running() && !event_queue.empty())
+	if (sys_timer_running && !event_queue.empty())
 	{
 		return current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH);
 	}
@@ -203,15 +204,10 @@ void set_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2_level)
 /*                       SYSTEM TIMER CONTROL                           */
 /************************************************************************/
 
-bool is_sys_timer_running()
-{
-	return tc_get_status(SYS_TC, SYS_TC_CH) & TC_SR_CLKSTA;
-}
-
 // return current system time in counts
 uint32_t current_time_cts()
 {
-	return is_sys_timer_running() ? tc_read_cv(SYS_TC, SYS_TC_CH) : 0;
+	return sys_timer_running ? tc_read_cv(SYS_TC, SYS_TC_CH) : 0;
 }
 
 // return current system time in microseconds
@@ -223,12 +219,14 @@ uint32_t current_time_us()
 // Start timer from 0
 void start_sys_timer()
 {
+	sys_timer_running = true;
 	tc_start(SYS_TC, SYS_TC_CH);
 }
 
 // Stop system timer
 void stop_sys_timer()
 {
+	sys_timer_running = false;
 	tc_stop(SYS_TC, SYS_TC_CH);
 }
 
@@ -245,7 +243,7 @@ void init_sys_timer()
 	_enable_event_irq();
 	
 	NVIC_EnableIRQ(SYS_TC_IRQn);
-	NVIC_SetPriority(SYS_TC_IRQn, 0); // highest possible priority is 0
+	NVIC_SetPriority(SYS_TC_IRQn, 1); // second-highest priority after UART
 }
 
 // This re-adjusts timestamps of scheduled events so we can pause and continue

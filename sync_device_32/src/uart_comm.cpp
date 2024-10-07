@@ -53,7 +53,7 @@ void init_uart_comm(void)
 	// Enable interrupts
 	uart_enable_interrupt(UART, UART_IER_RXRDY | UART_IER_ENDRX);
 	NVIC_EnableIRQ(UART_IRQn);
-	NVIC_SetPriority(UART_IRQn, 1);
+	NVIC_SetPriority(UART_IRQn, 0);  // the highest priority is 0
 	
 	// Initialize TC for timeout detection
 	_init_UART_TC();
@@ -198,7 +198,7 @@ void _parse_UART_command(const DataPacket *data)
 		printf("-- SYSTEM STATUS --\n");
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("Current system time:  %lu cts\n", current_time_cts());
-		printf("System timer is %s\n", is_sys_timer_running() ? "running" : "stopped");
+		printf("System timer is %s\n", sys_timer_running ? "running" : "stopped");
 	}
 	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
 	{

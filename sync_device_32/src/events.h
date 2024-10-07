@@ -67,7 +67,7 @@ void start_sys_timer();
 void stop_sys_timer();
 void pause_sys_timer();
 
-bool is_sys_timer_running();
+extern volatile bool sys_timer_running;
 uint32_t current_time_cts();
 uint32_t current_time_us();
 
