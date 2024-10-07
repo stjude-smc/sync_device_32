@@ -245,7 +245,7 @@ void init_sys_timer()
 	_enable_event_irq();
 	
 	NVIC_EnableIRQ(SYS_TC_IRQn);
-	NVIC_SetPriority(SYS_TC_IRQn, 15); // highest possible priority is 15
+	NVIC_SetPriority(SYS_TC_IRQn, 0); // highest possible priority is 0
 }
 
 // This re-adjusts timestamps of scheduled events so we can pause and continue

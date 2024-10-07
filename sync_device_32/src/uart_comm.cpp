@@ -145,7 +145,7 @@ void _init_UART_TC(void)
 	tc_enable_interrupt(UART_TC, UART_TC_CH, TC_IER_CPCS);
 	
 	NVIC_EnableIRQ(UART_TC_IRQn);
-	NVIC_SetPriority(UART_TC_IRQn, 0); // low priority
+	NVIC_SetPriority(UART_TC_IRQn, 15); // low priority
 	
 	tc_start(UART_TC, UART_TC_CH);
 }
