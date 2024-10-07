@@ -186,7 +186,7 @@ def run_ALEX(
     N_ch = len(lasers)
     frame_period = exposure_time + shutter_delay + cam_readout
 
-    if burst_duration < frame_period:
+    if burst_duration < frame_period * N_ch:
         burst_duration = frame_period * N_ch
 
     b = w_buf("STP")  # clear event queue
@@ -222,11 +222,11 @@ def run_ALEX(
 
 m = run_ALEX(
     exposure_time=100,
-    lasers=["A0", "A1"],
+    lasers=["A0", "A1", "A2"],
     N_bursts=0,
     cam_readout=150,
     shutter_delay=20,
-    interburst_pause=100,
+    burst_duration=100,
     fluidics=0,
 )
 c.write(m)
