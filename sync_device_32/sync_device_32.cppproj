@@ -37,9 +37,10 @@
     <option id="common.services.ioport" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.pdc" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.pio" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="sam.drivers.tc" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.trng" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.uart" value="Add" config="" content-id="Atmel.ASF" />
-    <option id="sam.drivers.tc" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="sam.drivers.wdt" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.applications.user_application" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.utils.cmsis.sam3x.source.template" value="Add" config="" content-id="Atmel.ASF" />
   </options>
@@ -206,6 +207,8 @@
     <file path="src/ASF/sam/drivers/pdc/pdc_uart_example/pdc_uart_example.h" framework="" version="3.52.0" source="sam\drivers\pdc\pdc_uart_example\pdc_uart_example.h" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/sam/drivers/tc/tc.c" framework="" version="3.52.0" source="sam\drivers\tc\tc.c" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/sam/drivers/tc/tc.h" framework="" version="3.52.0" source="sam\drivers\tc\tc.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/sam/drivers/wdt/wdt.c" framework="" version="3.52.0" source="sam\drivers\wdt\wdt.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/sam/drivers/wdt/wdt.h" framework="" version="3.52.0" source="sam\drivers\wdt\wdt.h" changed="False" content-id="Atmel.ASF" />
   </files>
   <documentation help="https://asf.microchip.com/docs/3.52.0/common.applications.user_application.arduino_due_x/html/index.html" />
   <offline-documentation help="" />
@@ -277,6 +280,7 @@
       <Value>../src/ASF/sam/drivers/pdc</Value>
       <Value>../src/ASF/sam/drivers/pdc/pdc_uart_example</Value>
       <Value>../src/ASF/sam/drivers/tc</Value>
+      <Value>../src/ASF/sam/drivers/wdt</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -318,6 +322,7 @@
       <Value>../src/ASF/sam/drivers/pdc</Value>
       <Value>../src/ASF/sam/drivers/pdc/pdc_uart_example</Value>
       <Value>../src/ASF/sam/drivers/tc</Value>
+      <Value>../src/ASF/sam/drivers/wdt</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -368,6 +373,7 @@
       <Value>../src/ASF/sam/drivers/pdc</Value>
       <Value>../src/ASF/sam/drivers/pdc/pdc_uart_example</Value>
       <Value>../src/ASF/sam/drivers/tc</Value>
+      <Value>../src/ASF/sam/drivers/wdt</Value>
     </ListValues>
   </armgcccpp.assembler.general.IncludePaths>
   <armgcccpp.preprocessingassembler.general.IncludePaths>
@@ -398,6 +404,7 @@
       <Value>../src/ASF/sam/drivers/pdc</Value>
       <Value>../src/ASF/sam/drivers/pdc/pdc_uart_example</Value>
       <Value>../src/ASF/sam/drivers/tc</Value>
+      <Value>../src/ASF/sam/drivers/wdt</Value>
     </ListValues>
   </armgcccpp.preprocessingassembler.general.IncludePaths>
 </ArmGccCpp>
@@ -447,6 +454,7 @@
       <Value>../src/ASF/sam/drivers/pdc</Value>
       <Value>../src/ASF/sam/drivers/pdc/pdc_uart_example</Value>
       <Value>../src/ASF/sam/drivers/tc</Value>
+      <Value>../src/ASF/sam/drivers/wdt</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -489,6 +497,7 @@
       <Value>../src/ASF/sam/drivers/pdc</Value>
       <Value>../src/ASF/sam/drivers/pdc/pdc_uart_example</Value>
       <Value>../src/ASF/sam/drivers/tc</Value>
+      <Value>../src/ASF/sam/drivers/wdt</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize debugging experience (-Og)</armgcccpp.compiler.optimization.level>
@@ -546,6 +555,7 @@
       <Value>../src/ASF/sam/drivers/pdc</Value>
       <Value>../src/ASF/sam/drivers/pdc/pdc_uart_example</Value>
       <Value>../src/ASF/sam/drivers/tc</Value>
+      <Value>../src/ASF/sam/drivers/wdt</Value>
     </ListValues>
   </armgcccpp.assembler.general.IncludePaths>
   <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
@@ -577,6 +587,7 @@
       <Value>../src/ASF/sam/drivers/pdc</Value>
       <Value>../src/ASF/sam/drivers/pdc/pdc_uart_example</Value>
       <Value>../src/ASF/sam/drivers/tc</Value>
+      <Value>../src/ASF/sam/drivers/wdt</Value>
     </ListValues>
   </armgcccpp.preprocessingassembler.general.IncludePaths>
   <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
@@ -600,6 +611,12 @@
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\ASF\sam\drivers\tc\tc.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\sam\drivers\wdt\wdt.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\wdt\wdt.h">
       <SubType>compile</SubType>
     </None>
     <Compile Include="src\events.cpp">
@@ -1105,6 +1122,7 @@
     <Folder Include="src\ASF\sam\drivers\tc\" />
     <Folder Include="src\ASF\sam\drivers\trng\" />
     <Folder Include="src\ASF\sam\drivers\uart\" />
+    <Folder Include="src\ASF\sam\drivers\wdt\" />
     <Folder Include="src\ASF\sam\utils\" />
     <Folder Include="src\ASF\sam\utils\cmsis\" />
     <Folder Include="src\ASF\sam\utils\cmsis\sam3x\" />

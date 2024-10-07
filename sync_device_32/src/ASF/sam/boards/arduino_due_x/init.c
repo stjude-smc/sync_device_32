@@ -40,6 +40,8 @@
 #include "gpio.h"
 #include "ioport.h"
 
+#define CONF_BOARD_KEEP_WATCHDOG_AT_INIT
+
 void board_init(void)
 {
 #ifndef CONF_BOARD_KEEP_WATCHDOG_AT_INIT

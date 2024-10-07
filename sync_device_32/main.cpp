@@ -18,6 +18,21 @@ extern "C" {
 
 
 
+void activate_watchdog(void) {
+	// Calculate the WDT counter value for 1 second timeout
+	uint32_t timeout_value = wdt_get_timeout_value(WATCHDOG_TIMEOUT * 1000, BOARD_FREQ_SLCK_XTAL);
+
+	uint32_t wdt_mode = WDT_MR_WDFIEN;
+	// Initialize WDT with the calculated timeout value
+	wdt_init(WDT, wdt_mode, timeout_value, timeout_value);
+	
+	NVIC_EnableIRQ(WDT_IRQn);
+	NVIC_SetPriority(WDT_IRQn, 0);
+}
+
+
+
+
 void out_of_memory_handler() {
 	// Handle out-of-memory error here
 	printf("ERR: out of memory!\n");
@@ -66,6 +81,8 @@ void init_pins()
 /*                       ENTRY POINT                                    */
 /************************************************************************/
 int main() {
+	activate_watchdog();
+	
 	// Set out of memory handler for `new` operator. This will send error
 	// message over UART
 	std::set_new_handler(out_of_memory_handler);
@@ -90,6 +107,17 @@ int main() {
 		}
 		poll_uart();
 
+		wdt_restart(WDT); // Kick the watchdog
 	}
 }
 
+
+
+void WDT_Handler(void)
+{
+	
+	printf("ERR - watchdog timeout, restarting system!\n");
+	
+	delay_ms(50);
+
+	RSTC->RSTC_CR = 0xA5000000 | RSTC_CR_PROCRST;  // proce

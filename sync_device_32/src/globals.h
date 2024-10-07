@@ -52,6 +52,8 @@
 /************************************************************************/
 /*                      EVENT HANDLING                                  */
 /************************************************************************/
+#define WATCHDOG_TIMEOUT  2000  // ms
+
 // Maximum allowed number of events in the event table
 #define MAX_N_EVENTS	1024
 

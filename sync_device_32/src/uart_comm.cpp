@@ -199,6 +199,7 @@ void _parse_UART_command(const DataPacket *data)
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("Current system time:  %lu cts\n", current_time_cts());
 		printf("System timer is %s\n", sys_timer_running ? "running" : "stopped");
+		printf("Watchdog interval: %lu us \n", wdt_get_us_timeout_period(WDT, BOARD_FREQ_SLCK_XTAL));
 	}
 	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
 	{
