@@ -34,6 +34,15 @@
 					   ioport_pin_to_mask(pin_name_to_ioport_id(CY7_PIN)))
 #define SHUTTERS_PORT ioport_pin_to_port_id(pin_name_to_ioport_id(CY2_PIN))
 
+// Error indicator trigger
+#define ERR_PIN "D53"
+inline void err_led_on(){
+	ioport_set_pin_level(pin_name_to_ioport_id(ERR_PIN), 1);
+}
+inline void err_led_off(){
+	ioport_set_pin_level(pin_name_to_ioport_id(ERR_PIN), 0);
+}
+
 
 /************************************************************************/
 /*                    UART AND DMA CONFIGURATION                        */

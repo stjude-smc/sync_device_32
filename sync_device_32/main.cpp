@@ -5,7 +5,6 @@
  * Author : rkiselev
  */ 
 
-
 extern "C" {
 	#include "asf.h"
 }
@@ -34,6 +33,7 @@ void activate_watchdog(void) {
 
 
 void out_of_memory_handler() {
+	err_led_on();
 	// Handle out-of-memory error here
 	printf("ERR: out of memory!\n");
 	// You can abort or take other actions
@@ -74,6 +74,9 @@ void init_pins()
 
 	ioport_set_pin_dir(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_DIR_OUTPUT);
 	ioport_set_pin_level(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_PIN_LEVEL_LOW);
+
+	ioport_set_pin_dir(pin_name_to_ioport_id(ERR_PIN), IOPORT_DIR_OUTPUT);
+	ioport_set_pin_level(pin_name_to_ioport_id(ERR_PIN), IOPORT_PIN_LEVEL_LOW);
 }
 
 
@@ -98,11 +101,11 @@ int main() {
 	init_sys_timer();
 	
 	printf("SYNC DEVICE READY\n");
-
+	
 	while (1) {
 		if (is_event_missed())
 		{
-			ioport_toggle_pin_level(pin_name_to_ioport_id(FLUIDIC_PIN));
+			err_led_on();
 			process_events();  // <- internally sets RA to timestamp of the next event
 		}
 		poll_uart();
@@ -115,9 +118,11 @@ int main() {
 
 void WDT_Handler(void)
 {
+	err_led_on();
 	
 	printf("ERR - watchdog timeout, restarting system!\n");
 	
 	delay_ms(50);
 
-	RSTC->RSTC_CR = 0xA5000000 | RSTC_CR_PROCRST;  // proce
+	RSTC->RSTC_CR = 0xA5000000 | RSTC_CR_PROCRST;  // processor reset
+}
