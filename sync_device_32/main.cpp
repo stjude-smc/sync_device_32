@@ -77,6 +77,10 @@ void init_pins()
 
 	ioport_set_pin_dir(pin_name_to_ioport_id(ERR_PIN), IOPORT_DIR_OUTPUT);
 	ioport_set_pin_level(pin_name_to_ioport_id(ERR_PIN), IOPORT_PIN_LEVEL_LOW);
+
+
+	ioport_set_pin_dir(DBG_PIN_IDX, IOPORT_DIR_OUTPUT);
+	ioport_set_pin_level(DBG_PIN_IDX, IOPORT_PIN_LEVEL_LOW);
 }
 
 
@@ -103,6 +107,8 @@ int main() {
 	printf("SYNC DEVICE READY\n");
 	
 	while (1) {
+		dbg_pin_up();
+		dbg_pin_dn();
 		if (is_event_missed())
 		{
 			err_led_on();

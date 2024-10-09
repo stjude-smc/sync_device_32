@@ -43,6 +43,14 @@ inline void err_led_off(){
 	ioport_set_pin_level(pin_name_to_ioport_id(ERR_PIN), 0);
 }
 
+// Debug pin
+#define DBG_PIN_IDX  PIO_PA7_IDX  // "D31"
+inline void dbg_pin_up(){
+	ioport_set_pin_level(DBG_PIN_IDX, 1);
+}
+inline void dbg_pin_dn(){
+	ioport_set_pin_level(DBG_PIN_IDX, 0);
+}
 
 /************************************************************************/
 /*                    UART AND DMA CONFIGURATION                        */
