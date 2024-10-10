@@ -84,6 +84,9 @@ inline void dbg_pin_dn(){
 // Minimal interval between two subsequent runs of the same events, us
 #define MIN_EVENT_INTERVAL 25
 
+// Grace period for event processing - any event within this interval gets fired
+#define EVENT_BIN 30 // us
+
 // Default pulse duration, us
 #define DFL_PULSE_DURATION 100
 
@@ -93,7 +96,7 @@ inline void dbg_pin_dn(){
 
 // Timer prescaler configuration. See SAM3X TC_CMR register, datasheet p883
 // Options are 2, 8, 32, and 128
-#define PRESC128
+#define PRESC32
 
 #ifdef PRESC2    // 1ct = 24ns, overflow after 102s  (1min 42s)
 #define SYS_TC_PRESCALER 2
@@ -116,6 +119,8 @@ inline void dbg_pin_dn(){
 #endif
 
 #define SYS_TC_CONVERSION_MULTIPLIER (8400000/SYS_TC_PRESCALER)
+#define EVENT_BIN_CTS (EVENT_BIN * SYS_TC_CONVERSION_MULTIPLIER / 100000)
+#define UNIFORM_TIME_DELAY_CTS (UNIFORM_TIME_DELAY * SYS_TC_CONVERSION_MULTIPLIER / 100000)
 
 // microseconds to counts
 static inline uint32_t us2cts(uint32_t us) {
@@ -138,5 +143,3 @@ static inline uint32_t cts2us(uint32_t cts) {
 #define SYS_TC_Handler  TC0_Handler
 #define SYS_TC_IRQn		TC0_IRQn
 
-
-#define UNIFORM_TIME_DELAY_CTS (UNIFORM_TIME_DELAY * SYS_TC_CONVERSION_MULTIPLIER / 100000)

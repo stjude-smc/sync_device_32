@@ -123,11 +123,15 @@ int main() {
 	while (1) {
 		dbg_pin_up();
 		dbg_pin_dn();
-		if (is_event_missed())
+		
+		// THERE IS SOMETHING WRONG WITH THIS ONE
+		// seems to be a race condition - one event overwrites another one
+		/*if (is_event_missed())
 		{
 			err_led_on();
 			process_events();  // <- internally sets RA to timestamp of the next event
-		}
+		}*/
+		
 		poll_uart();
 
 		wdt_restart(WDT); // Kick the watchdog

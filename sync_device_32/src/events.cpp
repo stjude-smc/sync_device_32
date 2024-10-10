@@ -189,7 +189,7 @@ void process_events()
 	_disable_event_irq();
 	while (!event_queue.empty())	{
 		// Keep processing events from the queue while they are pending
-		event = get_next_event();				if (event.ts64_cts > current_time_cts() + 25)  // it's a future event		{			// Update the RA register for compare interrupt
+		event = get_next_event();				if (event.ts64_cts > current_time_cts() + EVENT_BIN_CTS)  // it's a future event		{			// Update the RA register for compare interrupt
 			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);			_enable_event_irq();
 			return;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		_remove_event();  // remove the event from the queue, preserving order		if (_update_event(&event))  // Needs to be rescheduled?		{			_enqueue_event(&event); // Put updated event back, preserving order of the queue		}	}
 	_enable_event_irq();
