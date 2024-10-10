@@ -200,7 +200,7 @@ void _parse_UART_command(const DataPacket *data)
 	{
 		printf("-- SYSTEM STATUS --\n");
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
-		printf("Current system time:  %lu cts\n", current_time_cts());
+		printf("Current system time:  %llu cts\n", current_time_cts());
 		printf("System timer is %s\n", sys_timer_running ? "RUNNING" : "STOPPED");
 	}
 	else if (strncasecmp(data->cmd, "QUE", 3) == 0)

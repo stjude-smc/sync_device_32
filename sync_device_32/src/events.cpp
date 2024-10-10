@@ -63,7 +63,10 @@ void schedule_event(const Event *event, bool relative)
 	if (relative)
 	{
 		Event relative_event = *event;
-		relative_event.ts_cts += current_time_cts();
+		if (sys_timer_running)
+		{
+			relative_event.ts_cts += current_time_cts();
+		}
 		_enqueue_event(&relative_event);
 	}
 	else
@@ -126,7 +129,11 @@ void schedule_pulse(const DataPacket *data, bool is_positive)
 	event_p->arg2 = is_positive ? 1 : 0;
 
 	// Schedule front of the pulse
-	event_p->ts_cts += current_time_cts();   // TODO - check for uniform time delay
+	if (sys_timer_running)
+	{
+		event_p->ts_cts += current_time_cts();
+	}
+	
 	schedule_event(event_p, false);
 
 	// Schedule back of the pulse
@@ -203,12 +210,6 @@ void set_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2_level)
 /************************************************************************/
 /*                       SYSTEM TIMER CONTROL                           */
 /************************************************************************/
-
-// return current system time in counts
-uint32_t current_time_cts()
-{
-	return sys_timer_running ? tc_read_cv(SYS_TC, SYS_TC_CH) : 0;
-}
 
 // return current system time in microseconds
 uint32_t current_time_us()

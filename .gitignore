@@ -54,3 +54,12 @@ Thumbs.db
 *.gz
 *.rar
 *.7z
+
+# Jupyter notebook
+*-checkpoint.py
+*-checkpoint.ipynb
+
+__pycache__/
+
+# IDE
+.idea/

@@ -68,7 +68,11 @@ void stop_sys_timer();
 void pause_sys_timer();
 
 extern volatile bool sys_timer_running;
-uint32_t current_time_cts();
+//uint32_t current_time_cts();
+inline uint64_t current_time_cts()
+{
+	return SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV;
+}
 uint32_t current_time_us();
 
 // Functions to use within Event structure
