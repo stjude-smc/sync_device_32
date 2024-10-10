@@ -162,9 +162,13 @@ void schedule_toggle(const DataPacket *data)
 void process_events()
 {
 	Event event;	
+	_disable_event_irq();
 	while (!event_queue.empty())	{
 		// Keep processing events from the queue while they are pending
-		event = get_next_event();				if (event.ts_cts > current_time_cts())  // it's a future event		{			update_ra();			return;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		_remove_event();  // remove the event from the queue, preserving order		if (_update_event(&event))  // Needs to be rescheduled?		{			_enqueue_event(&event); // Put updated event back, preserving order of the queue		}	}
+		event = get_next_event();				if (event.ts_cts > current_time_cts() + 25)  // it's a future event		{			// Update the RA register for compare interrupt
+			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_cts);			_enable_event_irq();
+			return;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		_remove_event();  // remove the event from the queue, preserving order		if (_update_event(&event))  // Needs to be rescheduled?		{			_enqueue_event(&event); // Put updated event back, preserving order of the queue		}	}
+	_enable_event_irq();
 }
 
 Event get_next_event()
