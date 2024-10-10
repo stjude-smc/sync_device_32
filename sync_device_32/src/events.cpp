@@ -16,6 +16,7 @@ Event event_table_OLD[MAX_N_EVENTS] = {0};
 volatile uint32_t event_table_start = 0;  // Pointer to the next pending event
 volatile uint32_t event_table_end = 0;    // Pointer to the last pending event
 volatile bool sys_timer_running = false;
+volatile uint64_t sys_tc_ovf_count = 0;
 
 /************************************************************************/
 /*                  INTERNAL FUNCTION PROTOTYPES                        */
@@ -237,7 +238,7 @@ void set_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2_level)
 void start_burst_func(uint32_t period, uint32_t arg2)
 {
 	tc_stop(TC2, 0);
-	TC2->TC_CHANNEL[0].TC_RA = period >> 2;
+	TC2->TC_CHANNEL[0].TC_RA = period >> 3; // 1/8th of the period
 	TC2->TC_CHANNEL[0].TC_RC = period;
 	tc_start(TC2, 0);
 	pio_set_peripheral(PIOC, PIO_PERIPH_B, PIO_PC25);
@@ -285,6 +286,9 @@ void init_sys_timer()
 	// Enable the interrupt on register compare
 	_enable_event_irq();
 	
+	// Enable interrupt on overflow
+	tc_enable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_COVFS);
+	
 	NVIC_EnableIRQ(SYS_TC_IRQn);
 	NVIC_SetPriority(SYS_TC_IRQn, 1); // second-highest priority after UART
 }
@@ -316,8 +320,9 @@ void SYS_TC_Handler()
 		process_events();
     }
 
-
-	// TODO - Overflow interrupt?
+    if (status & TC_SR_COVFS) {  // overflow
+	    sys_tc_ovf_count += (1ULL << 32);
+    }
 }
 
 
