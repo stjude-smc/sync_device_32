@@ -93,9 +93,9 @@ class Event:
         self.func = uint32_to_py(c_struct_data[0:4])
         self.arg1 = uint32_to_py(c_struct_data[4:8])
         self.arg2 = uint32_to_py(c_struct_data[8:12])
-        self.timestamp = uint32_to_py(c_struct_data[12:16])
-        self.N = uint32_to_py(c_struct_data[16:20])
-        self.interval = uint32_to_py(c_struct_data[20:24])
+        self.timestamp = uint64_to_py(c_struct_data[12:20])
+        self.N = uint32_to_py(c_struct_data[20:24])
+        self.interval = uint32_to_py(c_struct_data[24:28])
         self.unit = "cts"
 
     def __repr__(self):
@@ -146,8 +146,8 @@ def get_events(unit="ms"):
     c.write(pad("QUE".encode()))
     r = c.readall()
     events = []
-    for offset in range(0, len(r), 24):  # Event is 24 bytes
-        e = Event(r[offset : offset + 24])
+    for offset in range(0, len(r), 28):  # Event is 28 bytes
+        e = Event(r[offset : offset + 28])
         e.map_func(func_map)
         e.timestamp -= us2cts(UNIFORM_TIME_DELAY)
         if unit in ["us", "ms"]:

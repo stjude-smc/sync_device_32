@@ -41,7 +41,7 @@ Event* event_from_datapacket(const DataPacket* packet, EventFunc func)
 	new_event->func = func;
 	new_event->arg1 = packet->arg1;
 	new_event->arg2 = packet->arg2;
-	new_event->ts_cts = us2cts(packet->ts_us) + UNIFORM_TIME_DELAY_CTS;
+	new_event->ts64_cts = us2cts(packet->ts_us) + UNIFORM_TIME_DELAY_CTS;
 	
 	// N is 1 (one-time event) if interval is too small
 	new_event->N = (packet->interv_us < MIN_EVENT_INTERVAL) ? 1 : packet->N;
@@ -66,7 +66,7 @@ void schedule_event(const Event *event, bool relative)
 		Event relative_event = *event;
 		if (sys_timer_running)
 		{
-			relative_event.ts_cts += current_time_cts();
+			relative_event.ts64_cts += current_time_cts();
 		}
 		_enqueue_event(&relative_event);
 	}
@@ -85,7 +85,7 @@ inline void update_ra()
 	Event retrieved_event = event_queue.top();
 	_enable_event_irq();
 	// Update the RA register for compare interrupt
-	tc_write_ra(SYS_TC, SYS_TC_CH, retrieved_event.ts_cts);
+	tc_write_ra(SYS_TC, SYS_TC_CH, retrieved_event.ts64_cts);
 }
 
 static inline void _enqueue_event(const Event* event)
@@ -132,13 +132,13 @@ void schedule_pulse(const DataPacket *data, bool is_positive)
 	// Schedule front of the pulse
 	if (sys_timer_running)
 	{
-		event_p->ts_cts += current_time_cts();
+		event_p->ts64_cts += current_time_cts();
 	}
 	
 	schedule_event(event_p, false);
 
 	// Schedule back of the pulse
-	event_p->ts_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFL_PULSE_DURATION);
+	event_p->ts64_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFL_PULSE_DURATION);
 	event_p->arg2 = is_positive ? 0 : 1;
 	schedule_event(event_p, false);
 
@@ -170,14 +170,14 @@ void schedule_burst(const DataPacket *data)
 	// Schedule front of the burst
 	if (sys_timer_running)
 	{
-		event_p->ts_cts += current_time_cts();
+		event_p->ts64_cts += current_time_cts();
 	}
 	
 	schedule_event(event_p, false);
 
 	// Schedule stop of the burst
 	event_p->func = stop_burst_func;
-	event_p->ts_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFL_PULSE_DURATION);
+	event_p->ts64_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFL_PULSE_DURATION);
 	schedule_event(event_p, false);
 
 	delete event_p;
@@ -189,8 +189,8 @@ void process_events()
 	_disable_event_irq();
 	while (!event_queue.empty())	{
 		// Keep processing events from the queue while they are pending
-		event = get_next_event();				if (event.ts_cts > current_time_cts() + 25)  // it's a future event		{			// Update the RA register for compare interrupt
-			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_cts);			_enable_event_irq();
+		event = get_next_event();				if (event.ts64_cts > current_time_cts() + 25)  // it's a future event		{			// Update the RA register for compare interrupt
+			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);			_enable_event_irq();
 			return;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		_remove_event();  // remove the event from the queue, preserving order		if (_update_event(&event))  // Needs to be rescheduled?		{			_enqueue_event(&event); // Put updated event back, preserving order of the queue		}	}
 	_enable_event_irq();
 }
@@ -208,14 +208,15 @@ bool is_event_missed()
 {
 	if (sys_timer_running && !event_queue.empty())
 	{
-		return current_time_cts() > tc_read_ra(SYS_TC, SYS_TC_CH);
+		Event next_event = event_queue.top();
+		return current_time_cts() > next_event.ts64_cts;
 	}
 	return false;
 }
 
 // Process the event metadatastatic inline bool _update_event(Event *event)
 {
-	if (event->interv_cts >= MIN_EVENT_INTERVAL) // repeating event	{		event->ts_cts += event->interv_cts;		if (event->N == 0){  // infinite event - reschedule			return true;		}		// if (N == 1), it was a last call, and we drop it		if (event->N > 1) {  // reschedule the event			event->N--;			return true;		}	}	return false;
+	if (event->interv_cts >= MIN_EVENT_INTERVAL) // repeating event	{		event->ts64_cts += event->interv_cts;		if (event->N == 0){  // infinite event - reschedule			return true;		}		// if (N == 1), it was a last call, and we drop it		if (event->N > 1) {  // reschedule the event			event->N--;			return true;		}	}	return false;
 }
 
 
