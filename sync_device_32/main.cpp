@@ -83,6 +83,19 @@ void init_pins()
 	ioport_set_pin_level(DBG_PIN_IDX, IOPORT_PIN_LEVEL_LOW);
 }
 
+void init_burst_timer()
+{
+	sysclk_enable_peripheral_clock(ID_TC6); // TC2, channel 0
+	tc_init(TC2, 0,
+	TC_CMR_TCCLKS_TIMER_CLOCK1 |  // same time unit as the main clock
+	TC_CMR_WAVE |          // waveform mode
+	TC_CMR_ASWTRG_SET |  // set on timer start
+	TC_CMR_ACPA_CLEAR |      // clear on compare event A
+	TC_CMR_ACPC_SET |    // set on compare event C
+	TC_CMR_WAVSEL_UP_RC    // reset timer on event C
+	);
+}
+
 
 /************************************************************************/
 /*                       ENTRY POINT                                    */
@@ -103,6 +116,7 @@ int main() {
 	init_uart_comm();
 	init_pins();	
 	init_sys_timer();
+	init_burst_timer();
 	
 	printf("SYNC DEVICE READY\n");
 	

@@ -55,6 +55,7 @@ void schedule_event(const Event *event, bool relative = true);
 void schedule_pulse(const DataPacket *data, bool is_positive);
 void schedule_pin(const DataPacket *data);
 void schedule_toggle(const DataPacket *data);
+void schedule_burst(const DataPacket *data);
 
 void process_events();
 bool is_event_missed();
@@ -78,3 +79,5 @@ uint32_t current_time_us();
 // Functions to use within Event structure
 void tgl_pin_event_func(uint32_t pin_idx, uint32_t arg2);
 void set_pin_event_func(uint32_t pin_idx, uint32_t arg2);
+void start_burst_func(uint32_t period, uint32_t arg2);
+void stop_burst_func(uint32_t arg1, uint32_t arg2);

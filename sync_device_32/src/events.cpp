@@ -159,6 +159,29 @@ void schedule_toggle(const DataPacket *data)
 }
 
 
+void schedule_burst(const DataPacket *data)
+{
+	Event* event_p = event_from_datapacket(data, start_burst_func);
+
+	// Convert us to TC2[0] counts (runs at 42MHz)
+	event_p->arg1 = data->arg1 * 42;
+
+	// Schedule front of the burst
+	if (sys_timer_running)
+	{
+		event_p->ts_cts += current_time_cts();
+	}
+	
+	schedule_event(event_p, false);
+
+	// Schedule stop of the burst
+	event_p->func = stop_burst_func;
+	event_p->ts_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFL_PULSE_DURATION);
+	schedule_event(event_p, false);
+
+	delete event_p;
+}
+
 void process_events()
 {
 	Event event;	
@@ -209,6 +232,21 @@ void set_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2_level)
 {
 	ioport_set_pin_dir(arg1_pin_idx, IOPORT_DIR_OUTPUT);
 	ioport_set_pin_level(arg1_pin_idx, arg2_level);
+}
+
+void start_burst_func(uint32_t period, uint32_t arg2)
+{
+	tc_stop(TC2, 0);
+	TC2->TC_CHANNEL[0].TC_RA = period >> 2;
+	TC2->TC_CHANNEL[0].TC_RC = period;
+	tc_start(TC2, 0);
+	pio_set_peripheral(PIOC, PIO_PERIPH_B, PIO_PC25);
+}
+
+void stop_burst_func(uint32_t period, uint32_t arg2)
+{
+	tc_stop(TC2, 0);
+	pio_set_output(PIOC, PIO_PC25, 0, 0, 0);
 }
 
 /************************************************************************/

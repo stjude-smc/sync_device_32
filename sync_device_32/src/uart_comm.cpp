@@ -176,6 +176,7 @@ void _parse_UART_command(const DataPacket *data)
 	}
 	else if (strncasecmp(data->cmd, "STP", 3) == 0)  // stop system timer and delete event queue
 	{
+		stop_burst_func(0, 0);
 		stop_sys_timer();
 		std::priority_queue<Event>().swap(event_queue);
 		err_led_off();
@@ -191,6 +192,10 @@ void _parse_UART_command(const DataPacket *data)
 	else if (strncasecmp(data->cmd, "NPL", 3) == 0)
 	{
 		schedule_pulse(data, false);
+	}
+	else if (strncasecmp(data->cmd, "BST", 3) == 0)
+	{
+		schedule_burst(data);
 	}
 	else if (strncasecmp(data->cmd, "TGL", 3) == 0)
 	{
@@ -209,8 +214,10 @@ void _parse_UART_command(const DataPacket *data)
 	}
 	else if (strncasecmp(data->cmd, "FUN", 3) == 0)
 	{
-		printf("%lu TGL\n", (uint32_t) &tgl_pin_event_func);
-		printf("%lu PIN\n", (uint32_t) &set_pin_event_func);
+		printf("%lu TGL_PIN\n", (uint32_t) &tgl_pin_event_func);
+		printf("%lu SET_PIN\n", (uint32_t) &set_pin_event_func);
+		printf("%lu BST__ON\n", (uint32_t) &start_burst_func);
+		printf("%lu BST_OFF\n", (uint32_t) &stop_burst_func);
 	}
 	else if (strncasecmp(data->cmd, "INT", 3) == 0)
 	{

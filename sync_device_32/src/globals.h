@@ -22,6 +22,8 @@
 // Fluidics trigger
 #define FLUIDIC_PIN "D2"  // PIO_PB25_IDX
 
+#define BURST_PIN   "D5"  // PIO_PC25_IDX
+
 // Laser shutters (see pio_sam3x8e.h for pin names) - these have to be on the same port!
 #define CY2_PIN		"A0"  // PIO_PA16_IDX
 #define CY3_PIN		"A1"  // PIO_PA24_IDX
