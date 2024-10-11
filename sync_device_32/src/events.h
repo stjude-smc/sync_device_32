@@ -16,7 +16,7 @@
 #undef max
 #endif
 
-#include <queue>          // priority queue
+#include <queue>          // priority queue, FIFO queue
 
 #ifndef UNIT_TEST
 #include <asf.h>
@@ -51,8 +51,12 @@ typedef struct  __attribute__((packed)) Event
 } Event;  // 28 bytes
 
 
-extern Event event_table_OLD[MAX_N_EVENTS];
+// Scheduled events, sorted by timestamp
 extern std::priority_queue<Event> event_queue;
+
+// Fired events that we need to process and maybe reschedule
+extern std::queue<Event> fired_events;
+
 extern volatile uint64_t sys_tc_ovf_count;
 
 // Allocate memory and create an event from data packet
@@ -67,6 +71,7 @@ void schedule_burst(const DataPacket *data);
 
 void process_events();
 
+void process_fired_events();
 inline void update_ra();
 
 void init_sys_timer();

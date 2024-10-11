@@ -132,6 +132,8 @@ int main() {
 			process_events();  // <- internally sets RA to timestamp of the next event
 		}*/
 		
+		process_fired_events();
+		
 		poll_uart();
 
 		wdt_restart(WDT); // Kick the watchdog
