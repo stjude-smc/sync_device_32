@@ -88,6 +88,7 @@ inline void update_ra()
 	_enable_event_irq();
 	// Update the RA register for compare interrupt
 	tc_write_ra(SYS_TC, SYS_TC_CH, retrieved_event.ts64_cts);
+	tc_write_rc(SYS_TC, SYS_TC_CH, retrieved_event.ts64_cts + 1);
 }
 
 static inline void _enqueue_event(const Event* event)
@@ -192,7 +193,7 @@ void process_events()
 	while (!event_queue.empty())	{
 		// Keep processing events from the queue while they are pending
 		event = event_queue.top();		if (event.ts64_cts > current_time_cts() + EVENT_BIN_CTS)  // it's a future event		{			// Update the RA register for compare interrupt
-			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);			break;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		event_queue.pop();  // remove the event from the queue, preserving order				// Throw it into the FIFO queue for the main loop to update		fired_events.push(event);	}
+			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);			tc_write_rc(SYS_TC, SYS_TC_CH, event.ts_lo32_cts + 1);			break;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		event_queue.pop();  // remove the event from the queue, preserving order		// Throw it into the FIFO queue for the main loop to update		fired_events.push(event);	}
 	_enable_event_irq();
 }
 
@@ -269,8 +270,15 @@ void init_sys_timer()
 	sysclk_enable_peripheral_clock(ID_SYS_TC);
 	
 	tc_init(SYS_TC, SYS_TC_CH,
-			SYS_TC_CMR_TCCLKS_TIMER_CLOCK | TC_CMR_WAVE
+			SYS_TC_CMR_TCCLKS_TIMER_CLOCK |
+			TC_CMR_WAVE |
+			TC_CMR_ASWTRG_CLEAR | // clear PB25 on timer start
+			TC_CMR_ACPA_SET |     //   set PB25 on compare event A
+			TC_CMR_ACPC_CLEAR     // clear PB25 on compare event C
 	);
+	
+	// Activate TIOA0 output
+	pio_set_peripheral(PIOB, PIO_PERIPH_B, PIO_PB25);
 	
 	// Enable the interrupt on register compare
 	_enable_event_irq();

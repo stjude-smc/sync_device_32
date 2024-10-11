@@ -20,7 +20,7 @@
 #define CAMERA_PIN	"D13" // PIO_PB27_IDX
 
 // Fluidics trigger
-#define FLUIDIC_PIN "D2"  // PIO_PB25_IDX
+#define FLUIDIC_PIN "D3"  // PIO_PC28_IDX
 
 #define BURST_PIN   "D5"  // PIO_PC25_IDX
 
