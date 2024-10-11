@@ -66,8 +66,6 @@ void schedule_toggle(const DataPacket *data);
 void schedule_burst(const DataPacket *data);
 
 void process_events();
-bool is_event_missed();
-Event get_next_event(); // returns the next event, thread-safe
 
 inline void update_ra();
 
@@ -75,9 +73,8 @@ void init_sys_timer();
 void start_sys_timer();
 void stop_sys_timer();
 void pause_sys_timer();
-
 extern volatile bool sys_timer_running;
-//uint32_t current_time_cts();
+
 inline uint64_t current_time_cts()
 {
 	return sys_tc_ovf_count | SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV;
@@ -89,3 +86,14 @@ void tgl_pin_event_func(uint32_t pin_idx, uint32_t arg2);
 void set_pin_event_func(uint32_t pin_idx, uint32_t arg2);
 void start_burst_func(uint32_t period, uint32_t arg2);
 void stop_burst_func(uint32_t arg1, uint32_t arg2);
+
+inline bool is_event_missed()
+{
+	static Event next_event;
+	if (sys_timer_running && !event_queue.empty())
+	{
+		next_event = event_queue.top();
+		return current_time_cts() > next_event.ts64_cts;
+	}
+	return false;
+}
