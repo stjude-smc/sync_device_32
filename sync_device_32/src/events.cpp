@@ -95,6 +95,11 @@ static inline void _enqueue_event(const Event* event)
 {
 	_disable_event_irq();
 	event_queue.push(*event);
+	// in case we missed any events while messing with the queue
+	if (sys_timer_running)
+	{
+		process_events();
+	}
 	_enable_event_irq();
 }
 
@@ -102,6 +107,11 @@ static inline void _remove_event()
 {
 	_disable_event_irq();
 	event_queue.pop();
+	// in case we missed any events while messing with the queue
+	if (sys_timer_running)
+	{
+		process_events();
+	}
 	_enable_event_irq();
 }
 
