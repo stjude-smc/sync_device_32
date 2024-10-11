@@ -98,7 +98,7 @@ inline bool is_event_missed()
 	if (sys_timer_running && !event_queue.empty())
 	{
 		next_event = event_queue.top();
-		return current_time_cts() > next_event.ts64_cts;
+		return current_time_cts() > next_event.ts64_cts + EVENT_BIN_CTS;
 	}
 	return false;
 }
