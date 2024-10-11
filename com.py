@@ -220,7 +220,7 @@ def run_ALEX(
         b += w_buf("PPL", arg1="D2", arg2=250_000, ts=fluidics, N=1, interval=0)
     elif fluidics < 0:
         b += w_buf("PPL", arg1="D2", arg2=250_000, ts=0, N=1, interval=0)
-    return b + w_buf("GO!")
+    return b
 
 def a():
     m = run_ALEX(

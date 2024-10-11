@@ -85,7 +85,7 @@ inline void dbg_pin_dn(){
 #define MIN_EVENT_INTERVAL 25
 
 // Grace period for event processing - any event within this interval gets fired
-#define EVENT_BIN 30 // us
+#define EVENT_BIN 2 // us
 
 // Default pulse duration, us
 #define DFL_PULSE_DURATION 100

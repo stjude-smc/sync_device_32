@@ -191,14 +191,14 @@ void process_events()
 	_disable_event_irq();
 	while (!event_queue.empty())	{
 		// Keep processing events from the queue while they are pending
-		event = event_queue.top();				if (event.ts64_cts > current_time_cts() + EVENT_BIN_CTS)  // it's a future event		{			// Update the RA register for compare interrupt
+		event = event_queue.top();		if (event.ts64_cts > current_time_cts() + EVENT_BIN_CTS)  // it's a future event		{			// Update the RA register for compare interrupt
 			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);			break;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		event_queue.pop();  // remove the event from the queue, preserving order				// Throw it into the FIFO queue for the main loop to update		fired_events.push(event);	}
 	_enable_event_irq();
 }
 
 void process_fired_events()
 {
-	static Event fired_event;	if (!fired_events.empty())	{		fired_event = fired_events.front();				// Remove element, preventing race condition		_disable_event_irq();			fired_events.pop();		_enable_event_irq();		if (_update_event(&fired_event))  // Needs to be rescheduled?		{			// Prevent race condition			_disable_event_irq();				event_queue.push(fired_event); // Put updated event back, preserving order of the queue			_enable_event_irq();		}	}
+	static Event fired_event;	while (!fired_events.empty())	{		fired_event = fired_events.front();				// Remove element, preventing race condition		_disable_event_irq();			fired_events.pop();		_enable_event_irq();		if (_update_event(&fired_event))  // Needs to be rescheduled?		{			// Prevent race condition			_disable_event_irq();				event_queue.push(fired_event); // Put updated event back, preserving order of the queue			_enable_event_irq();		}	}
 }
 
 
