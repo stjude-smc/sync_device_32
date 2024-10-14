@@ -3,13 +3,53 @@
 
 #define RSTC_KEY  0xA5000000  // password for reset controller
 
-// Memory buffer for DMA transmission
-static uint8_t tx_buffer[UART_BUFFER_SIZE];
-static uint8_t tx_next_buffer[UART_BUFFER_SIZE];
+/************************************************************************/
+/*                  UART RECEIVE/TRANSMIT BUFFERS                       */
+/************************************************************************/
+
+// Outgoing UART message class
+class UartTxMessage {
+private:
+	char *p_buf;
+	pdc_packet_t uart_tx_packet;
+	
+public:
+	bool is_transmitted;
+
+	UartTxMessage (const char* data, uint32_t len)
+	{
+		this->p_buf = new char[len];
+		this->uart_tx_packet.ul_addr = (uint32_t) this->p_buf;
+		this->uart_tx_packet.ul_size = len;
+		memcpy(p_buf, data, len);
+		this->is_transmitted = false;
+	}
+	
+	~UartTxMessage()
+	{
+		delete[] this->p_buf;
+	}
+	
+	void transmit()
+	{
+		pdc_tx_init(uart_get_pdc_base(UART), &uart_tx_packet, nullptr);
+		this->is_transmitted = true;
+	}
+};
+
+// Memory buffer for outgoing DMA transmissions
+std::queue<UartTxMessage*> tx_queue;
+
+//////////////////////////////////////////////////////////////////////////
+
+// Memory buffers for incoming DMA transmissions
 static volatile uint8_t rx_buffer_A[UART_BUFFER_SIZE];
 static volatile uint8_t rx_buffer_B[UART_BUFFER_SIZE];
 volatile bool rx_buffer_ready = false;
+
+// Pointer to buffer with pending data to be processed
 volatile uint8_t *rx_filled_buffer_p = NULL;
+
 
 /************************************************************************/
 /*                  INTERNAL FUNCTION PROTOTYPES                        */
@@ -53,7 +93,7 @@ void init_uart_comm(void)
 	// Enable interrupts
 	uart_enable_interrupt(UART, UART_IER_RXRDY | UART_IER_ENDRX);
 	NVIC_EnableIRQ(UART_IRQn);
-	NVIC_SetPriority(UART_IRQn, 0);  // the highest priority is 0
+	NVIC_SetPriority(UART_IRQn, 1);  // the highest priority is 0
 	
 	// Initialize TC for timeout detection
 	_init_UART_TC();
@@ -67,32 +107,13 @@ void sd_tx(const char *cstring)
 	sd_tx(cstring, strlen(cstring));
 }
 
-void sd_tx(const char *buf, uint32_t len)
+void sd_tx(const char *data, uint32_t len)
 {
-	Pdc* p_uart_pdc = uart_get_pdc_base(UART);
+	UartTxMessage * p_uart_msg = new UartTxMessage(data, len);
 	
-	pdc_packet_t pdc_uart_tx_packet;
-
-	if (pdc_read_tx_counter(p_uart_pdc) > 0)  // pending transmission, use next buffer
-	{
-		// If not enough space, wait until the next buffer clears
-		while (UART_BUFFER_SIZE - pdc_read_tx_next_counter(p_uart_pdc) < len)
-		{
-			;
-		}
-		// Append more data to the next outgoing buffer
-		memcpy(tx_next_buffer + pdc_read_tx_next_counter(p_uart_pdc), buf, len);
-		pdc_uart_tx_packet.ul_addr = (uint32_t)tx_next_buffer;
-		pdc_uart_tx_packet.ul_size = pdc_read_tx_next_counter(p_uart_pdc) + len;
-		pdc_tx_init(p_uart_pdc, NULL, &pdc_uart_tx_packet);
-		return;
-	}
-	
-	// Copy provided string to the outgoing buffer
-	memcpy(tx_buffer, buf, len);
-	pdc_uart_tx_packet.ul_addr = (uint32_t)tx_buffer;
-	pdc_uart_tx_packet.ul_size = len;
-	pdc_tx_init(p_uart_pdc, &pdc_uart_tx_packet, NULL);
+	tx_queue.push(p_uart_msg);
+	uart_get_status(UART); // clear pending interrupt flags
+	uart_enable_interrupt(UART, UART_IER_ENDTX);
 }
 
 
@@ -145,7 +166,7 @@ void _init_UART_TC(void)
 	tc_enable_interrupt(UART_TC, UART_TC_CH, TC_IER_CPCS);
 	
 	NVIC_EnableIRQ(UART_TC_IRQn);
-	NVIC_SetPriority(UART_TC_IRQn, 15); // low priority
+	NVIC_SetPriority(UART_TC_IRQn, 15); // the lowest priority is 15
 	
 	tc_start(UART_TC, UART_TC_CH);
 }
@@ -245,18 +266,13 @@ void _send_event_queue()
 {
 	std::priority_queue<Event> event_queue_copy = event_queue;
 
-	char *buf = new char[sizeof(Event)*event_queue_copy.size()];
-
-	uint32_t i = 0;
 	while (!event_queue_copy.empty())
 	{
 		Event event = event_queue_copy.top();
 		event_queue_copy.pop();
 		
-		memcpy(buf + sizeof(Event)*i++, &event, sizeof(Event));
-		
+		sd_tx((char *) &event, sizeof(Event));
 	}
-	sd_tx(buf, sizeof(Event)*i);
 }
 
 
@@ -280,13 +296,37 @@ void UART_Handler(void)
 	// A character arrived - reset the timer for communication timeout
 	tc_start(UART_TC, UART_TC_CH);
 	
-	// Check if the PDC transfer is complete - happens ~120us after end of transmission
-	// The current buffer is full, and DMA controller might be blasting data to the next buffer
-	if (status & UART_SR_ENDRX) {
+	// Check if the PDC reception is complete - happens ~120us after end of transmission
+	if (status & UART_SR_ENDRX)
+	{
 		// tell the main event loop to process rx_filled_buffer_p
 		rx_buffer_ready = true;
 		
 		// Swap DMA buffers and get ready for the next reception
 		_init_UART_DMA_rx(sizeof(DataPacket));
+	}
+	
+	// Check if the PDC transmission is complete
+	if (status & UART_SR_ENDTX)
+	{
+		if (!tx_queue.empty()) // there is pending data transfer
+		{
+			dbg_pin_up();
+			dbg_pin_dn();
+			UartTxMessage* p_uart_msg = tx_queue.front();
+			if (p_uart_msg->is_transmitted)
+			{
+				delete p_uart_msg; // free memory
+				tx_queue.pop();    // remove message from the queue
+			}
+			else
+			{
+				p_uart_msg->transmit();
+			}
+		}
+		else
+		{
+			uart_disable_interrupt(UART, UART_IDR_ENDTX);
+		}
 	}
 }

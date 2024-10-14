@@ -119,7 +119,7 @@ int main() {
 	init_burst_timer();
 	
 	printf("SYNC DEVICE READY\n");
-	
+
 	while (1) {
 		if (is_event_missed())
 		{
