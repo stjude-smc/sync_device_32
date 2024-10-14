@@ -121,7 +121,6 @@ int main() {
 	printf("SYNC DEVICE READY\n");
 	
 	while (1) {
-
 		if (is_event_missed())
 		{
 			err_led_on();
@@ -129,9 +128,6 @@ int main() {
 			err_led_off();
 		}
 
-		
-		process_fired_events();
-		
 		poll_uart();
 
 		wdt_restart(WDT); // Kick the watchdog

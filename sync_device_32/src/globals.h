@@ -82,10 +82,10 @@ inline void dbg_pin_dn(){
 #define UNIFORM_TIME_DELAY 500
 
 // Minimal interval between two subsequent runs of the same events, us
-#define MIN_EVENT_INTERVAL 25
+#define MIN_EVENT_INTERVAL 10
 
 // Grace period for event processing - any event within this interval gets fired
-#define EVENT_BIN 2 // us
+#define TS_TOLERANCE 2 // us
 
 // Default pulse duration, us
 #define DFL_PULSE_DURATION 100
@@ -119,7 +119,7 @@ inline void dbg_pin_dn(){
 #endif
 
 #define SYS_TC_CONVERSION_MULTIPLIER (8400000/SYS_TC_PRESCALER)
-#define EVENT_BIN_CTS (EVENT_BIN * SYS_TC_CONVERSION_MULTIPLIER / 100000)
+#define TS_TOLERANCE_CTS (TS_TOLERANCE * SYS_TC_CONVERSION_MULTIPLIER / 100000)
 #define UNIFORM_TIME_DELAY_CTS (UNIFORM_TIME_DELAY * SYS_TC_CONVERSION_MULTIPLIER / 100000)
 
 // microseconds to counts

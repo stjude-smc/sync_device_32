@@ -12,8 +12,6 @@
 // Create a table of events
 std::priority_queue<Event> event_queue;
 
-std::queue<Event> fired_events;
-    
 volatile bool sys_timer_running = false;
 volatile uint64_t sys_tc_ovf_count = 0;
 
@@ -33,17 +31,17 @@ static inline void _enqueue_event(const Event* event);  // thread-safe
 void process_events()
 {
 	static Event event;
+	
 	_disable_event_irq();
-	while (!event_queue.empty())	{
-		// Keep processing events from the queue while they are pending
-		event = event_queue.top();		if (event.ts64_cts > current_time_cts() + EVENT_BIN_CTS)  // it's a future event		{			// Update the RA register for compare interrupt
-			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);			tc_write_rc(SYS_TC, SYS_TC_CH, event.ts_lo32_cts + 1);			break;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		event_queue.pop();  // remove the event from the queue, preserving order		// Throw it into the FIFO queue for the main loop to update		fired_events.push(event);	}
+		while (!event_queue.empty())		{
+			// Keep processing events from the queue while they are pending
+			event = event_queue.top();			if (event.ts64_cts > current_time_cts() + TS_TOLERANCE_CTS)  // it's a future event			{				// Update the RA register for compare interrupt
+				tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);				tc_write_rc(SYS_TC, SYS_TC_CH, event.ts_lo32_cts + 1);				break;  // Our job is done			}			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue, preserving order			if (_update_event(&event))  // Needs to be rescheduled?
+			{
+				// Put updated event back, preserving order of the queue
+				event_queue.push(event);
+			}		}
 	_enable_event_irq();
-}
-
-void process_fired_events()
-{
-	static Event fired_event;	while (!fired_events.empty())	{		_disable_event_irq();			fired_event = fired_events.front();			// Remove element, preventing race condition			fired_events.pop();		_enable_event_irq();		if (_update_event(&fired_event))  // Needs to be rescheduled?		{			// Prevent race condition			_disable_event_irq();				// Put updated event back, preserving order of the queue				event_queue.push(fired_event);			_enable_event_irq();		}	}
 }
 
 
@@ -107,25 +105,19 @@ void schedule_event(const Event *event_p, bool relative)
 static inline void _update_ra()
 {
 	static Event next_event;
-	if (is_event_missed())
-	{
-		process_events(); // this internally sets RA and RC
-	}
-	else
-	{
-		_disable_event_irq();
+
+	_disable_event_irq();
 		next_event = event_queue.top();
 		// Update the RA register for compare interrupt
 		tc_write_ra(SYS_TC, SYS_TC_CH, next_event.ts64_cts);
 		tc_write_rc(SYS_TC, SYS_TC_CH, next_event.ts64_cts + 1);
-		_enable_event_irq();
-	}
+	_enable_event_irq();
 }
 
 static inline void _enqueue_event(const Event* event)
 {
 	_disable_event_irq();
-	event_queue.push(*event);
+		event_queue.push(*event);
 	_enable_event_irq();
 	// in case we missed any events while messing with the queue
 	if (sys_timer_running)

@@ -54,9 +54,6 @@ typedef struct  __attribute__((packed)) Event
 // Scheduled events, sorted by timestamp
 extern std::priority_queue<Event> event_queue;
 
-// Fired events that we need to process and maybe reschedule
-extern std::queue<Event> fired_events;
-
 extern volatile uint64_t sys_tc_ovf_count;
 
 // Allocate memory and create an event from data packet
@@ -70,8 +67,6 @@ void schedule_toggle(const DataPacket *data);
 void schedule_burst(const DataPacket *data);
 
 void process_events();
-
-void process_fired_events();
 
 void init_sys_timer();
 void start_sys_timer();
@@ -94,15 +89,13 @@ void stop_burst_func(uint32_t arg1, uint32_t arg2);
 
 inline bool is_event_missed()
 {
-	static Event next_event;
 	static bool result = false;
 
 	if (sys_timer_running && !event_queue.empty())
 	{
-		SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IDR = TC_IDR_CPAS;
-			next_event = event_queue.top();
-			result = current_time_cts() > next_event.ts64_cts + EVENT_BIN_CTS;
-		SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IER = TC_IER_CPAS;
+		//SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IDR = TC_IDR_CPAS;
+			result = SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV > SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_RA + TS_TOLERANCE_CTS;
+		//SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IER = TC_IER_CPAS;
 	}
 	return result;
 }
