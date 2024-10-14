@@ -121,6 +121,11 @@ int main() {
 	printf("SYNC DEVICE READY\n");
 
 	while (1) {
+		
+		// Indicates execution of the main loop
+		dbg_pin_up();
+		dbg_pin_dn();
+		
 		if (is_event_missed())
 		{
 			err_led_on();

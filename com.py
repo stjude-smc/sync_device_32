@@ -104,7 +104,7 @@ class Event:
         arg1 = self.arg1
         if f in ["PIN", "TGL"]:
             arg1 = rev_pin_map[arg1]
-        return f"{f}({arg1:<3}, {self.arg2}) at t={self.timestamp:>11}{self.unit}. Call {self.N:>4} times every {self.interval:>10} {self.unit}"
+        return f"{f}({arg1:<3}, {self.arg2:<3}) at t={self.timestamp:>11}{self.unit}. Call {self.N:>6} times every {self.interval:>10} {self.unit}"
 
     def map_func(self, func_map):
         self.func = func_map[str(self.func)]
