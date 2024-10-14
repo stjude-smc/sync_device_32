@@ -39,7 +39,7 @@ typedef struct DataPacket
 void init_uart_comm(void);
 
 // Send data to the host
-void sd_tx(const char *cstring);
-void sd_tx(const char *data, uint32_t len);
+void uart_tx(const char *cstring);
+void uart_tx(const char *data, uint32_t len);
 
 void poll_uart();

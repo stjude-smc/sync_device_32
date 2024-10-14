@@ -82,7 +82,7 @@ void schedule_event(const Event *event_p, bool relative)
 	// Do we have enough memory?
 	if (event_queue.size() >= MAX_N_EVENTS)
 	{
-		sd_tx("ERR: event table is full!\n");
+		uart_tx("ERR: event table is full!\n");
 		return;
 	}
 	

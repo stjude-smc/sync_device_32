@@ -45,7 +45,7 @@ extern "C" {
 	// Implementation of _write function for printf
 	// NOTE: printf is buffered and sends data out after \n symbol
 	int _write(int file, char *ptr, int len) {
-		sd_tx(ptr, len);
+		uart_tx(ptr, len);
 		return len;
 	}
 

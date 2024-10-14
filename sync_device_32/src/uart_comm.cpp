@@ -102,12 +102,12 @@ void init_uart_comm(void)
 
 
 // Send data to host using DMA controller
-void sd_tx(const char *cstring)
+void uart_tx(const char *cstring)
 {
-	sd_tx(cstring, strlen(cstring));
+	uart_tx(cstring, strlen(cstring));
 }
 
-void sd_tx(const char *data, uint32_t len)
+void uart_tx(const char *data, uint32_t len)
 {
 	UartTxMessage * p_uart_msg = new UartTxMessage(data, len);
 	
@@ -264,14 +264,15 @@ void _parse_UART_command(const DataPacket *data)
 
 void _send_event_queue()
 {
+	Event event;
 	std::priority_queue<Event> event_queue_copy = event_queue;
 
 	while (!event_queue_copy.empty())
 	{
-		Event event = event_queue_copy.top();
+		event = event_queue_copy.top();
+
 		event_queue_copy.pop();
-		
-		sd_tx((char *) &event, sizeof(Event));
+		uart_tx((char *) &event, sizeof(Event));
 	}
 }
 
@@ -311,8 +312,6 @@ void UART_Handler(void)
 	{
 		if (!tx_queue.empty()) // there is pending data transfer
 		{
-			dbg_pin_up();
-			dbg_pin_dn();
 			UartTxMessage* p_uart_msg = tx_queue.front();
 			if (p_uart_msg->is_transmitted)
 			{
