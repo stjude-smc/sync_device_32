@@ -143,8 +143,7 @@ def cts2us(cts, prescaler=0):
 def get_events(unit="ms"):
     func_map = get_function_addr()
 
-    if unit in ["us", "ms"]:
-        prescaler = get_prescaler()
+    prescaler = get_prescaler()
 
     c.reset_input_buffer()
     c.write(pad("QUE".encode()))
@@ -153,11 +152,11 @@ def get_events(unit="ms"):
     for offset in range(0, len(r), 28):  # Event is 28 bytes
         e = Event(r[offset : offset + 28])
         e.map_func(func_map)
-        e.timestamp -= us2cts(UNIFORM_TIME_DELAY)
+        e.timestamp -= us2cts(UNIFORM_TIME_DELAY, prescaler)
         if unit in ["us", "ms"]:
             e.unit = unit
-            e.timestamp = round(cts2us(e.timestamp) * (0.001 if unit == "ms" else 1))
-            e.interval = round(cts2us(e.interval) * (0.001 if unit == "ms" else 1))
+            e.timestamp = round(cts2us(e.timestamp, prescaler) * (0.001 if unit == "ms" else 1))
+            e.interval = round(cts2us(e.interval, prescaler) * (0.001 if unit == "ms" else 1))
         events.append(e)
     return events
 
