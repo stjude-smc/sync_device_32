@@ -77,8 +77,10 @@ Event* event_from_datapacket(const DataPacket* packet, EventFunc func)
 
 
 // Schedule event relative to t=0
-void schedule_event(const Event *event, bool relative)
+void schedule_event(const Event *event_p, bool relative)
 {
+	static Event relative_event;
+	
 	// Do we have enough memory?
 	if (event_queue.size() >= MAX_N_EVENTS)
 	{
@@ -86,18 +88,16 @@ void schedule_event(const Event *event, bool relative)
 		return;
 	}
 	
-	if (relative)
+	if (relative & sys_timer_running)
 	{
-		Event relative_event = *event;
-		if (sys_timer_running)
-		{
-			relative_event.ts64_cts += current_time_cts();
-		}
+		relative_event = *event_p;
+		relative_event.ts64_cts += current_time_cts();
+
 		_enqueue_event(&relative_event);
 	}
 	else
 	{
-		_enqueue_event(event);
+		_enqueue_event(event_p);
 	}
 
 	_update_ra();
