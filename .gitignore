@@ -58,6 +58,7 @@ Thumbs.db
 # Jupyter notebook
 *-checkpoint.py
 *-checkpoint.ipynb
+.ipynb_checkpoints/
 
 __pycache__/
 
