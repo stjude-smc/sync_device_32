@@ -14,23 +14,46 @@ std::priority_queue<Event> event_queue;
 
 std::queue<Event> fired_events;
     
-Event event_table_OLD[MAX_N_EVENTS] = {0};
-volatile uint32_t event_table_start = 0;  // Pointer to the next pending event
-volatile uint32_t event_table_end = 0;    // Pointer to the last pending event
 volatile bool sys_timer_running = false;
 volatile uint64_t sys_tc_ovf_count = 0;
 
 /************************************************************************/
 /*                  INTERNAL FUNCTION PROTOTYPES                        */
 /************************************************************************/
+static inline void _update_ra();
 static inline void _enable_event_irq();
 static inline void _disable_event_irq();
 static inline bool _update_event(Event *event);
 static inline void _enqueue_event(const Event* event);  // thread-safe
-static inline void _remove_event();               // thread-safe
 
 /************************************************************************/
-/*                 EVENT HANDLING AND PROCESSING                        */
+/*                 EVENT PROCESSING                                     */
+/************************************************************************/
+
+void process_events()
+{
+	static Event event;
+	_disable_event_irq();
+	while (!event_queue.empty())	{
+		// Keep processing events from the queue while they are pending
+		event = event_queue.top();		if (event.ts64_cts > current_time_cts() + EVENT_BIN_CTS)  // it's a future event		{			// Update the RA register for compare interrupt
+			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);			tc_write_rc(SYS_TC, SYS_TC_CH, event.ts_lo32_cts + 1);			break;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		event_queue.pop();  // remove the event from the queue, preserving order		// Throw it into the FIFO queue for the main loop to update		fired_events.push(event);	}
+	_enable_event_irq();
+}
+
+void process_fired_events()
+{
+	static Event fired_event;	while (!fired_events.empty())	{		_disable_event_irq();			fired_event = fired_events.front();			// Remove element, preventing race condition			fired_events.pop();		_enable_event_irq();		if (_update_event(&fired_event))  // Needs to be rescheduled?		{			// Prevent race condition			_disable_event_irq();				// Put updated event back, preserving order of the queue				event_queue.push(fired_event);			_enable_event_irq();		}	}
+}
+
+
+// Process the event metadatastatic inline bool _update_event(Event *event)
+{
+	if (event->interv_cts >= MIN_EVENT_INTERVAL) // repeating event	{		event->ts64_cts += event->interv_cts;		if (event->N == 0){  // infinite event - reschedule			return true;		}		// if (N == 1), it was a last call, and we drop it		if (event->N > 1) {  // reschedule the event			event->N--;			return true;		}	}	return false;
+}
+
+/************************************************************************/
+/*             EVENT SCHEDULING                                         */
 /************************************************************************/
 
 // Create an Event with data from a DataPacket.
@@ -77,44 +100,39 @@ void schedule_event(const Event *event, bool relative)
 		_enqueue_event(event);
 	}
 
-	update_ra();
+	_update_ra();
 }
 
-inline void update_ra()
+
+static inline void _update_ra()
 {
-	// grab the next event
-	_disable_event_irq();
-	Event retrieved_event = event_queue.top();
-	_enable_event_irq();
-	// Update the RA register for compare interrupt
-	tc_write_ra(SYS_TC, SYS_TC_CH, retrieved_event.ts64_cts);
-	tc_write_rc(SYS_TC, SYS_TC_CH, retrieved_event.ts64_cts + 1);
+	static Event next_event;
+	if (is_event_missed())
+	{
+		process_events(); // this internally sets RA and RC
+	}
+	else
+	{
+		_disable_event_irq();
+		next_event = event_queue.top();
+		// Update the RA register for compare interrupt
+		tc_write_ra(SYS_TC, SYS_TC_CH, next_event.ts64_cts);
+		tc_write_rc(SYS_TC, SYS_TC_CH, next_event.ts64_cts + 1);
+		_enable_event_irq();
+	}
 }
 
 static inline void _enqueue_event(const Event* event)
 {
 	_disable_event_irq();
 	event_queue.push(*event);
+	_enable_event_irq();
 	// in case we missed any events while messing with the queue
 	if (sys_timer_running)
 	{
 		process_events();
 	}
-	_enable_event_irq();
 }
-
-static inline void _remove_event()
-{
-	_disable_event_irq();
-	event_queue.pop();
-	// in case we missed any events while messing with the queue
-	if (sys_timer_running)
-	{
-		process_events();
-	}
-	_enable_event_irq();
-}
-
 
 // Schedule an electric level event on a given pin
 // data->arg1 is the pin name (e.g. "A3")
@@ -196,27 +214,7 @@ void schedule_burst(const DataPacket *data)
 	delete event_p;
 }
 
-void process_events()
-{
-	static Event event;	
-	_disable_event_irq();
-	while (!event_queue.empty())	{
-		// Keep processing events from the queue while they are pending
-		event = event_queue.top();		if (event.ts64_cts > current_time_cts() + EVENT_BIN_CTS)  // it's a future event		{			// Update the RA register for compare interrupt
-			tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);			tc_write_rc(SYS_TC, SYS_TC_CH, event.ts_lo32_cts + 1);			break;  // Our job is done		}		// Fire the event function		event.func(event.arg1, event.arg2);		event_queue.pop();  // remove the event from the queue, preserving order		// Throw it into the FIFO queue for the main loop to update		fired_events.push(event);	}
-	_enable_event_irq();
-}
 
-void process_fired_events()
-{
-	static Event fired_event;	while (!fired_events.empty())	{		fired_event = fired_events.front();				// Remove element, preventing race condition		_disable_event_irq();			fired_events.pop();		_enable_event_irq();		if (_update_event(&fired_event))  // Needs to be rescheduled?		{			// Prevent race condition			_disable_event_irq();				event_queue.push(fired_event); // Put updated event back, preserving order of the queue			_enable_event_irq();		}	}
-}
-
-
-// Process the event metadatastatic inline bool _update_event(Event *event)
-{
-	if (event->interv_cts >= MIN_EVENT_INTERVAL) // repeating event	{		event->ts64_cts += event->interv_cts;		if (event->N == 0){  // infinite event - reschedule			return true;		}		// if (N == 1), it was a last call, and we drop it		if (event->N > 1) {  // reschedule the event			event->N--;			return true;		}	}	return false;
-}
 
 
 /************************************************************************/
@@ -263,8 +261,11 @@ uint32_t current_time_us()
 // Start timer from 0
 void start_sys_timer()
 {
-	sys_timer_running = true;
-	tc_start(SYS_TC, SYS_TC_CH);
+	if (!sys_timer_running)
+	{
+		sys_timer_running = true;
+		tc_start(SYS_TC, SYS_TC_CH);
+	}
 }
 
 // Stop system timer
@@ -332,17 +333,14 @@ void SYS_TC_Handler()
     }
 }
 
-
-
-/************************************************************************/
-/*                           INTERNAL FUNCTIONS                         */
-/************************************************************************/
-
+// Disable system timer interrupt on register A compare
 static inline void _disable_event_irq()
 {
-	tc_disable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_CPAS);
+	SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IDR = TC_IDR_CPAS;
 }
+
+// Enable system timer interrupt on register A compare
 static inline void _enable_event_irq()
 {
-	tc_enable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_CPAS);
+	SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IER = TC_IER_CPAS;
 }

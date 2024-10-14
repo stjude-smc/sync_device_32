@@ -121,17 +121,14 @@ int main() {
 	printf("SYNC DEVICE READY\n");
 	
 	while (1) {
-		dbg_pin_up();
-		dbg_pin_dn();
-		
-		// THERE IS SOMETHING WRONG WITH THIS ONE
-		// seems to be a race condition - one event overwrites another one
-		/*if (is_event_missed())
+
+		if (is_event_missed())
 		{
 			err_led_on();
 			process_events();  // <- internally sets RA to timestamp of the next event
 			err_led_off();
-		}*/
+		}
+
 		
 		process_fired_events();
 		

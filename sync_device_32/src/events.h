@@ -72,7 +72,6 @@ void schedule_burst(const DataPacket *data);
 void process_events();
 
 void process_fired_events();
-inline void update_ra();
 
 void init_sys_timer();
 void start_sys_timer();
@@ -92,13 +91,18 @@ void set_pin_event_func(uint32_t pin_idx, uint32_t arg2);
 void start_burst_func(uint32_t period, uint32_t arg2);
 void stop_burst_func(uint32_t arg1, uint32_t arg2);
 
+
 inline bool is_event_missed()
 {
 	static Event next_event;
+	static bool result = false;
+
 	if (sys_timer_running && !event_queue.empty())
 	{
-		next_event = event_queue.top();
-		return current_time_cts() > next_event.ts64_cts + EVENT_BIN_CTS;
+		SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IDR = TC_IDR_CPAS;
+			next_event = event_queue.top();
+			result = current_time_cts() > next_event.ts64_cts + EVENT_BIN_CTS;
+		SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IER = TC_IER_CPAS;
 	}
-	return false;
+	return result;
 }
