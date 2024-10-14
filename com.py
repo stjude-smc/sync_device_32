@@ -72,10 +72,7 @@ def s(command="STA"):
     response = c.readall()
     if response:
         response = response.decode()
-        cts = int(re.findall(r"Current system time:\s*(\d+)\s?cts", response)[0])
-        p = get_prescaler()
         print(response)
-        print(f"System time in seconds: {p*cts/84_000_000:.3f}")
 
 
 class UInt32(ctypes.LittleEndianStructure):

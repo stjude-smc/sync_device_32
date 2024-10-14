@@ -123,16 +123,13 @@ inline void dbg_pin_dn(){
 #define UNIFORM_TIME_DELAY_CTS (UNIFORM_TIME_DELAY * SYS_TC_CONVERSION_MULTIPLIER / 100000)
 
 // microseconds to counts
-static inline uint32_t us2cts(uint32_t us) {
-	// Avoid overflow by using a larger intermediate type
-	uint64_t temp = (uint64_t) us * SYS_TC_CONVERSION_MULTIPLIER;
-	return (uint32_t)(temp / 100000);
+static inline uint64_t us2cts(uint64_t us) {
+	return us * SYS_TC_CONVERSION_MULTIPLIER / 100000;
 }
 
 // counts to microseconds
-static inline uint32_t cts2us(uint32_t cts) {
-	uint64_t temp = (uint64_t) cts * 100000;
-	return (uint32_t)(temp / SYS_TC_CONVERSION_MULTIPLIER);
+static inline uint64_t cts2us(uint64_t cts) {
+	return cts * 100000 / SYS_TC_CONVERSION_MULTIPLIER;
 }
 
 

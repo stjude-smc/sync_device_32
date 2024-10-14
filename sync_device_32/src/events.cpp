@@ -245,9 +245,15 @@ void stop_burst_func(uint32_t period, uint32_t arg2)
 /************************************************************************/
 
 // return current system time in microseconds
-uint32_t current_time_us()
+uint64_t current_time_us()
 {
 	return cts2us(current_time_cts());
+}
+
+// return current system time in seconds
+float current_time_s()
+{
+	return ((float) cts2us(current_time_cts())) / 1000000.0;
 }
 
 // Start timer from 0

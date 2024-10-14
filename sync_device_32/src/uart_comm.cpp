@@ -183,7 +183,7 @@ void _parse_UART_command(const DataPacket *data)
 	if (strncasecmp(data->cmd, "VER", 3) == 0)
 	{
 		printf("SYNC DEVICE v%s\n", VERSION);
-		printf("System timer prescaler=%d (1ct=%luns)\n", SYS_TC_PRESCALER, cts2us(1000));
+		printf("System timer prescaler=%d (1ct=%luns)\n", SYS_TC_PRESCALER, (uint32_t) cts2us(1000));
 		printf("Watchdog interval: %lu us \n", wdt_get_us_timeout_period(WDT, BOARD_FREQ_SLCK_XTAL));
 
 	}
@@ -226,8 +226,9 @@ void _parse_UART_command(const DataPacket *data)
 	{
 		printf("-- SYSTEM STATUS --\n");
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
-		printf("Current system time:  %llu cts\n", current_time_cts());
-		printf("System timer is %s\n", sys_timer_running ? "RUNNING" : "STOPPED");
+		printf("System counter is %s\n", sys_timer_running ? "RUNNING" : "STOPPED");
+		printf("Counter value:  %lu cts, OVF = %lu\n", SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV, sys_tc_ovf_count >> 32);
+		printf("System time: %f s\n", current_time_s());
 	}
 	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
 	{

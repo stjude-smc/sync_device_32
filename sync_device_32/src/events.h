@@ -78,8 +78,9 @@ inline uint64_t current_time_cts()
 {
 	return sys_tc_ovf_count | SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV;
 }
-uint32_t current_time_us();
+uint64_t current_time_us();
 
+float current_time_s();
 // Functions to use within Event structure
 void tgl_pin_event_func(uint32_t pin_idx, uint32_t arg2);
 void set_pin_event_func(uint32_t pin_idx, uint32_t arg2);
