@@ -71,25 +71,25 @@ inline void dbg_pin_dn(){
 /************************************************************************/
 /*                      EVENT HANDLING                                  */
 /************************************************************************/
-#define WATCHDOG_TIMEOUT  2000  // ms
+#define WATCHDOG_TIMEOUT  100UL  // ms
 
 // Maximum allowed number of events in the event table
-#define MAX_N_EVENTS	1024
+#define MAX_N_EVENTS	1024UL
 
 // Uniform time delay added to every single scheduled event, us
 // It should be long enough to ensure correct event processing
 // under any circumstance
-#define UNIFORM_TIME_DELAY 500
+#define UNIFORM_TIME_DELAY 500UL
 
 // Minimal interval between two subsequent runs of the same events, us
-#define MIN_EVENT_INTERVAL 20
+#define MIN_EVENT_INTERVAL 20UL
 
 // Grace period for event processing - any event within this interval gets fired
-#define TS_TOLERANCE        2 // us
-#define TS_MISSED_TOLERANCE 100 // us - when we decide the event has been missed
+#define TS_TOLERANCE        2UL   // us
+#define TS_MISSED_TOLERANCE 100UL // us - when we decide the event has been missed
 
 // Default pulse duration, us
-#define DFL_PULSE_DURATION 100
+#define DFL_PULSE_DURATION 100UL
 
 /************************************************************************/
 /*    SYSTEM TIMER CONFIGURATION AND TIME CONVERSION FUNCTIONS          */
@@ -100,38 +100,38 @@ inline void dbg_pin_dn(){
 #define PRESC32
 
 #ifdef PRESC2    // 1ct = 24ns, overflow after 102s  (1min 42s)
-#define SYS_TC_PRESCALER 2
+#define SYS_TC_PRESCALER 2UL
 #define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK1
 #endif
 
 #ifdef PRESC8    // 1ct = 95ns, overflow after 409s  (6min 49s)
-#define SYS_TC_PRESCALER 8
+#define SYS_TC_PRESCALER 8UL
 #define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK2
 #endif
 
 #ifdef PRESC32   // 1ct = 381ns, overflow after 1636s (27min 16s)
-#define SYS_TC_PRESCALER 32
+#define SYS_TC_PRESCALER 32UL
 #define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK3
 #endif
 
 #ifdef PRESC128  // 1ct = 1524ns, overflow after 6544s (1h 49min)
-#define SYS_TC_PRESCALER 128
+#define SYS_TC_PRESCALER 128UL
 #define SYS_TC_CMR_TCCLKS_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK4
 #endif
 
-#define SYS_TC_CONVERSION_MULTIPLIER (8400000/SYS_TC_PRESCALER)
-#define TS_TOLERANCE_CTS (TS_TOLERANCE * SYS_TC_CONVERSION_MULTIPLIER / 100000)
-#define TS_MISSED_TOLERANCE_CTS (TS_MISSED_TOLERANCE * SYS_TC_CONVERSION_MULTIPLIER / 100000)
-#define UNIFORM_TIME_DELAY_CTS (UNIFORM_TIME_DELAY * SYS_TC_CONVERSION_MULTIPLIER / 100000)
+#define SYS_TC_CONVERSION_MULTIPLIER (8400000UL/SYS_TC_PRESCALER)
+#define TS_TOLERANCE_CTS (TS_TOLERANCE * SYS_TC_CONVERSION_MULTIPLIER / 100000UL)
+#define TS_MISSED_TOLERANCE_CTS (TS_MISSED_TOLERANCE * SYS_TC_CONVERSION_MULTIPLIER / 100000UL)
+#define UNIFORM_TIME_DELAY_CTS (UNIFORM_TIME_DELAY * SYS_TC_CONVERSION_MULTIPLIER / 100000UL)
 
 // microseconds to counts
 static inline uint64_t us2cts(uint64_t us) {
-	return us * SYS_TC_CONVERSION_MULTIPLIER / 100000;
+	return us * SYS_TC_CONVERSION_MULTIPLIER / 100000ULL;
 }
 
 // counts to microseconds
 static inline uint64_t cts2us(uint64_t cts) {
-	return cts * 100000 / SYS_TC_CONVERSION_MULTIPLIER;
+	return cts * 100000ULL / SYS_TC_CONVERSION_MULTIPLIER;
 }
 
 

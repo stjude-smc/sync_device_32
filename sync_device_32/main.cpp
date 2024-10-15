@@ -20,6 +20,12 @@ extern "C" {
 void activate_watchdog(void) {
 	// Calculate the WDT counter value for 1 second timeout
 	uint32_t timeout_value = wdt_get_timeout_value(WATCHDOG_TIMEOUT * 1000, BOARD_FREQ_SLCK_XTAL);
+	
+	if (timeout_value == WDT_INVALID_ARGUMENT)
+	{
+		printf("ERR: Can't activate watchdog for timeout of %lu us\n", WATCHDOG_TIMEOUT * 1000);
+		return;
+	}
 
 	uint32_t wdt_mode = WDT_MR_WDFIEN;
 	// Initialize WDT with the calculated timeout value
@@ -121,11 +127,6 @@ int main() {
 	printf("SYNC DEVICE READY\n");
 
 	while (1) {
-		
-		// Indicates execution of the main loop
-		dbg_pin_up();
-		dbg_pin_dn();
-		
 		if (is_event_missed())
 		{
 			err_led_on();
@@ -134,6 +135,10 @@ int main() {
 		}
 
 		poll_uart();
+
+		// Indicates execution of the main loop
+		dbg_pin_up();
+		dbg_pin_dn();
 
 		wdt_restart(WDT); // Kick the watchdog
 	}
@@ -144,8 +149,12 @@ int main() {
 void WDT_Handler(void)
 {
 	err_led_on();
+	const char err_msg[] = "ERR - watchdog timeout, restarting system!\n";
 	
-	printf("ERR - watchdog timeout, restarting system!\n");
+	pdc_packet_t uart_tx_packet;
+	uart_tx_packet.ul_addr = (uint32_t) err_msg;
+	uart_tx_packet.ul_size = sizeof(err_msg);
+	pdc_tx_init(uart_get_pdc_base(UART), &uart_tx_packet, nullptr);
 	
 	delay_ms(50);
 

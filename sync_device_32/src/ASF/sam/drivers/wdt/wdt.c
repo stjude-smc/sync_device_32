@@ -148,7 +148,7 @@ uint32_t wdt_get_status(Wdt *p_wdt)
  */
 uint32_t wdt_get_us_timeout_period(Wdt *p_wdt, uint32_t ul_sclk)
 {
-	return WDT_MR_WDV(p_wdt->WDT_MR) * WDT_SLCK_DIV / ul_sclk * 1000000;
+	return WDT_MR_WDV(p_wdt->WDT_MR) * 1000000 / ul_sclk * WDT_SLCK_DIV ;
 }
 
 //@}
