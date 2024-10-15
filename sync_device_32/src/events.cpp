@@ -296,7 +296,7 @@ void init_sys_timer()
 	tc_enable_interrupt(SYS_TC, SYS_TC_CH, TC_IER_COVFS);
 	
 	NVIC_EnableIRQ(SYS_TC_IRQn);
-	NVIC_SetPriority(SYS_TC_IRQn, 0); // The highest priority is 0
+	NVIC_SetPriority(SYS_TC_IRQn, 1); // The highest priority is 0 (reserved for watchdog)
 }
 
 // This re-adjusts timestamps of scheduled events so we can pause and continue

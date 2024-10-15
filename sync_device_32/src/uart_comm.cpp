@@ -93,7 +93,7 @@ void init_uart_comm(void)
 	// Enable interrupts
 	uart_enable_interrupt(UART, UART_IER_RXRDY | UART_IER_ENDRX);
 	NVIC_EnableIRQ(UART_IRQn);
-	NVIC_SetPriority(UART_IRQn, 1);  // the highest priority is 0
+	NVIC_SetPriority(UART_IRQn, 2);  // the highest priority is 0
 	
 	// Initialize TC for timeout detection
 	_init_UART_TC();
@@ -183,7 +183,7 @@ void _parse_UART_command(const DataPacket *data)
 	if (strncasecmp(data->cmd, "VER", 3) == 0)
 	{
 		printf("SYNC DEVICE v%s\n", VERSION);
-		printf("System timer prescaler=%d (1ct=%luns)\n", SYS_TC_PRESCALER, (uint32_t) cts2us(1000));
+		printf("System timer prescaler=%lu (1ct=%luns)\n", SYS_TC_PRESCALER, (uint32_t) cts2us(1000));
 		printf("Watchdog interval: %lu us \n", wdt_get_us_timeout_period(WDT, BOARD_FREQ_SLCK_XTAL));
 
 	}
