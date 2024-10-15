@@ -90,13 +90,13 @@ void stop_burst_func(uint32_t arg1, uint32_t arg2);
 
 inline bool is_event_missed()
 {
-	static bool result = false;
+	static Event e;
+	bool result = false;
 
 	if (sys_timer_running && !event_queue.empty())
 	{
-		//SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IDR = TC_IDR_CPAS;
-			result = SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV > SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_RA + TS_TOLERANCE_CTS;
-		//SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_IER = TC_IER_CPAS;
+		e = event_queue.top();
+		result = current_time_cts() > (e.ts64_cts + TS_MISSED_TOLERANCE_CTS);
 	}
 	return result;
 }

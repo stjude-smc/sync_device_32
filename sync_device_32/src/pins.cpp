@@ -118,6 +118,6 @@ uint32_t pin_name_to_ioport_id(const uint32_t pin_name_uint32) {
 	}
 
 	// Return 0 if pin name is not found
-	printf("Could not find pin %s", pin_name);
+	printf("ERR: Could not find pin %s\n", pin_name);
 	return 0;
 }

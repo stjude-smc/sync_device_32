@@ -227,7 +227,7 @@ void _parse_UART_command(const DataPacket *data)
 		printf("-- SYSTEM STATUS --\n");
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("System counter is %s\n", sys_timer_running ? "RUNNING" : "STOPPED");
-		printf("Counter value:  %lu cts, OVF = %lu\n", SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV, sys_tc_ovf_count >> 32);
+		printf("Counter value:  %lu cts, OVF = %lu\n", SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV, (uint32_t) (sys_tc_ovf_count >> 32));
 		printf("System time: %f s\n", current_time_s());
 	}
 	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
@@ -259,7 +259,7 @@ void _parse_UART_command(const DataPacket *data)
 	}
 	else
 	{
-		printf("unknown command %.3s\n", data->cmd);
+		printf("ERR: unknown command %.3s\n", data->cmd);
 	}
 }
 
