@@ -17,41 +17,42 @@
 /*                    PINOUT AND WIRING DEFINITIONS                     */
 /************************************************************************/
 // Camera trigger
-#define CAMERA_PIN	"D13" // PIO_PB27_IDX
+#define CAMERA_PIN	PIO_PB27_IDX	// D13
 
 // Fluidics trigger
-#define FLUIDIC_PIN "D3"  // PIO_PC28_IDX
+#define FLUIDIC_PIN PIO_PC28_IDX	// D3
 
-#define BURST_PIN   "D5"  // PIO_PC25_IDX
+// Burst pulse train pin
+#define BURST_PIN   PIO_PC25_IDX	// D5
 
-// Laser shutters (see pio_sam3x8e.h for pin names) - these have to be on the same port!
-#define CY2_PIN		"A0"  // PIO_PA16_IDX
-#define CY3_PIN		"A1"  // PIO_PA24_IDX
-#define CY5_PIN		"A2"  // PIO_PA23_IDX
-#define CY7_PIN		"A3"  // PIO_PA22_IDX
+// Laser shutters
+#define CY2_PIN		PIO_PA16_IDX	// A0
+#define CY3_PIN		PIO_PA24_IDX	// A1
+#define CY5_PIN		PIO_PA23_IDX	// A2
+#define CY7_PIN		PIO_PA22_IDX	// A3 
 
-#define SHUTTERS_MASK (ioport_pin_to_mask(pin_name_to_ioport_id(CY2_PIN)) | \
-                       ioport_pin_to_mask(pin_name_to_ioport_id(CY3_PIN)) | \
-					   ioport_pin_to_mask(pin_name_to_ioport_id(CY5_PIN)) | \
-					   ioport_pin_to_mask(pin_name_to_ioport_id(CY7_PIN)))
-#define SHUTTERS_PORT ioport_pin_to_port_id(pin_name_to_ioport_id(CY2_PIN))
+#define SHUTTERS_MASK (ioport_pin_to_mask(CY2_PIN) | \
+                       ioport_pin_to_mask(CY3_PIN) | \
+					   ioport_pin_to_mask(CY5_PIN) | \
+					   ioport_pin_to_mask(CY7_PIN))
+#define SHUTTERS_PORT ioport_pin_to_port_id(CY2_PIN)
 
 // Error indicator trigger
-#define ERR_PIN "D53"
+#define ERR_PIN		PIO_PB14_IDX	// D53
 inline void err_led_on(){
-	ioport_set_pin_level(PIO_PB14_IDX, 1);
+	ioport_set_pin_level(ERR_PIN, 1);
 }
 inline void err_led_off(){
-	ioport_set_pin_level(PIO_PB14_IDX, 0);
+	ioport_set_pin_level(ERR_PIN, 0);
 }
 
 // Debug pin
-#define DBG_PIN_IDX  PIO_PA7_IDX  // "D31"
+#define DBG_PIN  PIO_PA7_IDX  // D31
 inline void dbg_pin_up(){
-	ioport_set_pin_level(DBG_PIN_IDX, 1);
+	ioport_set_pin_level(DBG_PIN, 1);
 }
 inline void dbg_pin_dn(){
-	ioport_set_pin_level(DBG_PIN_IDX, 0);
+	ioport_set_pin_level(DBG_PIN, 0);
 }
 
 /************************************************************************/
