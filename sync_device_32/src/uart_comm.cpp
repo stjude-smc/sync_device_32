@@ -195,10 +195,17 @@ void _parse_UART_command(const DataPacket *data)
 	{
 		RSTC->RSTC_CR = RSTC_KEY | RSTC_CR_PROCRST;  // processor reset
 	}
-	else if (strncasecmp(data->cmd, "STP", 3) == 0)  // stop system timer and delete event queue
+	else if (strncasecmp(data->cmd, "STP", 3) == 0)  // delete event queue, set all pins low, and stop system timer
 	{
 		stop_burst_func(0, 0);
 		stop_sys_timer();
+		std::priority_queue<Event>().swap(event_queue);
+		
+		init_pins();
+	}
+	else if (strncasecmp(data->cmd, "CLR", 3) == 0)  // delete event queue, set all pins low
+	{
+		stop_burst_func(0, 0);
 		std::priority_queue<Event>().swap(event_queue);
 		
 		init_pins();
@@ -249,6 +256,8 @@ void _parse_UART_command(const DataPacket *data)
 		printf("%lu SET_PIN\n", (uint32_t) &set_pin_event_func);
 		printf("%lu BST__ON\n", (uint32_t) &start_burst_func);
 		printf("%lu BST_OFF\n", (uint32_t) &stop_burst_func);
+		printf("%lu EN__PIN\n", (uint32_t) &enable_pin_func);
+		printf("%lu DIS_PIN\n", (uint32_t) &disable_pin_func);
 	}
 	else if (strncasecmp(data->cmd, "INT", 3) == 0)
 	{
