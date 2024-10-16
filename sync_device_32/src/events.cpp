@@ -172,7 +172,7 @@ void schedule_pulse(const DataPacket *data, bool is_positive)
 	schedule_event(event_p, false);
 
 	// Schedule back of the pulse
-	event_p->ts64_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFL_PULSE_DURATION);
+	event_p->ts64_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFLT_PULSE_DURATION);
 	event_p->arg2 = is_positive ? 0 : 1;
 	schedule_event(event_p, false);
 
@@ -211,7 +211,7 @@ void schedule_burst(const DataPacket *data)
 
 	// Schedule stop of the burst
 	event_p->func = stop_burst_func;
-	event_p->ts64_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFL_PULSE_DURATION);
+	event_p->ts64_cts += us2cts((data->arg2 > 0) ? data->arg2 : DFLT_PULSE_DURATION);
 	schedule_event(event_p, false);
 
 	delete event_p;

@@ -1,5 +1,6 @@
 #include "uart_comm.h"
 #include "events.h"
+#include "props.h"
 
 #define RSTC_KEY  0xA5000000  // password for reset controller
 
@@ -193,6 +194,7 @@ void _parse_UART_command(const DataPacket *data)
 	}
 	else if (strncasecmp(data->cmd, "RST", 3) == 0)
 	{
+		init_pins();
 		RSTC->RSTC_CR = RSTC_KEY | RSTC_CR_PROCRST;  // processor reset
 	}
 	else if (strncasecmp(data->cmd, "STP", 3) == 0)  // delete event queue, set all pins low, and stop system timer
@@ -237,6 +239,10 @@ void _parse_UART_command(const DataPacket *data)
 	else if (strncasecmp(data->cmd, "DSP", 3) == 0)
 	{
 		schedule_disable_pin(data);
+	}
+	else if (strncasecmp(data->cmd, "GET", 3) == 0)
+	{
+		get_property((SysProps) data->arg1);
 	}
 	else if (strncasecmp(data->cmd, "STA", 3) == 0)
 	{

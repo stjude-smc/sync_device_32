@@ -90,7 +90,7 @@ inline void dbg_pin_dn(){
 #define TS_MISSED_TOLERANCE 100UL // us - when we decide the event has been missed
 
 // Default pulse duration, us
-#define DFL_PULSE_DURATION 100UL
+#define DFLT_PULSE_DURATION 100UL
 
 /************************************************************************/
 /*    SYSTEM TIMER CONFIGURATION AND TIME CONVERSION FUNCTIONS          */
