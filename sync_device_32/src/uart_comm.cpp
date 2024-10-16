@@ -259,22 +259,6 @@ void _parse_UART_command(const DataPacket *data)
 		printf("%lu EN__PIN\n", (uint32_t) &enable_pin_func);
 		printf("%lu DIS_PIN\n", (uint32_t) &disable_pin_func);
 	}
-	else if (strncasecmp(data->cmd, "INT", 3) == 0)
-	{
-		// Check the default priority of Timer/Counter 0 interrupt
-		uint32_t sys_tc_priority = NVIC_GetPriority(SYS_TC_IRQn);
-
-		// Check the default priority of Timer/Counter 0 interrupt
-		uint32_t uart_tc_priority = NVIC_GetPriority(UART_TC_IRQn);
-
-		// Check the default priority of UART interrupt
-		uint32_t uart_priority = NVIC_GetPriority(UART_IRQn);
-		
-		printf("-- SYSTEM INTERRUPT PRIORITIES --\n");
-		printf("System timer: %lu\n", sys_tc_priority);
-		printf("UART:         %lu\n", uart_priority);
-		printf("UART timer:   %lu\n", uart_tc_priority);
-	}
 	else
 	{
 		printf("ERR: unknown command %.3s\n", data->cmd);
