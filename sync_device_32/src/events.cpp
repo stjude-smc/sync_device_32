@@ -45,7 +45,18 @@ void process_events()
 }
 
 
-// Process the event metadatastatic inline bool _update_event(Event *event)
+void init_burst_timer()
+{
+	sysclk_enable_peripheral_clock(ID_TC6); // TC2, channel 0
+	tc_init(TC2, 0,
+	TC_CMR_TCCLKS_TIMER_CLOCK1 |  // same time unit as the main clock
+	TC_CMR_WAVE |          // waveform mode
+	TC_CMR_ASWTRG_SET |  // set on timer start
+	TC_CMR_ACPA_CLEAR |      // clear on compare event A
+	TC_CMR_ACPC_SET |    // set on compare event C
+	TC_CMR_WAVSEL_UP_RC    // reset timer on event C
+	);
+}// Process the event metadatastatic inline bool _update_event(Event *event)
 {
 	if (event->interv_cts >= MIN_EVENT_INTERVAL) // repeating event	{		event->ts64_cts += event->interv_cts;		if (event->N == 0){  // infinite event - reschedule			return true;		}		// if (N == 1), it was a last call, and we drop it		if (event->N > 1) {  // reschedule the event			event->N--;			return true;		}	}	return false;
 }

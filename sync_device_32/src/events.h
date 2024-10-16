@@ -70,6 +70,8 @@ void schedule_disable_pin(const DataPacket *data);
 
 void process_events();
 
+void init_burst_timer();
+
 void init_sys_timer();
 void start_sys_timer();
 void stop_sys_timer();

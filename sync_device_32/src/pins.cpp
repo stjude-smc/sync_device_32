@@ -124,6 +124,26 @@ uint32_t pin_name_to_ioport_id(const uint32_t pin_name_uint32) {
 	return 0;
 }
 
+// Initialize predefined pins for camera and laser shutters
+void init_pins()
+{
+	// Initialize all gpio controllers
+	sysclk_enable_peripheral_clock(ID_PIOA);
+	sysclk_enable_peripheral_clock(ID_PIOB);
+	sysclk_enable_peripheral_clock(ID_PIOC);
+	sysclk_enable_peripheral_clock(ID_PIOD);
+	
+	
+	// Assign indices to pins
+	for (uint32_t i = 0; i < sizeof(pins)/sizeof(Pin); i++)
+	{
+		Pin * p = &pins[i];
+		p->pin_idx = i;
+		p->set_level(false);
+	}
+}
+
+
 void Pin::set_level(bool level)
 {
 	ioport_set_pin_dir(this->pin_idx, IOPORT_DIR_OUTPUT);

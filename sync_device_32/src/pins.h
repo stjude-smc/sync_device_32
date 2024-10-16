@@ -41,3 +41,5 @@ public:
 };
 
 extern Pin pins[107];
+
+void init_pins();

@@ -63,50 +63,6 @@ extern "C" {
 }
 
 
-// Initialize predefined pins for camera and laser shutters
-void init_pins()
-{
-	// Initialize all gpio controllers
-	sysclk_enable_peripheral_clock(ID_PIOA);
-	sysclk_enable_peripheral_clock(ID_PIOB);
-	sysclk_enable_peripheral_clock(ID_PIOC);
-	sysclk_enable_peripheral_clock(ID_PIOD);
-	
-	ioport_set_port_dir(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_DIR_OUTPUT);
-	ioport_set_port_level(SHUTTERS_PORT, SHUTTERS_MASK, IOPORT_PIN_LEVEL_LOW);
-
-	ioport_set_pin_dir(pin_name_to_ioport_id(CAMERA_PIN), IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(pin_name_to_ioport_id(CAMERA_PIN), IOPORT_PIN_LEVEL_LOW);
-
-	ioport_set_pin_dir(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(pin_name_to_ioport_id(FLUIDIC_PIN), IOPORT_PIN_LEVEL_LOW);
-
-	ioport_set_pin_dir(pin_name_to_ioport_id(ERR_PIN), IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(pin_name_to_ioport_id(ERR_PIN), IOPORT_PIN_LEVEL_LOW);
-
-
-	ioport_set_pin_dir(DBG_PIN_IDX, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(DBG_PIN_IDX, IOPORT_PIN_LEVEL_LOW);
-	
-	// Assign indices to pins
-	for (uint32_t i = 0; i < sizeof(pins)/sizeof(Pin); i++)
-	{
-		pins[i].pin_idx = i;
-	}
-}
-
-void init_burst_timer()
-{
-	sysclk_enable_peripheral_clock(ID_TC6); // TC2, channel 0
-	tc_init(TC2, 0,
-	TC_CMR_TCCLKS_TIMER_CLOCK1 |  // same time unit as the main clock
-	TC_CMR_WAVE |          // waveform mode
-	TC_CMR_ASWTRG_SET |  // set on timer start
-	TC_CMR_ACPA_CLEAR |      // clear on compare event A
-	TC_CMR_ACPC_SET |    // set on compare event C
-	TC_CMR_WAVSEL_UP_RC    // reset timer on event C
-	);
-}
 
 
 /************************************************************************/
