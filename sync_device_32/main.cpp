@@ -101,8 +101,8 @@ int main() {
 		poll_uart();
 
 		// Indicates execution of the main loop
-		dbg_pin_up();
-		dbg_pin_dn();
+		err_led_on();
+		err_led_off();
 
 		wdt_restart(WDT); // Kick the watchdog
 	}

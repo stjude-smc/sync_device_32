@@ -39,10 +39,10 @@
 // Error indicator trigger
 #define ERR_PIN "D53"
 inline void err_led_on(){
-	ioport_set_pin_level(pin_name_to_ioport_id(ERR_PIN), 1);
+	ioport_set_pin_level(PIO_PB14_IDX, 1);
 }
 inline void err_led_off(){
-	ioport_set_pin_level(pin_name_to_ioport_id(ERR_PIN), 0);
+	ioport_set_pin_level(PIO_PB14_IDX, 0);
 }
 
 // Debug pin
