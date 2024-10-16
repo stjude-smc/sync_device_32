@@ -87,6 +87,12 @@ void init_pins()
 
 	ioport_set_pin_dir(DBG_PIN_IDX, IOPORT_DIR_OUTPUT);
 	ioport_set_pin_level(DBG_PIN_IDX, IOPORT_PIN_LEVEL_LOW);
+	
+	// Assign indices to pins
+	for (uint32_t i = 0; i < sizeof(pins)/sizeof(Pin); i++)
+	{
+		pins[i].pin_idx = i;
+	}
 }
 
 void init_burst_timer()

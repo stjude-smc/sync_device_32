@@ -23,3 +23,21 @@ typedef struct {
 
 // pin_map array
 extern const pin_map_t pin_map[];
+
+class Pin {
+private:
+	bool level;
+	bool active;
+
+public:
+	uint32_t pin_idx;
+	
+	Pin() : level(false), active(true) {};
+	
+	void set_level(bool level);
+	void toggle();
+	void enable();
+	void disable();
+};
+
+extern Pin pins[107];

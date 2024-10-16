@@ -222,6 +222,14 @@ void _parse_UART_command(const DataPacket *data)
 	{
 		schedule_toggle(data);
 	}
+	else if (strncasecmp(data->cmd, "ENP", 3) == 0)
+	{
+		schedule_enable_pin(data);
+	}
+	else if (strncasecmp(data->cmd, "DSP", 3) == 0)
+	{
+		schedule_disable_pin(data);
+	}
 	else if (strncasecmp(data->cmd, "STA", 3) == 0)
 	{
 		printf("-- SYSTEM STATUS --\n");

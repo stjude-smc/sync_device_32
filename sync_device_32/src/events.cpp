@@ -207,7 +207,27 @@ void schedule_burst(const DataPacket *data)
 }
 
 
+void schedule_enable_pin(const DataPacket *data)
+{
+	Event* event_p = event_from_datapacket(data, enable_pin_func);
 
+	// Convert pin name to ioport index for the event function
+	event_p->arg1 = pin_name_to_ioport_id(data->arg1);
+
+	schedule_event(event_p);
+	delete event_p;
+}
+
+void schedule_disable_pin(const DataPacket *data)
+{
+	Event* event_p = event_from_datapacket(data, disable_pin_func);
+
+	// Convert pin name to ioport index for the event function
+	event_p->arg1 = pin_name_to_ioport_id(data->arg1);
+
+	schedule_event(event_p);
+	delete event_p;
+}
 
 /************************************************************************/
 /*                 FUNCTION TO USE WITHIN EVENTS                        */
@@ -215,29 +235,38 @@ void schedule_burst(const DataPacket *data)
 
 void tgl_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2_unused)
 {
-	ioport_set_pin_dir(arg1_pin_idx, IOPORT_DIR_OUTPUT);
-	ioport_toggle_pin_level(arg1_pin_idx);
+	pins[arg1_pin_idx].toggle();
 }
 
 void set_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2_level)
 {
-	ioport_set_pin_dir(arg1_pin_idx, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(arg1_pin_idx, arg2_level);
+	pins[arg1_pin_idx].set_level(arg2_level);
 }
 
-void start_burst_func(uint32_t period, uint32_t arg2)
+void start_burst_func(uint32_t arg1_period, uint32_t arg2_unused)
 {
 	tc_stop(TC2, 0);
-	TC2->TC_CHANNEL[0].TC_RA = period >> 3; // 1/8th of the period
-	TC2->TC_CHANNEL[0].TC_RC = period;
-	tc_start(TC2, 0);
+	TC2->TC_CHANNEL[0].TC_RA = arg1_period >> 3; // 1/8th of the period
+	TC2->TC_CHANNEL[0].TC_RC = arg1_period;
 	pio_set_peripheral(PIOC, PIO_PERIPH_B, PIO_PC25);
+	tc_start(TC2, 0);
 }
 
-void stop_burst_func(uint32_t period, uint32_t arg2)
+void stop_burst_func(uint32_t arg1_unused, uint32_t arg2_unused)
 {
 	tc_stop(TC2, 0);
 	pio_set_output(PIOC, PIO_PC25, 0, 0, 0);
+	pio_set_pin_low(PIO_PC25_IDX);
+}
+
+void enable_pin_func(uint32_t arg1_pin_idx, uint32_t arg2)
+{
+	pins[arg1_pin_idx].enable();
+}
+
+void disable_pin_func(uint32_t arg1_pin_idx, uint32_t arg2)
+{
+	pins[arg1_pin_idx].disable();
 }
 
 /************************************************************************/

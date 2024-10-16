@@ -8,6 +8,8 @@
 #include "pins.h"
 #include "strings.h"
 
+Pin pins[107];
+
 /************************************************************************/
 /*                    PIN MAPPING                                       */
 /************************************************************************/
@@ -120,4 +122,31 @@ uint32_t pin_name_to_ioport_id(const uint32_t pin_name_uint32) {
 	// Return 0 if pin name is not found
 	printf("ERR: Could not find pin %s\n", pin_name);
 	return 0;
+}
+
+void Pin::set_level(bool level)
+{
+	ioport_set_pin_dir(this->pin_idx, IOPORT_DIR_OUTPUT);
+	this->level = level;
+	ioport_set_pin_level(this->pin_idx, this->active * level);
+}
+
+void Pin::toggle()
+{
+	ioport_set_pin_dir(this->pin_idx, IOPORT_DIR_OUTPUT);
+
+	this->level = !this->level;	
+	ioport_set_pin_level(this->pin_idx, this->active * level);
+}
+
+void Pin::enable()
+{
+	this->active = true;
+	this->set_level(this->level);
+}
+
+void Pin::disable()
+{
+	this->active = false;
+	this->set_level(this->level);
 }
