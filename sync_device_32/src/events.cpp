@@ -32,14 +32,12 @@ void process_events()
 {
 	static Event event;
 	
-	dbg_pin_up();					// 1            t = -2.1 us
 	_disable_event_irq();
 		while (!event_queue.empty())		{
 			// Keep processing events from the queue while they are pending
 			event = event_queue.top();			if (event.ts64_cts > current_time_cts() + TS_TOLERANCE_CTS)  // it's a future event			{				// Update the RA register for compare interrupt
-				tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);				tc_write_rc(SYS_TC, SYS_TC_CH, event.ts_lo32_cts + 1);				dbg_pin_dn();		// 4            t = 9.2 us				break;  // Our job is done			}			dbg_pin_dn();			// 2			t = -1.3 us			// Fire the event function			event.func(event.arg1, event.arg2);	 // t = 0			event_queue.pop();  // remove the event from the queue, preserving order			if (_update_event(&event))  // Needs to be rescheduled?
+				tc_write_ra(SYS_TC, SYS_TC_CH, event.ts_lo32_cts);				tc_write_rc(SYS_TC, SYS_TC_CH, event.ts_lo32_cts + 1);				break;  // Our job is done			}			// Fire the event function			event.func(event.arg1, event.arg2);			event_queue.pop();  // remove the event from the queue, preserving order			if (_update_event(&event))  // Needs to be rescheduled?
 			{
-				dbg_pin_up();		// 3            t = 4.6 us
 				// Put updated event back, preserving order of the queue
 				event_queue.push(event);
 			}		}
@@ -359,21 +357,19 @@ void pause_sys_timer()
 // This interrupt runs when current time reaches the timestamp of the next
 // scheduled event in the event_queue. We might end up processing more than
 // one event.
-void SYS_TC_Handler()  // t = -3.1 us
+void SYS_TC_Handler()
 {
     // Read Timer Counter Status to clear the interrupt flag
 	uint32_t status = tc_get_status(SYS_TC, SYS_TC_CH);
 	
     if (status & TC_SR_CPAS) {  // RA match
-		ioport_set_pin_level(PIO_PA23_IDX, 1);  // t = -2.4 us
 		process_events();
-		ioport_set_pin_level(PIO_PA23_IDX, 0);  // t = 9.5 us
     }
 
     if (status & TC_SR_COVFS) {  // overflow
 	    sys_tc_ovf_count += (1ULL << 32);
     }
-}  // t = 9.8 us
+}
 
 // Disable system timer interrupt on register A compare
 static inline void _disable_event_irq()
