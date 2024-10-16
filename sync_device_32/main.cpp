@@ -86,7 +86,7 @@ int main() {
 	init_sys_timer();
 	init_burst_timer();
 	
-	printf("SYNC DEVICE READY\n");
+	printf("Sync device is ready. Firmware version: %s\n", VERSION);
 	
 	start_sys_timer();
 
