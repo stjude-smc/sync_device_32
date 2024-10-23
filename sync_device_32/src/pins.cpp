@@ -84,6 +84,8 @@ const pin_map_t pin_map[] = {
 	{"D65", PIO_PB20_IDX},
 	{"D66", PIO_PB15_IDX},
 	{"D67", PIO_PB16_IDX},
+	{"D68", PIO_PA1_IDX},
+	{"D69", PIO_PA0_IDX},
 
 	{"A0", PIO_PA16_IDX},
 	{"A1", PIO_PA24_IDX},
@@ -97,10 +99,15 @@ const pin_map_t pin_map[] = {
 	{"A9", PIO_PB18_IDX},
 	{"A10", PIO_PB19_IDX},
 	{"A11", PIO_PB20_IDX},
+	{"A12", PIO_PB15_IDX},
+	{"A13", PIO_PB16_IDX},
+	{"A14", PIO_PA1_IDX},
+	{"A15", PIO_PA0_IDX},
 };
 
 
 // Convert pin name (e.g., "D13" or "A0") to SAM3X I/O port pin ID
+// This takes ~300us
 uint32_t pin_name_to_ioport_id(const char* pin_name) {
 	return pin_name_to_ioport_id(*((uint32_t*) pin_name));
 }
