@@ -605,9 +605,6 @@
     <Compile Include="main.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="props.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\ASF\sam\drivers\pdc\pdc.c">
       <SubType>compile</SubType>
     </Compile>
@@ -645,6 +642,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\props.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\props.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\uart_comm.cpp">
