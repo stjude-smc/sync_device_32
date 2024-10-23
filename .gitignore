@@ -45,7 +45,6 @@ project.xml
 Thumbs.db
 
 # Ignore other unnecessary files
-*.pdf
 *.doc
 *.xls
 *.ppt
