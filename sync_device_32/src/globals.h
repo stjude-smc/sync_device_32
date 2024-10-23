@@ -10,7 +10,7 @@
 #include "pins.h"
 #endif
 
-#define VERSION "2.0.0"
+#define VERSION "2.0.1"
 
 
 /************************************************************************/
@@ -21,9 +21,6 @@
 
 // Fluidics trigger
 #define FLUIDIC_PIN PIO_PC28_IDX	// D3
-
-// Burst pulse train pin
-#define BURST_PIN   PIO_PC25_IDX	// D5
 
 // Laser shutters
 #define CY2_PIN		PIO_PA16_IDX	// A0
@@ -55,18 +52,29 @@ inline void dbg_pin_dn(){
 	ioport_set_pin_level(DBG_PIN, 0);
 }
 
+// Burst pulse train pin
+#define BURST_PIN    PIO_PC25_IDX	// D5, TIOA6  (TC2, channel 0)
+
+
+// Interlock pin
+#define INTERLOCK_PIN PIO_PB27_IDX  // D13, TIOB0  (TC0, channel 0)
+#define ID_INTERLOCK_TC      ID_TC0
+#define INTERLOCK_TC         TC0	// ID / 3
+#define INTERLOCK_TC_CH      0		// ID % 3
+
+
 /************************************************************************/
 /*                    UART AND DMA CONFIGURATION                        */
 /************************************************************************/
 #define UART_BUFFER_SIZE 512   // Size of DMA-controlled UART buffers
 #define UART_BAUDRATE 115200   // bits per second
 #define UART_TIMEOUT  25       // ms
-// UART uses timer 8 (module TC2 channel 2)
-#define UART_TC              TC2
-#define UART_TC_CH           2
-#define ID_UART_TC           ID_TC8
-#define UART_TIMEOUT_Handler TC8_Handler
-#define UART_TC_IRQn	     TC8_IRQn
+// UART uses timer 4 (module TC1 channel 1)
+#define ID_UART_TC           ID_TC4
+#define UART_TC              TC1	// ID / 3
+#define UART_TC_CH           1		// ID % 3
+#define UART_TIMEOUT_Handler TC4_Handler
+#define UART_TC_IRQn	     TC4_IRQn
 
 
 /************************************************************************/
@@ -136,10 +144,10 @@ static inline uint64_t cts2us(uint64_t cts) {
 }
 
 
-// Main timer/counter for events
-#define SYS_TC			TC0
-#define SYS_TC_CH		0
-#define ID_SYS_TC		ID_TC0
-#define SYS_TC_Handler  TC0_Handler
-#define SYS_TC_IRQn		TC0_IRQn
+// Main timer/counter for events (module TC1 channel 0)
+#define ID_SYS_TC		ID_TC3
+#define SYS_TC			TC1		// ID / 3
+#define SYS_TC_CH		0		// ID % 3
+#define SYS_TC_Handler  TC3_Handler
+#define SYS_TC_IRQn		TC3_IRQn
 
