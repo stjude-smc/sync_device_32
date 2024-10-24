@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include "globals.h"
 
 // Pin mapping for Arduino Due (Digital and Analog pins)
 uint32_t pin_name_to_ioport_id(const uint32_t pin_name);

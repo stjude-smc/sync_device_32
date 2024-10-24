@@ -10,7 +10,7 @@
 #include "pins.h"
 #endif
 
-#define VERSION "2.0.1"
+#define VERSION "2.1.0"
 
 
 /************************************************************************/
@@ -56,11 +56,13 @@ inline void dbg_pin_dn(){
 #define BURST_PIN    PIO_PC25_IDX	// D5, TIOA6  (TC2, channel 0)
 
 
-// Interlock pin
-#define INTERLOCK_PIN PIO_PB27_IDX  // D13, TIOB0  (TC0, channel 0)
-#define ID_INTERLOCK_TC      ID_TC0
-#define INTERLOCK_TC         TC0	// ID / 3
-#define INTERLOCK_TC_CH      0		// ID % 3
+// Interlock configuration (see datasheet table 36-4)
+#define INTLCK_OUT        PIO_PB27_IDX  // D13, TIOB0  (TC0, channel 0)
+#define INTLCK_OUT_PERIPH IOPORT_MODE_MUX_B
+#define ID_INTLCK_TC      ID_TC0
+#define INTLCK_TC         TC0	// ID / 3
+#define INTLCK_TC_CH      0		// ID % 3
+#define INTLCK_IN		  PIO_PD8_IDX   // D12
 
 
 /************************************************************************/

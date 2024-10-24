@@ -14,6 +14,7 @@ extern "C" {
 #include "globals.h"
 #include "uart_comm.h"
 #include "events.h"
+#include "interlock.h"
 
 
 
@@ -85,6 +86,8 @@ int main() {
 	init_pins();	
 	init_sys_timer();
 	init_burst_timer();
+	
+	init_interlock();
 	
 	printf("Sync device is ready. Firmware version: %s\n", VERSION);
 	

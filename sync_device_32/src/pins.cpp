@@ -144,9 +144,21 @@ void init_pins()
 	// Assign indices to pins
 	for (uint32_t i = 0; i < sizeof(pins)/sizeof(Pin); i++)
 	{
-		Pin * p = &pins[i];
-		p->pin_idx = i;
-		p->set_level(false);
+		switch (i){
+			// exclude special pins
+			case INTLCK_OUT:
+			break;
+			case INTLCK_IN:
+				ioport_set_pin_mode(INTLCK_IN, IOPORT_MODE_PULLUP);
+				ioport_set_pin_dir(INTLCK_IN, IOPORT_DIR_INPUT);
+			break;
+			
+			// all other pins are initialized as output
+			default:
+				Pin * p = &pins[i];
+				p->pin_idx = i;
+				p->set_level(false);
+		}
 	}
 }
 
