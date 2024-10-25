@@ -242,7 +242,11 @@ void _parse_UART_command(const DataPacket *data)
 	}
 	else if (strncasecmp(data->cmd, "GET", 3) == 0)
 	{
-		get_property((SysProps) data->arg1);
+		print_property((SysProps) data->arg1);
+	}
+	else if (strncasecmp(data->cmd, "SET", 3) == 0)
+	{
+		set_property((SysProps) data->arg1, data->arg2);
 	}
 	else if (strncasecmp(data->cmd, "STA", 3) == 0)
 	{

@@ -10,18 +10,12 @@
 #include "pins.h"
 #endif
 
-#define VERSION "2.0.1"
+#define VERSION "2.1.0"
 
 
 /************************************************************************/
 /*                    PINOUT AND WIRING DEFINITIONS                     */
 /************************************************************************/
-// Camera trigger
-#define CAMERA_PIN	PIO_PB27_IDX	// D13
-
-// Fluidics trigger
-#define FLUIDIC_PIN PIO_PC28_IDX	// D3
-
 // Laser shutters
 #define CY2_PIN		PIO_PA16_IDX	// A0
 #define CY3_PIN		PIO_PA24_IDX	// A1
@@ -56,12 +50,22 @@ inline void dbg_pin_dn(){
 #define BURST_PIN    PIO_PC25_IDX	// D5, TIOA6  (TC2, channel 0)
 
 
-// Interlock pin
-#define INTERLOCK_PIN PIO_PB27_IDX  // D13, TIOB0  (TC0, channel 0)
-#define ID_INTERLOCK_TC      ID_TC0
-#define INTERLOCK_TC         TC0	// ID / 3
-#define INTERLOCK_TC_CH      0		// ID % 3
-
+// Interlock configuration (see datasheet table 36-4)
+#define INTLCK_IN		      PIO_PD8_IDX   // D12
+#define INTLCK_TIOB
+#ifdef INTLCK_TIOA
+	#define INTLCK_OUT        PIO_PB25_IDX  //  D2, TIOA0  (TC0, channel 0)
+	#define INTLCK_OUT_PERIPH IOPORT_MODE_MUX_B
+#else
+	#define INTLCK_OUT        PIO_PB27_IDX  // D13, TIOB0  (TC0, channel 0)
+	#define INTLCK_OUT_PERIPH IOPORT_MODE_MUX_B
+#endif
+#define ID_INTLCK_TC          ID_TC0
+#define INTLCK_TC             TC0	// ID / 3
+#define INTLCK_TC_CH          0		// ID % 3
+#define INTLCK_TC_Handler     TC0_Handler
+#define INTLCK_TC_IRQn		  TC0_IRQn
+#define INTLCK_TC_PERIOD_US	  25000UL
 
 /************************************************************************/
 /*                    UART AND DMA CONFIGURATION                        */
@@ -97,8 +101,6 @@ inline void dbg_pin_dn(){
 #define TS_TOLERANCE        2UL   // us
 #define TS_MISSED_TOLERANCE 100UL // us - when we decide the event has been missed
 
-// Default pulse duration, us
-#define DFLT_PULSE_DURATION 100UL
 
 /************************************************************************/
 /*    SYSTEM TIMER CONFIGURATION AND TIME CONVERSION FUNCTIONS          */

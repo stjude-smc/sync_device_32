@@ -7,47 +7,113 @@
  *  Author: rkiselev
  */ 
 
+#include <unordered_map>
+
 #include "props.h"
+#include "uart_comm.h"
+#include "events.h"
+#include "interlock.h"
+
+// Global map to store properties by their ID
+std::unordered_map<SysProps, DeviceProperty*> props;
 
 
-void get_property(SysProps prop)
-{
-	switch (prop)
-	{
-	case prop_VERSION:
-		printf("%s\n", VERSION);
-		break;
-	case prop_SYS_TIMER_STATUS:
-		printf("%s\n", sys_timer_running ? "RUNNING" : "STOPPED");
-		break;
-	case prop_SYS_TIMER_VALUE:
-		printf("%lu\n", SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV);
-		break;
-	case prop_SYS_TIMER_OVF_COUNT:
-		printf("%lu\n", (uint32_t) (sys_tc_ovf_count >> 32));
-		break;
-	case prop_SYS_TIME_S:
-		printf("%f\n", current_time_s());
-		break;
-	case prop_SYS_TIMER_PRESCALER:
-		printf("%lu\n", SYS_TC_PRESCALER);
-		break;
-	case prop_DFLT_PULSE_DURATION_US:
-		printf("%lu\n", DFLT_PULSE_DURATION);
-		break;
-	case prop_WATCHDOG_TIMEOUT:
-		printf("%lu\n", WATCHDOG_TIMEOUT);
-		break;
-	case prop_N_EVENTS:
-		printf("%i\n", event_queue.size());
-		break;
+void print_version(){printf("%s\n", VERSION);}
+void print_timer_cv(){printf("%lu\n", SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV);}
+void print_sys_tc_ovf(){printf("%lu\n", (uint32_t) (sys_tc_ovf_count >> 32));}
+void print_time_s(){printf("%f\n", current_time_s());}
+void print_N_events(){printf("%u\n", event_queue.size());}
 
-	default:
-		printf("ERR: unknown property with id=%lu\n", (uint32_t) prop);
-	}
+
+void init_props() {
+	props[ro_VERSION]                = new FunctionProperty(print_version);
+	props[ro_SYS_TIMER_STATUS]       = new ExternalProperty((uint32_t*) &sys_timer_running);
+	props[ro_SYS_TIMER_VALUE]        = new FunctionProperty(print_timer_cv);
+	props[ro_SYS_TIMER_OVF_COUNT]    = new FunctionProperty(print_sys_tc_ovf);
+	props[ro_SYS_TIME_s]             = new FunctionProperty(print_time_s);
+	props[ro_SYS_TIMER_PRESCALER]    = new InternalProperty((uint32_t) SYS_TC_PRESCALER);
+	props[rw_DFLT_PULSE_DURATION_us] = new ExternalProperty((uint32_t*) &default_pulse_duration_us, PropertyAccess::ReadWrite);
+	props[ro_WATCHDOG_TIMEOUT_ms]    = new InternalProperty((uint32_t) WATCHDOG_TIMEOUT);
+	props[ro_N_EVENTS]               = new FunctionProperty(print_N_events);
+	props[rw_INTLCK_ENABLED]         = new ExternalProperty((uint32_t*) &interlock_enabled, PropertyAccess::ReadWrite);
 }
 
-void set_property(SysProps prop, uint32_t value)
+
+
+void print_property(SysProps id)
 {
-	printf("ERR: set_property() is not implemented\n");
+	auto iterator = props.find(id);
+	if (iterator == props.end())
+	{
+		printf("ERR: Property not found (ID: %d)\n", id);
+		return;
+	}
+	iterator->second->print_value();
+}
+
+
+void set_property(SysProps id, uint32_t value)
+{
+    auto iterator = props.find(id);
+    if (iterator == props.end()) {
+        printf("ERR: Property not found (ID: %d)\n", id);
+        return;
+    }
+    iterator->second->set_value(value);
+}
+
+
+
+void InternalProperty::print_value() const 
+{
+	printf("%lu\n", value);
+}
+
+uint32_t InternalProperty::get_value() const
+{
+	return value;
+}
+
+void InternalProperty::set_value(uint32_t newValue)
+{
+	if (access == PropertyAccess::ReadOnly) {
+		std::printf("ERR: read-only property\n");
+		return;
+	}
+	value = newValue;
+}
+
+void ExternalProperty::print_value() const 
+{
+	printf("%lu\n", *externalValue);
+}
+
+uint32_t ExternalProperty::get_value() const
+{
+	return *externalValue;
+}
+
+void ExternalProperty::set_value(uint32_t newValue)
+{
+    if (access == PropertyAccess::ReadOnly) {
+        std::printf("ERR: read-only property\n");
+        return;
+    }
+    *externalValue = newValue;
+}
+
+void FunctionProperty::print_value() const 
+{
+	this->valueFunction();
+}
+
+uint32_t FunctionProperty::get_value() const
+{
+	printf("ERR: don't call `get_value()` function in FunctionProperty class!\n");
+	return 0;
+}
+
+void FunctionProperty::set_value(uint32_t)
+{
+	std::printf("ERR: read-only property\n");
 }

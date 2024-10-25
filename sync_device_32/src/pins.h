@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include "globals.h"
 
 // Pin mapping for Arduino Due (Digital and Analog pins)
 uint32_t pin_name_to_ioport_id(const uint32_t pin_name);
@@ -35,9 +36,11 @@ public:
 	Pin() : level(false), active(true) {};
 	
 	void set_level(bool level);
+	void update();
 	void toggle();
 	void enable();
 	void disable();
+	bool is_active();
 };
 
 extern Pin pins[107];

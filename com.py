@@ -12,6 +12,21 @@ from rev_pin_map import rev_pin_map
 UNIFORM_TIME_DELAY = 500
 
 
+from enum import Enum
+
+class props(Enum):
+    ro_VERSION = 0
+    ro_SYS_TIMER_STATUS = 1
+    ro_SYS_TIMER_VALUE = 2
+    ro_SYS_TIMER_OVF_COUNT = 3
+    ro_SYS_TIME_s = 4
+    ro_SYS_TIMER_PRESCALER = 5
+    rw_DFLT_PULSE_DURATION_us = 6
+    ro_WATCHDOG_TIMEOUT_ms = 7
+    ro_N_EVENTS = 8
+    rw_INTLCK_ENABLED = 9
+
+
 def cu8(value):
     assert value < 2**8, "value exceeds 8 bit"
     return c_uint8(value)
@@ -118,9 +133,7 @@ def get_function_addr():
 
 def get_prescaler():
     c.flushInput()
-    c.write(pad("VER".encode()))
-    r = c.readall().decode()
-    return int(re.findall(r"prescaler=(\d+)", r)[0])
+    return int(get_prop(props.ro_SYS_TIMER_PRESCALER))
 
 
 def us2cts(us, prescaler=0):
@@ -169,6 +182,16 @@ def rst():
 def r():
     return c.readall().decode()
 
+def get_prop(prop=0):
+    if isinstance(prop, Enum):
+        prop = prop.value
+    return w("get", prop).strip()
+
+def set_prop(prop, value):
+    if isinstance(prop, Enum):
+        prop = prop.value
+    return w("set", prop, value).strip()
+
 
 # here "lasers" is a list with Arduino pin names, like ["A1", "A2"] for Cy3, Cy5
 def run_ALEX(
@@ -205,7 +228,7 @@ def run_ALEX(
         # camera
         b += w_buf(
             "PPL",
-            arg1="D12",
+            arg1="A12",
             arg2=exposure_time,
             ts=start_ts + offset + shutter_delay,
             N=N_bursts,
@@ -231,5 +254,5 @@ def a():
     c.write(m + w_buf("go!"))
 
 
-c = serial.Serial("COM3", baudrate=115200, timeout=0.01)
+c = serial.Serial("COM4", baudrate=115200, timeout=0.01)
 

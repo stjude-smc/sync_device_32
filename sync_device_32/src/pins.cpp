@@ -7,6 +7,7 @@
 
 #include "pins.h"
 #include "strings.h"
+#include "interlock.h"
 
 Pin pins[107];
 
@@ -144,9 +145,21 @@ void init_pins()
 	// Assign indices to pins
 	for (uint32_t i = 0; i < sizeof(pins)/sizeof(Pin); i++)
 	{
-		Pin * p = &pins[i];
-		p->pin_idx = i;
-		p->set_level(false);
+		switch (i){
+			// exclude special pins
+			case INTLCK_OUT:
+			break;
+			case INTLCK_IN:
+				ioport_set_pin_mode(INTLCK_IN, IOPORT_MODE_PULLUP);
+				ioport_set_pin_dir(INTLCK_IN, IOPORT_DIR_INPUT);
+			break;
+			
+			// all other pins are initialized as output
+			default:
+				Pin * p = &pins[i];
+				p->pin_idx = i;
+				p->set_level(false);
+		}
 	}
 }
 
@@ -155,7 +168,23 @@ void Pin::set_level(bool level)
 {
 	ioport_set_pin_dir(this->pin_idx, IOPORT_DIR_OUTPUT);
 	this->level = level;
-	ioport_set_pin_level(this->pin_idx, this->active * level);
+	switch (this->pin_idx)
+	{
+		case CY2_PIN:
+		case CY3_PIN:
+		case CY5_PIN:
+		case CY7_PIN:
+			ioport_set_pin_level(this->pin_idx, lasers_enabled * this->active * level);
+			break;
+		default:
+			ioport_set_pin_level(this->pin_idx, this->active * level);
+	}
+	
+}
+
+void Pin::update()
+{
+	this->set_level(this->level);
 }
 
 void Pin::toggle()
@@ -176,4 +205,9 @@ void Pin::disable()
 {
 	this->active = false;
 	this->set_level(this->level);
+}
+
+bool Pin::is_active()
+{
+	return this->active;
 }
