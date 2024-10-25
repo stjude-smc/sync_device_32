@@ -39,6 +39,7 @@ public:
 	void toggle();
 	void enable();
 	void disable();
+	bool is_active();
 };
 
 extern Pin pins[107];

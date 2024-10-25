@@ -6,9 +6,18 @@
  */ 
 
 #include "interlock.h"
+#include "globals.h"
+#include "pins.h"
 
 volatile bool intlck_match_1 = false;
 volatile bool intlck_match_2 = false;
+volatile bool lasers_enabled = true;
+
+volatile bool cy2_active = true;
+volatile bool cy3_active = true;
+volatile bool cy5_active = true;
+volatile bool cy7_active = true;
+
 
 void _init_interlock_timer()
 {
@@ -33,16 +42,16 @@ void _init_interlock_timer()
 
 #ifdef INTLCK_TIOA
     tc_write_ra(INTLCK_TC, INTLCK_TC_CH, us2cts(INTLCK_TC_PERIOD_US >> 4));
-	tc_enable_interrupt(INTLCK_TC, INTLCK_TC_CH, TC_IER_CPAS);
+    tc_enable_interrupt(INTLCK_TC, INTLCK_TC_CH, TC_IER_CPAS);
 #else
     tc_write_rb(INTLCK_TC, INTLCK_TC_CH, us2cts(INTLCK_TC_PERIOD_US >> 4));
-	tc_enable_interrupt(INTLCK_TC, INTLCK_TC_CH, TC_IER_CPBS);
+    tc_enable_interrupt(INTLCK_TC, INTLCK_TC_CH, TC_IER_CPBS);
 #endif
     tc_write_rc(INTLCK_TC, INTLCK_TC_CH, us2cts(INTLCK_TC_PERIOD_US));
-	tc_enable_interrupt(INTLCK_TC, INTLCK_TC_CH, TC_IER_CPCS);
-	
-	NVIC_EnableIRQ(INTLCK_TC_IRQn);
-	NVIC_SetPriority(INTLCK_TC_IRQn, 3); // The highest priority is 0 (reserved for watchdog)
+    tc_enable_interrupt(INTLCK_TC, INTLCK_TC_CH, TC_IER_CPCS);
+    
+    NVIC_EnableIRQ(INTLCK_TC_IRQn);
+    NVIC_SetPriority(INTLCK_TC_IRQn, 3); // The highest priority is 0 (reserved for watchdog)
 }
 
 
@@ -59,29 +68,78 @@ void init_interlock()
 }
 
 
+void enable_lasers()
+{
+    // Correctly map pins
+    pins[CY2_PIN].pin_idx = CY2_PIN;
+    pins[CY3_PIN].pin_idx = CY3_PIN;
+    pins[CY5_PIN].pin_idx = CY5_PIN;
+    pins[CY7_PIN].pin_idx = CY7_PIN;
+
+    // Enable pins
+	if (cy2_active) {pins[CY2_PIN].enable();} else {pins[CY2_PIN].disable();}
+	if (cy3_active) {pins[CY3_PIN].enable();} else {pins[CY3_PIN].disable();}
+	if (cy5_active) {pins[CY5_PIN].enable();} else {pins[CY5_PIN].disable();}
+	if (cy7_active) {pins[CY7_PIN].enable();} else {pins[CY7_PIN].disable();}
+		
+	lasers_enabled = true;
+}
+
+
+void disable_lasers()
+{
+    // Remember the state of pins
+    cy2_active = pins[CY2_PIN].is_active();
+    cy3_active = pins[CY3_PIN].is_active();
+    cy5_active = pins[CY5_PIN].is_active();
+    cy7_active = pins[CY7_PIN].is_active();
+
+    // Disable all pins
+    pins[CY2_PIN].disable();
+    pins[CY3_PIN].disable();
+    pins[CY5_PIN].disable();
+    pins[CY7_PIN].disable();
+
+    // Remap pins to PIO_PC30_IDX pin that is not wired
+    // on Arduino Due. This prevents their activation
+    pins[CY2_PIN].pin_idx = PIO_PC30_IDX;
+    pins[CY3_PIN].pin_idx = PIO_PC30_IDX;
+    pins[CY5_PIN].pin_idx = PIO_PC30_IDX;
+    pins[CY7_PIN].pin_idx = PIO_PC30_IDX;
+	
+	lasers_enabled = false;
+}
+
+
 void INTLCK_TC_Handler()
 {
     // Read Timer Counter Status to clear the interrupt flag
     uint32_t status = tc_get_status(INTLCK_TC, INTLCK_TC_CH);
     
     // RA or RB match - output went from high to low
-	if ((status & TC_SR_CPAS) || (status & TC_SR_CPBS)) {
-		intlck_match_1 = ioport_get_pin_level(INTLCK_IN) == 0;
-	}
+    if ((status & TC_SR_CPAS) || (status & TC_SR_CPBS)) {
+        intlck_match_1 = ioport_get_pin_level(INTLCK_IN) == 0;
+    }
 
-	// RC match - output went from low to high
-	if (status & TC_SR_CPCS) {
-		intlck_match_2 = ioport_get_pin_level(INTLCK_IN) == 1;
-	}
-	
-	// Check if both conditions match
-	if (intlck_match_1 && intlck_match_2)
-	{
-		pins[CY2_PIN].set_level(0);
-	}
-	else
-	{
-		pins[CY2_PIN].set_level(1);
-	}
+    // RC match - output went from low to high
+    if (status & TC_SR_CPCS) {
+        intlck_match_2 = ioport_get_pin_level(INTLCK_IN) == 1;
+    }
+    
+    // Check if both conditions match
+    if (intlck_match_1 && intlck_match_2)
+    {
+		if (!lasers_enabled)
+		{
+			enable_lasers();
+		}
+    }
+    else
+    {
+		if (lasers_enabled)
+		{
+			disable_lasers();
+		}
+    }
 }
 

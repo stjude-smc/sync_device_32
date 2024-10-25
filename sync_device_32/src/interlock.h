@@ -7,6 +7,4 @@
 
 #pragma once
 
-#include "globals.h"
-
 void init_interlock();

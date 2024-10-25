@@ -205,7 +205,7 @@ def run_ALEX(
         # camera
         b += w_buf(
             "PPL",
-            arg1="D12",
+            arg1="D2",
             arg2=exposure_time,
             ts=start_ts + offset + shutter_delay,
             N=N_bursts,
@@ -231,5 +231,5 @@ def a():
     c.write(m + w_buf("go!"))
 
 
-c = serial.Serial("COM3", baudrate=115200, timeout=0.01)
+c = serial.Serial("COM4", baudrate=115200, timeout=0.01)
 

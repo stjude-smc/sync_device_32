@@ -189,3 +189,8 @@ void Pin::disable()
 	this->active = false;
 	this->set_level(this->level);
 }
+
+bool Pin::is_active()
+{
+	return this->active;
+}
