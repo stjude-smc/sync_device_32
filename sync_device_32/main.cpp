@@ -15,7 +15,7 @@ extern "C" {
 #include "uart_comm.h"
 #include "events.h"
 #include "interlock.h"
-
+#include "props.h"
 
 
 void activate_watchdog(void) {
@@ -86,6 +86,8 @@ int main() {
 	init_pins();	
 	init_sys_timer();
 	init_burst_timer();
+	
+	init_props();
 	
 	init_interlock();
 	
