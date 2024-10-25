@@ -66,6 +66,11 @@ void InternalProperty::print_value() const
 	printf("%lu\n", value);
 }
 
+uint32_t InternalProperty::get_value() const
+{
+	return value;
+}
+
 void InternalProperty::set_value(uint32_t newValue)
 {
 	if (access == PropertyAccess::ReadOnly) {
@@ -80,6 +85,11 @@ void ExternalProperty::print_value() const
 	printf("%lu\n", *externalValue);
 }
 
+uint32_t ExternalProperty::get_value() const
+{
+	return *externalValue;
+}
+
 void ExternalProperty::set_value(uint32_t newValue)
 {
     if (access == PropertyAccess::ReadOnly) {
@@ -92,6 +102,12 @@ void ExternalProperty::set_value(uint32_t newValue)
 void FunctionProperty::print_value() const 
 {
 	this->valueFunction();
+}
+
+uint32_t FunctionProperty::get_value() const
+{
+	printf("ERR: don't call `get_value()` function in FunctionProperty class!\n");
+	return 0;
 }
 
 void FunctionProperty::set_value(uint32_t)

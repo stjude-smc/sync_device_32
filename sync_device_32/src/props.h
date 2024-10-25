@@ -30,6 +30,7 @@ class DeviceProperty {
 public:
     virtual ~DeviceProperty() = default;
     virtual void print_value() const = 0;
+	virtual uint32_t get_value() const = 0;
     virtual void set_value(uint32_t newValue) = 0;
 };
 
@@ -45,7 +46,7 @@ public:
         : value(value), access(access) {}
 
     void print_value() const override;
-
+	uint32_t get_value() const override;
     void set_value(uint32_t newValue) override;
 };
 
@@ -61,7 +62,7 @@ public:
         : externalValue(externalValue), access(access) {}
 
     void print_value() const override;
-
+	uint32_t get_value() const override;
     void set_value(uint32_t newValue) override;
 };
 
@@ -75,7 +76,7 @@ public:
         : valueFunction(func) {}
 
     void print_value() const override;
-
+	uint32_t get_value() const override;
     void set_value(uint32_t) override;
 };
 
