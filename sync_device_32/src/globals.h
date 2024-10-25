@@ -57,13 +57,21 @@ inline void dbg_pin_dn(){
 
 
 // Interlock configuration (see datasheet table 36-4)
-#define INTLCK_OUT        PIO_PB27_IDX  // D13, TIOB0  (TC0, channel 0)
-#define INTLCK_OUT_PERIPH IOPORT_MODE_MUX_B
-#define ID_INTLCK_TC      ID_TC0
-#define INTLCK_TC         TC0	// ID / 3
-#define INTLCK_TC_CH      0		// ID % 3
-#define INTLCK_IN		  PIO_PD8_IDX   // D12
-
+#define INTLCK_IN		      PIO_PD8_IDX   // D12
+#define INTLCK_TIOB
+#ifdef INTLCK_TIOA
+	#define INTLCK_OUT        PIO_PB25_IDX  //  D2, TIOA0  (TC0, channel 0)
+	#define INTLCK_OUT_PERIPH IOPORT_MODE_MUX_B
+#else
+	#define INTLCK_OUT        PIO_PB27_IDX  // D13, TIOB0  (TC0, channel 0)
+	#define INTLCK_OUT_PERIPH IOPORT_MODE_MUX_B
+#endif
+#define ID_INTLCK_TC          ID_TC0
+#define INTLCK_TC             TC0	// ID / 3
+#define INTLCK_TC_CH          0		// ID % 3
+#define INTLCK_TC_Handler     TC0_Handler
+#define INTLCK_TC_IRQn		  TC0_IRQn
+#define INTLCK_TC_PERIOD_US	  25000UL
 
 /************************************************************************/
 /*                    UART AND DMA CONFIGURATION                        */
