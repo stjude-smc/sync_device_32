@@ -18,6 +18,7 @@ volatile bool cy3_active = true;
 volatile bool cy5_active = true;
 volatile bool cy7_active = true;
 
+bool interlock_enabled = true;
 
 void _init_interlock_timer()
 {
@@ -107,20 +108,31 @@ void INTLCK_TC_Handler()
         intlck_match_2 = ioport_get_pin_level(INTLCK_IN) == 1;
     }
     
-    // Check if both conditions match
-    if (intlck_match_1 && intlck_match_2)
-    {
+	if (interlock_enabled)
+	{
+		// Check if both conditions match
+		if (intlck_match_1 && intlck_match_2)
+		{
+			if (!lasers_enabled)
+			{
+				enable_lasers();
+			}
+		}
+		else
+		{
+			if (lasers_enabled)
+			{
+				disable_lasers();
+			}
+		}
+	}
+	else
+	{
+		// ignore interlock status, enable the lasers
 		if (!lasers_enabled)
 		{
 			enable_lasers();
 		}
-    }
-    else
-    {
-		if (lasers_enabled)
-		{
-			disable_lasers();
-		}
-    }
+	}
 }
 

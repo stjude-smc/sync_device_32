@@ -10,3 +10,4 @@
 void init_interlock();
 
 extern volatile bool lasers_enabled;
+extern bool interlock_enabled;

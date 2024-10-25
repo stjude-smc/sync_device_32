@@ -10,6 +10,9 @@
 #include <unordered_map>
 
 #include "props.h"
+#include "uart_comm.h"
+#include "events.h"
+#include "interlock.h"
 
 // Global map to store properties by their ID
 std::unordered_map<SysProps, DeviceProperty*> props;
@@ -23,16 +26,16 @@ void print_N_events(){printf("%u\n", event_queue.size());}
 
 
 void init_props() {
-	props[prop_VERSION]                = new FunctionProperty(print_version);
-	props[prop_SYS_TIMER_STATUS]       = new ExternalProperty((uint32_t*) &sys_timer_running);
-	props[prop_SYS_TIMER_VALUE]        = new FunctionProperty(print_timer_cv);
-	props[prop_SYS_TIMER_OVF_COUNT]    = new FunctionProperty(print_sys_tc_ovf);
-	props[prop_SYS_TIME_s]             = new FunctionProperty(print_time_s);
-	props[prop_SYS_TIMER_PRESCALER]    = new InternalProperty((uint32_t) SYS_TC_PRESCALER);
-	props[prop_DFLT_PULSE_DURATION_us] = new InternalProperty((uint32_t) DFLT_PULSE_DURATION);
-	props[prop_WATCHDOG_TIMEOUT_ms]    = new InternalProperty((uint32_t) WATCHDOG_TIMEOUT);
-	props[prop_N_EVENTS]               = new FunctionProperty(print_N_events);
-	props[prop_INTLCK_ACTIVE]          = new InternalProperty(1, PropertyAccess::ReadWrite);
+	props[ro_VERSION]                = new FunctionProperty(print_version);
+	props[ro_SYS_TIMER_STATUS]       = new ExternalProperty((uint32_t*) &sys_timer_running);
+	props[ro_SYS_TIMER_VALUE]        = new FunctionProperty(print_timer_cv);
+	props[ro_SYS_TIMER_OVF_COUNT]    = new FunctionProperty(print_sys_tc_ovf);
+	props[ro_SYS_TIME_s]             = new FunctionProperty(print_time_s);
+	props[ro_SYS_TIMER_PRESCALER]    = new InternalProperty((uint32_t) SYS_TC_PRESCALER);
+	props[ro_DFLT_PULSE_DURATION_us] = new InternalProperty((uint32_t) DFLT_PULSE_DURATION);
+	props[ro_WATCHDOG_TIMEOUT_ms]    = new InternalProperty((uint32_t) WATCHDOG_TIMEOUT);
+	props[ro_N_EVENTS]               = new FunctionProperty(print_N_events);
+	props[rw_INTLCK_ENABLED]         = new ExternalProperty((uint32_t*) &interlock_enabled, PropertyAccess::ReadWrite);
 }
 
 

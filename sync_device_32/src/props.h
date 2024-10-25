@@ -1,21 +1,20 @@
 #pragma once
 
 #include "globals.h"
-#include "uart_comm.h"
-#include "events.h"
+
 
 // System Properties
 enum SysProps {
-	prop_VERSION,
-	prop_SYS_TIMER_STATUS,
-	prop_SYS_TIMER_VALUE,
-	prop_SYS_TIMER_OVF_COUNT,
-	prop_SYS_TIME_s,
-	prop_SYS_TIMER_PRESCALER,
-	prop_DFLT_PULSE_DURATION_us,
-	prop_WATCHDOG_TIMEOUT_ms,
-	prop_N_EVENTS,
-	prop_INTLCK_ACTIVE,
+	ro_VERSION,
+	ro_SYS_TIMER_STATUS,
+	ro_SYS_TIMER_VALUE,
+	ro_SYS_TIMER_OVF_COUNT,
+	ro_SYS_TIME_s,
+	ro_SYS_TIMER_PRESCALER,
+	ro_DFLT_PULSE_DURATION_us,
+	ro_WATCHDOG_TIMEOUT_ms,
+	ro_N_EVENTS,
+	rw_INTLCK_ENABLED,
 };
 
 enum class PropertyAccess {
