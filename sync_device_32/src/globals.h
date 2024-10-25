@@ -16,12 +16,6 @@
 /************************************************************************/
 /*                    PINOUT AND WIRING DEFINITIONS                     */
 /************************************************************************/
-// Camera trigger
-#define CAMERA_PIN	PIO_PB27_IDX	// D13
-
-// Fluidics trigger
-#define FLUIDIC_PIN PIO_PC28_IDX	// D3
-
 // Laser shutters
 #define CY2_PIN		PIO_PA16_IDX	// A0
 #define CY3_PIN		PIO_PA24_IDX	// A1
@@ -107,8 +101,6 @@ inline void dbg_pin_dn(){
 #define TS_TOLERANCE        2UL   // us
 #define TS_MISSED_TOLERANCE 100UL // us - when we decide the event has been missed
 
-// Default pulse duration, us
-#define DFLT_PULSE_DURATION 100UL
 
 /************************************************************************/
 /*    SYSTEM TIMER CONFIGURATION AND TIME CONVERSION FUNCTIONS          */

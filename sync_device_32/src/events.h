@@ -26,6 +26,9 @@
 #include "globals.h"
 #include "uart_comm.h"
 
+// Default pulse duration, us
+extern volatile uint32_t default_pulse_duration_us;
+
 // An event function expects two uint32_t arguments
 using EventFunc = void (*)(uint32_t, uint32_t);
 

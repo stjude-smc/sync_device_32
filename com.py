@@ -205,7 +205,7 @@ def run_ALEX(
         # camera
         b += w_buf(
             "PPL",
-            arg1="D2",
+            arg1="A12",
             arg2=exposure_time,
             ts=start_ts + offset + shutter_delay,
             N=N_bursts,

@@ -32,7 +32,7 @@ void init_props() {
 	props[ro_SYS_TIMER_OVF_COUNT]    = new FunctionProperty(print_sys_tc_ovf);
 	props[ro_SYS_TIME_s]             = new FunctionProperty(print_time_s);
 	props[ro_SYS_TIMER_PRESCALER]    = new InternalProperty((uint32_t) SYS_TC_PRESCALER);
-	props[ro_DFLT_PULSE_DURATION_us] = new InternalProperty((uint32_t) DFLT_PULSE_DURATION);
+	props[rw_DFLT_PULSE_DURATION_us] = new ExternalProperty((uint32_t*) &default_pulse_duration_us, PropertyAccess::ReadWrite);
 	props[ro_WATCHDOG_TIMEOUT_ms]    = new InternalProperty((uint32_t) WATCHDOG_TIMEOUT);
 	props[ro_N_EVENTS]               = new FunctionProperty(print_N_events);
 	props[rw_INTLCK_ENABLED]         = new ExternalProperty((uint32_t*) &interlock_enabled, PropertyAccess::ReadWrite);
