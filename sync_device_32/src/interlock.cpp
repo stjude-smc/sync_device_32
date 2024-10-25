@@ -70,44 +70,25 @@ void init_interlock()
 
 void enable_lasers()
 {
-    // Correctly map pins
-    pins[CY2_PIN].pin_idx = CY2_PIN;
-    pins[CY3_PIN].pin_idx = CY3_PIN;
-    pins[CY5_PIN].pin_idx = CY5_PIN;
-    pins[CY7_PIN].pin_idx = CY7_PIN;
-
-    // Enable pins
-	if (cy2_active) {pins[CY2_PIN].enable();} else {pins[CY2_PIN].disable();}
-	if (cy3_active) {pins[CY3_PIN].enable();} else {pins[CY3_PIN].disable();}
-	if (cy5_active) {pins[CY5_PIN].enable();} else {pins[CY5_PIN].disable();}
-	if (cy7_active) {pins[CY7_PIN].enable();} else {pins[CY7_PIN].disable();}
-		
 	lasers_enabled = true;
+
+    // Update pin state to reflect the interlock state
+    pins[CY2_PIN].update();
+    pins[CY3_PIN].update();
+    pins[CY5_PIN].update();
+    pins[CY7_PIN].update();
 }
 
 
 void disable_lasers()
 {
-    // Remember the state of pins
-    cy2_active = pins[CY2_PIN].is_active();
-    cy3_active = pins[CY3_PIN].is_active();
-    cy5_active = pins[CY5_PIN].is_active();
-    cy7_active = pins[CY7_PIN].is_active();
-
-    // Disable all pins
-    pins[CY2_PIN].disable();
-    pins[CY3_PIN].disable();
-    pins[CY5_PIN].disable();
-    pins[CY7_PIN].disable();
-
-    // Remap pins to PIO_PC30_IDX pin that is not wired
-    // on Arduino Due. This prevents their activation
-    pins[CY2_PIN].pin_idx = PIO_PC30_IDX;
-    pins[CY3_PIN].pin_idx = PIO_PC30_IDX;
-    pins[CY5_PIN].pin_idx = PIO_PC30_IDX;
-    pins[CY7_PIN].pin_idx = PIO_PC30_IDX;
-	
 	lasers_enabled = false;
+
+    // Update pin state to reflect the interlock state
+    pins[CY2_PIN].update();
+    pins[CY3_PIN].update();
+    pins[CY5_PIN].update();
+    pins[CY7_PIN].update();
 }
 
 

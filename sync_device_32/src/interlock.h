@@ -8,3 +8,5 @@
 #pragma once
 
 void init_interlock();
+
+extern volatile bool lasers_enabled;

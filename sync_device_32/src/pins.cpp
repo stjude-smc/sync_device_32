@@ -7,6 +7,7 @@
 
 #include "pins.h"
 #include "strings.h"
+#include "interlock.h"
 
 Pin pins[107];
 
@@ -167,7 +168,23 @@ void Pin::set_level(bool level)
 {
 	ioport_set_pin_dir(this->pin_idx, IOPORT_DIR_OUTPUT);
 	this->level = level;
-	ioport_set_pin_level(this->pin_idx, this->active * level);
+	switch (this->pin_idx)
+	{
+		case CY2_PIN:
+		case CY3_PIN:
+		case CY5_PIN:
+		case CY7_PIN:
+			ioport_set_pin_level(this->pin_idx, lasers_enabled * this->active * level);
+			break;
+		default:
+			ioport_set_pin_level(this->pin_idx, this->active * level);
+	}
+	
+}
+
+void Pin::update()
+{
+	this->set_level(this->level);
 }
 
 void Pin::toggle()

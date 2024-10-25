@@ -36,6 +36,7 @@ public:
 	Pin() : level(false), active(true) {};
 	
 	void set_level(bool level);
+	void update();
 	void toggle();
 	void enable();
 	void disable();
