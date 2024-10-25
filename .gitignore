@@ -3,6 +3,7 @@ Debug/
 Release/
 obj/
 bin/
+build/
 
 # Ignore generated files from the build process
 *.elf
@@ -44,7 +45,6 @@ project.xml
 Thumbs.db
 
 # Ignore other unnecessary files
-*.pdf
 *.doc
 *.xls
 *.ppt
@@ -53,3 +53,19 @@ Thumbs.db
 *.gz
 *.rar
 *.7z
+
+# Jupyter notebook
+*-checkpoint.py
+*-checkpoint.ipynb
+.ipynb_checkpoints/
+
+__pycache__/
+
+# IDE
+.idea/
+
+# MS Office
+~$*.xlsx
+~$*.pptx
+~$*.docx
+

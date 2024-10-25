@@ -93,14 +93,14 @@
 // From module: TC - Timer Counter
 #include <tc.h>
 
+// From module: TRNG - True Random Number Generator Register
+#include <trng.h>
+
 // From module: UART - Univ. Async Rec/Trans
 #include <uart.h>
 
-// From module: USART - Serial interface - SAM implementation for devices with both UART and USART
-#include <serial.h>
-
-// From module: USART - Univ. Syn Async Rec/Trans
-#include <usart.h>
+// From module: WDT - Watchdog Timer
+#include <wdt.h>
 
 // From module: pio_handler support enabled
 #include <pio_handler.h>
