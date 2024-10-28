@@ -189,10 +189,8 @@ void Pin::update()
 
 void Pin::toggle()
 {
-	ioport_set_pin_dir(this->pin_idx, IOPORT_DIR_OUTPUT);
-
 	this->level = !this->level;	
-	ioport_set_pin_level(this->pin_idx, this->active * level);
+	this->set_level(this->level);
 }
 
 void Pin::enable()
