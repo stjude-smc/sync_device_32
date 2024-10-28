@@ -87,7 +87,7 @@ inline void dbg_pin_dn(){
 #define WATCHDOG_TIMEOUT  100UL  // ms
 
 // Maximum allowed number of events in the event table
-#define MAX_N_EVENTS	1024UL
+#define MAX_N_EVENTS	450UL
 
 // Uniform time delay added to every single scheduled event, us
 // It should be long enough to ensure correct event processing
