@@ -181,40 +181,13 @@ void _init_UART_TC(void)
 // This takes about 280-360 us
 void _parse_UART_command(const DataPacket *data)
 {
-	if (strncasecmp(data->cmd, "VER", 3) == 0)
-	{
-		printf("SYNC DEVICE v%s\n", VERSION);
-		printf("System timer prescaler=%lu (1ct=%luns)\n", SYS_TC_PRESCALER, (uint32_t) cts2us(1000));
-		printf("Watchdog interval: %lu us \n", wdt_get_us_timeout_period(WDT, BOARD_FREQ_SLCK_XTAL));
-
-	}
-	else if (strncasecmp(data->cmd, "GO!", 3) == 0)
-	{
-		start_sys_timer();
-	}
-	else if (strncasecmp(data->cmd, "RST", 3) == 0)
-	{
-		init_pins();
-		RSTC->RSTC_CR = RSTC_KEY | RSTC_CR_PROCRST;  // processor reset
-	}
-	else if (strncasecmp(data->cmd, "STP", 3) == 0)  // delete event queue, set all pins low, and stop system timer
-	{
-		stop_burst_func(0, 0);
-		stop_sys_timer();
-		std::priority_queue<Event>().swap(event_queue);
-		
-		init_pins();
-	}
-	else if (strncasecmp(data->cmd, "CLR", 3) == 0)  // delete event queue, set all pins low
-	{
-		stop_burst_func(0, 0);
-		std::priority_queue<Event>().swap(event_queue);
-		
-		init_pins();
-	}
-	else if (strncasecmp(data->cmd, "PIN", 3) == 0)
+	if (strncasecmp(data->cmd, "PIN", 3) == 0)
 	{
 		schedule_pin(data);
+	}
+	else if (strncasecmp(data->cmd, "TGL", 3) == 0)
+	{
+		schedule_toggle(data);
 	}
 	else if (strncasecmp(data->cmd, "PPL", 3) == 0)
 	{
@@ -228,10 +201,6 @@ void _parse_UART_command(const DataPacket *data)
 	{
 		schedule_burst(data);
 	}
-	else if (strncasecmp(data->cmd, "TGL", 3) == 0)
-	{
-		schedule_toggle(data);
-	}
 	else if (strncasecmp(data->cmd, "ENP", 3) == 0)
 	{
 		schedule_enable_pin(data);
@@ -239,6 +208,31 @@ void _parse_UART_command(const DataPacket *data)
 	else if (strncasecmp(data->cmd, "DSP", 3) == 0)
 	{
 		schedule_disable_pin(data);
+	}
+	else if (strncasecmp(data->cmd, "GO!", 3) == 0)
+	{
+		start_sys_timer();
+	}
+	else if (strncasecmp(data->cmd, "STP", 3) == 0)
+	{
+		// delete event queue, set all pins low, and stop system timer
+		stop_burst_func(0, 0);
+		stop_sys_timer();
+		std::priority_queue<Event>().swap(event_queue);
+			
+		init_pins();
+	}
+	else if (strncasecmp(data->cmd, "CLR", 3) == 0)  // delete event queue, set all pins low
+	{
+		stop_burst_func(0, 0);
+		std::priority_queue<Event>().swap(event_queue);
+		
+		init_pins();
+	}
+	else if (strncasecmp(data->cmd, "RST", 3) == 0)
+	{
+		init_pins();
+		RSTC->RSTC_CR = RSTC_KEY | RSTC_CR_PROCRST;  // processor reset
 	}
 	else if (strncasecmp(data->cmd, "GET", 3) == 0)
 	{
@@ -250,15 +244,11 @@ void _parse_UART_command(const DataPacket *data)
 	}
 	else if (strncasecmp(data->cmd, "STA", 3) == 0)
 	{
+		printf("SYNC DEVICE v%s\n", VERSION);
 		printf("-- SYSTEM STATUS --\n");
 		printf("Event queue size: %lu\n", (uint32_t) event_queue.size());
 		printf("System counter is %s\n", sys_timer_running ? "RUNNING" : "STOPPED");
-		printf("Counter value:  %lu cts, OVF = %lu\n", SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV, (uint32_t) (sys_tc_ovf_count >> 32));
 		printf("System time: %f s\n", current_time_s());
-	}
-	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
-	{
-		_send_event_queue();
 	}
 	else if (strncasecmp(data->cmd, "FUN", 3) == 0)
 	{
@@ -269,9 +259,13 @@ void _parse_UART_command(const DataPacket *data)
 		printf("%lu EN__PIN\n", (uint32_t) &enable_pin_func);
 		printf("%lu DIS_PIN\n", (uint32_t) &disable_pin_func);
 	}
+	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
+	{
+		_send_event_queue();
+	}
 	else
 	{
-		printf("ERR: unknown command %.3s\n", data->cmd);
+		printf("ERR: unknown command '%.3s'\n", data->cmd);
 	}
 }
 
