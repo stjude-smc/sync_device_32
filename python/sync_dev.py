@@ -1,4 +1,3 @@
-#from rev_pin_map import rev_pin_map
 from __version__ import __version__
 from constants import ms, MHz, UNIFORM_TIME_DELAY
 from ctypes import c_int32
@@ -6,6 +5,7 @@ from ctypes import c_uint16
 from ctypes import c_uint32
 from ctypes import c_uint8
 from enum import Enum
+from rev_pin_map import rev_pin_map
 from serial import Serial, SerialException
 import ctypes
 import datetime
@@ -177,7 +177,7 @@ class Event:
     def __repr__(self):
         f = self.func
         arg1 = self.arg1
-        if f in ["PIN", "TGL"]:
+        if f in ["SET_PIN", "TGL_PIN"]:
             arg1 = rev_pin_map[arg1]
         return (f"{f}({arg1:<3}, {self.arg2:<3}) at " 
               + f"t={self.ts:>11}{self.unit}. Call "
@@ -360,7 +360,7 @@ class SyncDevice(object):
 
     @pulse_duration_us.setter
     def pulse_duration_us(self, value):
-        return int(self.set_property(props.rw_DFLT_PULSE_DURATION_us, value))
+        self.set_property(props.rw_DFLT_PULSE_DURATION_us, value)
 
     @property
     def watchdog_timeout_ms(self):
