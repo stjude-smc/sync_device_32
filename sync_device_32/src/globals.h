@@ -10,7 +10,7 @@
 #include "pins.h"
 #endif
 
-#define VERSION "2.1.0"
+#define VERSION "2.2.0"
 
 
 /************************************************************************/
@@ -22,11 +22,7 @@
 #define CY5_PIN		PIO_PA23_IDX	// A2
 #define CY7_PIN		PIO_PA22_IDX	// A3 
 
-#define SHUTTERS_MASK (ioport_pin_to_mask(CY2_PIN) | \
-                       ioport_pin_to_mask(CY3_PIN) | \
-					   ioport_pin_to_mask(CY5_PIN) | \
-					   ioport_pin_to_mask(CY7_PIN))
-#define SHUTTERS_PORT ioport_pin_to_port_id(CY2_PIN)
+const uint32_t shutter_pins[] = { CY2_PIN, CY3_PIN, CY5_PIN, CY7_PIN };
 
 // Error indicator trigger
 #define ERR_PIN		PIO_PB14_IDX	// D53

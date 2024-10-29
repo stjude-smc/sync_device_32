@@ -236,7 +236,14 @@ void _parse_UART_command(const DataPacket *data)
 	}
 	else if (strncasecmp(data->cmd, "GET", 3) == 0)
 	{
-		print_property((SysProps) data->arg1);
+		if (data->arg1 == SysProps::ro_VERSION)
+		{
+			printf("%s\n", VERSION);
+		}
+		else
+		{
+			printf("%lu\n", get_property((SysProps) data->arg1));
+		}
 	}
 	else if (strncasecmp(data->cmd, "SET", 3) == 0)
 	{

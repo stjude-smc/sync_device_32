@@ -99,7 +99,10 @@ class props(Enum):
     ro_WATCHDOG_TIMEOUT_ms = 7
     ro_N_EVENTS = 8
     rw_INTLCK_ENABLED = 9
-
+    # pTIRF extension
+    rw_ENABLED_LASERS = 10
+    wo_OPEN_SHUTTERS = 11
+    wo_CLOSE_SHUTTERS = 12
 
 ####################################################################
 #        LOGGING SERIAL PORT CLASS
@@ -224,7 +227,8 @@ class SyncDevice(object):
                 + f"Expected message:\n{msg_template + __version__}"
             )
 
-        version_match = _compare_versions(self.version, __version__)
+        v = self.version
+        version_match = _compare_versions(v, __version__)
         if not version_match["major"] or not version_match["minor"]:
             raise RuntimeWarning(
                 f"Version mismatch: driver {__version__} != firmware {v}"
@@ -400,4 +404,18 @@ class SyncDevice(object):
             events.append(e)
         return events
 
+    ## pTIRF extension
+    def open_shutters(self, mask=0):
+        self.set_property(props.wo_OPEN_SHUTTERS, mask)
+
+    def close_shutters(self, mask=0):
+        self.set_property(props.wo_CLOSE_SHUTTERS, mask)
+
+    @property
+    def enabled_lasers(self):
+        return int(self.get_property(props.rw_ENABLED_LASERS))
+
+    @enabled_lasers.setter
+    def enabled_lasers(self, mask):
+        self.set_property(props.rw_ENABLED_LASERS, mask)
 
