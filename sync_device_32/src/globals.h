@@ -24,7 +24,7 @@
 
 const uint32_t shutter_pins[] = { CY2_PIN, CY3_PIN, CY5_PIN, CY7_PIN };
 	
-#define CAMERA_PIN  PIO_
+#define CAMERA_PIN  PIO_PB15_IDX    // A12
 
 // Error indicator trigger
 #define ERR_PIN		PIO_PB14_IDX	// D53
