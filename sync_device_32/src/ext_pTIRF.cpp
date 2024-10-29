@@ -7,6 +7,9 @@
 
 #include "ext_pTIRF.h"
 
+/************************************************************************/
+/*                SHORTCUTS FOR SHUTTER CONTROL                         */
+/************************************************************************/
 
 void open_shutters(uint32_t mask)
 {
@@ -65,3 +68,15 @@ uint32_t selected_lasers()
 	}
 	return mask;
 }
+
+
+/************************************************************************/
+/*              SHORTCUTS FOR ACQUISITION MODES                         */
+/************************************************************************/
+
+void start_continuous_acq(const DataPacket* data)
+{
+	// 
+}
+void start_stroboscopic_acq(const DataPacket* data){}
+void start_ALEX_acq(const DataPacket* data){}
