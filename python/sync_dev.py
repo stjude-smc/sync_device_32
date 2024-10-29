@@ -103,6 +103,8 @@ class props(Enum):
     rw_SELECTED_LASERS = 10
     wo_OPEN_SHUTTERS = 11
     wo_CLOSE_SHUTTERS = 12
+    rw_SHUTTER_DELAY_us = 13
+    rw_CAM_READOUT_us = 14
 
 ####################################################################
 #        LOGGING SERIAL PORT CLASS
@@ -418,8 +420,22 @@ class SyncDevice(object):
     def selected_lasers(self):
         return int(self.get_property(props.rw_SELECTED_LASERS))
 
-    @enabled_lasers.setter
+    @selected_lasers.setter
     def selected_lasers(self, mask):
         self.select_lasers(mask)
-        
+    
+    @property
+    def cam_readout_us(self):
+        return int(self.get_property(props.rw_CAM_READOUT_us))
 
+    @cam_readout_us.setter
+    def cam_readout_us(self, value):
+        self.set_property(props.rw_CAM_READOUT_us, value)
+
+    @property
+    def shutter_delay_us(self):
+        return int(self.get_property(props.rw_SHUTTER_DELAY_us))
+
+    @shutter_delay_us.setter
+    def shutter_delay_us(self, value):
+        self.set_property(props.rw_SHUTTER_DELAY_us, value)

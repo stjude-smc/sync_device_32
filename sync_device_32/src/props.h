@@ -19,7 +19,9 @@ enum SysProps {
 	// pTIRF extension
 	rw_SELECTED_LASERS,
 	wo_OPEN_SHUTTERS,
-	wo_CLOSE_SHUTTERS
+	wo_CLOSE_SHUTTERS,
+	rw_SHUTTER_DELAY_us,
+	rw_CAM_READOUT_us
 };
 
 enum class PropertyAccess {

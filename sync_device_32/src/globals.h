@@ -10,7 +10,7 @@
 #include "pins.h"
 #endif
 
-#define VERSION "2.2.0"
+#define VERSION "2.2.1"
 
 
 /************************************************************************/
@@ -23,6 +23,8 @@
 #define CY7_PIN		PIO_PA22_IDX	// A3 
 
 const uint32_t shutter_pins[] = { CY2_PIN, CY3_PIN, CY5_PIN, CY7_PIN };
+	
+#define CAMERA_PIN  PIO_
 
 // Error indicator trigger
 #define ERR_PIN		PIO_PB14_IDX	// D53
