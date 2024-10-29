@@ -100,7 +100,7 @@ class props(Enum):
     ro_N_EVENTS = 8
     rw_INTLCK_ENABLED = 9
     # pTIRF extension
-    rw_ENABLED_LASERS = 10
+    rw_SELECTED_LASERS = 10
     wo_OPEN_SHUTTERS = 11
     wo_CLOSE_SHUTTERS = 12
 
@@ -411,11 +411,15 @@ class SyncDevice(object):
     def close_shutters(self, mask=0):
         self.set_property(props.wo_CLOSE_SHUTTERS, mask)
 
+    def select_lasers(self, mask):
+        self.set_property(props.rw_SELECTED_LASERS, mask)
+
     @property
-    def enabled_lasers(self):
-        return int(self.get_property(props.rw_ENABLED_LASERS))
+    def selected_lasers(self):
+        return int(self.get_property(props.rw_SELECTED_LASERS))
 
     @enabled_lasers.setter
-    def enabled_lasers(self, mask):
-        self.set_property(props.rw_ENABLED_LASERS, mask)
+    def selected_lasers(self, mask):
+        self.select_lasers(mask)
+        
 

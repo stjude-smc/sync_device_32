@@ -13,6 +13,7 @@
 #include "uart_comm.h"
 #include "events.h"
 #include "interlock.h"
+#include "ext_pTIRF.h"
 
 
 // Global map to store properties by their ID
@@ -25,64 +26,6 @@ uint32_t get_N_events(){return (uint32_t) event_queue.size();}
 
 
 
-void open_shutters(uint32_t mask)
-{
-	if (mask == 0)
-	{
-		mask = 0b1111;
-	}
-    for (uint32_t i = 0; i < 4; ++i)
-    {
-	    if (mask & (1 << i))
-	    {
-		    pins[shutter_pins[i]].set_level(true);
-	    }
-    }
-}
-
-void close_shutters(uint32_t mask)
-{
-	if (mask == 0)
-	{
-		mask = 0b1111;
-	}
-    for (uint32_t i = 0; i < 4; ++i)
-    {
-	    if (mask & (1 << i))
-	    {
-		    pins[shutter_pins[i]].set_level(false);
-	    }
-    }
-}
-
-void select_lasers(uint32_t mask)
-{
-	for (uint32_t i = 0; i < 4; ++i)
-	{
-		if (mask & (1 << i))
-		{
-			pins[shutter_pins[i]].enable();
-		}
-		else
-		{
-			pins[shutter_pins[i]].disable();
-		}
-	}
-}
-
-uint32_t selected_lasers()
-{
-	uint32_t mask = 0;
-	for (uint32_t i = 0; i < 4; ++i)
-	{
-		if (pins[shutter_pins[i]].is_active())
-		{
-			mask |= (1 << i);
-		}
-	}
-	return mask;
-}
-
 
 void init_props() {
 	props[ro_SYS_TIMER_STATUS]       = new ExternalProperty((uint32_t*) &sys_timer_running);
@@ -94,8 +37,9 @@ void init_props() {
 	props[ro_WATCHDOG_TIMEOUT_ms]    = new InternalProperty((uint32_t) WATCHDOG_TIMEOUT);
 	props[ro_N_EVENTS]               = new FunctionProperty(get_N_events, nullptr);
 	props[rw_INTLCK_ENABLED]         = new ExternalProperty((uint32_t*) &interlock_enabled, PropertyAccess::ReadWrite);
-	
-	props[rw_ENABLED_LASERS]         = new FunctionProperty(selected_lasers, select_lasers, PropertyAccess::ReadWrite);
+
+	// pTIRF extension
+	props[rw_SELECTED_LASERS]        = new FunctionProperty(selected_lasers, select_lasers, PropertyAccess::ReadWrite);
 	props[wo_OPEN_SHUTTERS]          = new FunctionProperty(nullptr, open_shutters, PropertyAccess::WriteOnly);
 	props[wo_CLOSE_SHUTTERS]         = new FunctionProperty(nullptr, close_shutters, PropertyAccess::WriteOnly);
 }

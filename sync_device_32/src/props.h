@@ -15,8 +15,9 @@ enum SysProps {
 	ro_WATCHDOG_TIMEOUT_ms,
 	ro_N_EVENTS,
 	rw_INTLCK_ENABLED,
+
 	// pTIRF extension
-	rw_ENABLED_LASERS,
+	rw_SELECTED_LASERS,
 	wo_OPEN_SHUTTERS,
 	wo_CLOSE_SHUTTERS
 };

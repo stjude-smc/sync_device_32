@@ -34,7 +34,7 @@ inline void err_led_off(){
 }
 
 // Debug pin
-#define DBG_PIN  PIO_PA7_IDX  // D31
+#define DBG_PIN  PIO_PA7_IDX        // D31
 inline void dbg_pin_up(){
 	ioport_set_pin_level(DBG_PIN, 1);
 }
