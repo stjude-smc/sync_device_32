@@ -87,19 +87,15 @@ void close_shutters_func(uint32_t mask, uint32_t){close_shutters(mask);}
 // interval - ignored
 void start_continuous_acq(const DataPacket* data)
 {
-	Event* event_p = event_from_datapacket(data, open_shutters_func);
 	uint32_t exp_time_cts = us2cts(data->arg1);
-	uint32_t now_cts = 0;
+	uint32_t now_cts = (sys_timer_running) ? current_time_cts() : 0;
 	uint32_t ts_cts = us2cts(data->ts_us);
 	uint32_t cam_readout_cts = us2cts(get_property(rw_CAM_READOUT_us));
 	uint32_t shutter_delay_cts = us2cts(get_property(rw_SHUTTER_DELAY_us));
 	uint32_t pulse_dur_cts = us2cts(default_pulse_duration_us);
 
 	// Schedule shutters
-	if (sys_timer_running)
-	{
-		now_cts = current_time_cts();
-	}
+	Event* event_p = event_from_datapacket(data, open_shutters_func);
 	event_p->ts64_cts += now_cts + cam_readout_cts - shutter_delay_cts;
 	event_p->N = 1;
 	event_p->arg1 = selected_lasers();
@@ -134,10 +130,49 @@ void start_continuous_acq(const DataPacket* data)
 	delete event_p;
 }
 
-
+// arg1 - exposure_time_us
+// arg2 - ignored
+// ts - when to start imaging (if not now)
+// N - number of frames
+// interval - frame period
 void start_stroboscopic_acq(const DataPacket* data)
 {
+	uint32_t exp_time_cts = us2cts(data->arg1);
+	uint32_t now_cts = (sys_timer_running) ? current_time_cts() : 0;
+	uint32_t ts_cts = us2cts(data->ts_us);
+	uint32_t cam_readout_cts = us2cts(get_property(rw_CAM_READOUT_us));
+	uint32_t shutter_delay_cts = us2cts(get_property(rw_SHUTTER_DELAY_us));
+	uint32_t frame_period = us2cts(data->interv_us);
+	
+	// make sure frame period isn't too short
+	frame_period = std::max(exp_time_cts + cam_readout_cts + shutter_delay_cts, frame_period);
 
+	Event* event_p = event_from_datapacket(data, open_shutters_func);
+	event_p->interv_cts = frame_period;
+	event_p->N = data->N;
+	// Schedule shutters
+	event_p->ts64_cts += now_cts;
+	event_p->arg1 = selected_lasers();
+	schedule_event(event_p, false); // open
+	
+	event_p->func = close_shutters_func;
+	event_p->ts64_cts += exp_time_cts;
+	schedule_event(event_p, false); // close
+
+
+	// Schedule pulse train for the camera
+	//  TODO - do we need a dummy read?
+	event_p->func = set_pin_event_func;
+	event_p->arg1 = pin_name_to_ioport_id("A12");
+	event_p->arg2 = 1;
+	event_p->ts64_cts = ts_cts + now_cts + shutter_delay_cts;
+	schedule_event(event_p, false); // front
+
+	event_p->arg2 = 0;
+	event_p->ts64_cts += exp_time_cts;
+	schedule_event(event_p, false); // back
+	
+	delete event_p;
 }
 
 void start_ALEX_acq(const DataPacket* data){}

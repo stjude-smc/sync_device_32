@@ -275,6 +275,14 @@ void _parse_UART_command(const DataPacket *data)
 	{
 		start_continuous_acq(data);
 	}
+	else if (strncasecmp(data->cmd, "STR", 3) == 0)
+	{
+		start_stroboscopic_acq(data);
+	}
+	else if (strncasecmp(data->cmd, "ALX", 3) == 0)
+	{
+		start_ALEX_acq(data);
+	}
 	else
 	{
 		printf("ERR: unknown command '%.3s'\n", data->cmd);
