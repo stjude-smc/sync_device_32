@@ -413,16 +413,13 @@ class SyncDevice(object):
     def close_shutters(self, mask=0):
         self.set_property(props.wo_CLOSE_SHUTTERS, mask)
 
-    def select_lasers(self, mask):
-        self.set_property(props.rw_SELECTED_LASERS, mask)
-
     @property
     def selected_lasers(self):
         return int(self.get_property(props.rw_SELECTED_LASERS))
 
     @selected_lasers.setter
     def selected_lasers(self, mask):
-        self.select_lasers(mask)
+        self.set_property(props.rw_SELECTED_LASERS, mask)
     
     @property
     def cam_readout_us(self):
@@ -439,3 +436,21 @@ class SyncDevice(object):
     @shutter_delay_us.setter
     def shutter_delay_us(self, value):
         self.set_property(props.rw_SHUTTER_DELAY_us, value)
+
+    def start_continuous_acq(self, exp_time, N_frames, ts=0):
+        self.write("CON", arg1=exp_time, ts=ts, N=N_frames)
+
+    def start_stroboscopic_acq(self, exp_time, N_frames, ts=0, frame_period=0):
+        self.write("STR", arg1=exp_time, ts=ts, N=N_frames, interval=frame_period)
+
+    def start_ALEX_acq(self, exp_time, N_bursts, ts=0, burst_period=0):
+        self.write("ALX", arg1=exp_time, ts=ts, N=N_bursts, interval=burst_period)
+
+    def N_frames_left(self):
+        """ Return number of frames left, if acquisition is running """
+        events = self.get_events()
+        if events:
+            for event in events:
+                if rev_pin_map[event.arg1] == "A12":
+                    return event.N
+        return 0
