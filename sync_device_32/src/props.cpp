@@ -13,42 +13,50 @@
 #include "uart_comm.h"
 #include "events.h"
 #include "interlock.h"
+#include "ext_pTIRF.h"
+
 
 // Global map to store properties by their ID
 std::unordered_map<SysProps, DeviceProperty*> props;
 
 
-void print_version(){printf("%s\n", VERSION);}
-void print_timer_cv(){printf("%lu\n", SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV);}
-void print_sys_tc_ovf(){printf("%lu\n", (uint32_t) (sys_tc_ovf_count >> 32));}
-void print_time_s(){printf("%f\n", current_time_s());}
-void print_N_events(){printf("%u\n", event_queue.size());}
+uint32_t get_sys_tc_ovf(){return (uint32_t) (sys_tc_ovf_count >> 32);}
+uint32_t get_time_ms(){return (uint32_t) (cts2us(current_time_cts()) / 1000);}
+uint32_t get_N_events(){return (uint32_t) event_queue.size();}
+
+
 
 
 void init_props() {
-	props[ro_VERSION]                = new FunctionProperty(print_version);
 	props[ro_SYS_TIMER_STATUS]       = new ExternalProperty((uint32_t*) &sys_timer_running);
-	props[ro_SYS_TIMER_VALUE]        = new FunctionProperty(print_timer_cv);
-	props[ro_SYS_TIMER_OVF_COUNT]    = new FunctionProperty(print_sys_tc_ovf);
-	props[ro_SYS_TIME_s]             = new FunctionProperty(print_time_s);
+	props[ro_SYS_TIMER_VALUE]        = new ExternalProperty((uint32_t*) &(SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV));
+	props[ro_SYS_TIMER_OVF_COUNT]    = new FunctionProperty(get_sys_tc_ovf, nullptr);
+	props[ro_SYS_TIME_ms]            = new FunctionProperty(get_time_ms, nullptr);
 	props[ro_SYS_TIMER_PRESCALER]    = new InternalProperty((uint32_t) SYS_TC_PRESCALER);
 	props[rw_DFLT_PULSE_DURATION_us] = new ExternalProperty((uint32_t*) &default_pulse_duration_us, PropertyAccess::ReadWrite);
 	props[ro_WATCHDOG_TIMEOUT_ms]    = new InternalProperty((uint32_t) WATCHDOG_TIMEOUT);
-	props[ro_N_EVENTS]               = new FunctionProperty(print_N_events);
+	props[ro_N_EVENTS]               = new FunctionProperty(get_N_events, nullptr);
 	props[rw_INTLCK_ENABLED]         = new ExternalProperty((uint32_t*) &interlock_enabled, PropertyAccess::ReadWrite);
+
+	// pTIRF extension
+	props[rw_SELECTED_LASERS]        = new FunctionProperty(selected_lasers, select_lasers, PropertyAccess::ReadWrite);
+	props[wo_OPEN_SHUTTERS]          = new FunctionProperty(nullptr, open_shutters, PropertyAccess::WriteOnly);
+	props[wo_CLOSE_SHUTTERS]         = new FunctionProperty(nullptr, close_shutters, PropertyAccess::WriteOnly);
+	props[rw_SHUTTER_DELAY_us]       = new InternalProperty(1000UL, PropertyAccess::ReadWrite);
+	props[rw_CAM_READOUT_us]         = new InternalProperty(12000UL, PropertyAccess::ReadWrite);
 }
 
 
 
-void print_property(SysProps id)
+uint32_t get_property(SysProps id)
 {
 	auto iterator = props.find(id);
 	if (iterator == props.end())
 	{
 		printf("ERR: Property not found (ID: %d)\n", id);
-		return;
+		return 0;
 	}
-	iterator->second->print_value();
+	return iterator->second->get_value();
 }
 
 
@@ -63,57 +71,98 @@ void set_property(SysProps id, uint32_t value)
 }
 
 
-
-void InternalProperty::print_value() const 
+// InternalProperty methods
+InternalProperty::InternalProperty(uint32_t value, PropertyAccess access)
+: DeviceProperty(access), value(value)
 {
-	printf("%lu\n", value);
 }
 
 uint32_t InternalProperty::get_value() const
 {
-	return value;
-}
-
-void InternalProperty::set_value(uint32_t newValue)
-{
-	if (access == PropertyAccess::ReadOnly) {
-		std::printf("ERR: read-only property\n");
-		return;
+	if (access == PropertyAccess::ReadOnly || access == PropertyAccess::ReadWrite)
+	{
+		return value;
 	}
-	value = newValue;
+	else
+	{
+		printf("ERR: property is WriteOnly\n");
+		return 0;
+	}
 }
 
-void ExternalProperty::print_value() const 
+void InternalProperty::set_value(uint32_t new_value)
 {
-	printf("%lu\n", *externalValue);
+	if (access == PropertyAccess::ReadWrite || access == PropertyAccess::WriteOnly)
+	{
+		value = new_value;
+	}
+	else
+	{
+		printf("ERR: property is ReadOnly\n");
+	}
+}
+
+// ExternalProperty methods
+ExternalProperty::ExternalProperty(uint32_t* externalValue, PropertyAccess access)
+: DeviceProperty(access), externalValue(externalValue)
+{
 }
 
 uint32_t ExternalProperty::get_value() const
 {
-	return *externalValue;
+	if (access == PropertyAccess::ReadOnly || access == PropertyAccess::ReadWrite)
+	{
+		return *externalValue;
+	}
+	else
+	{
+		printf("ERR: property is WriteOnly\n");
+		return 0;
+	}
 }
 
-void ExternalProperty::set_value(uint32_t newValue)
+void ExternalProperty::set_value(uint32_t new_value)
 {
-    if (access == PropertyAccess::ReadOnly) {
-        std::printf("ERR: read-only property\n");
-        return;
-    }
-    *externalValue = newValue;
+	if (access == PropertyAccess::ReadWrite || access == PropertyAccess::WriteOnly)
+	{
+		*externalValue = new_value;
+	}
+	else
+	{
+		printf("ERR: property is ReadOnly\n");
+	}
 }
 
-void FunctionProperty::print_value() const 
+// FunctionProperty methods
+FunctionProperty::FunctionProperty(PropGetter getter, PropSetter setter, PropertyAccess access)
+: DeviceProperty(access), getter(getter), setter(setter)
 {
-	this->valueFunction();
 }
 
 uint32_t FunctionProperty::get_value() const
 {
-	printf("ERR: don't call `get_value()` function in FunctionProperty class!\n");
-	return 0;
+	if (access == PropertyAccess::ReadOnly || access == PropertyAccess::ReadWrite)
+	{
+		return getter ? getter() : 0;
+	}
+	else
+	{
+		printf("ERR: property is WriteOnly\n");
+		return 0;
+	}
 }
 
-void FunctionProperty::set_value(uint32_t)
+void FunctionProperty::set_value(uint32_t new_value)
 {
-	std::printf("ERR: read-only property\n");
+	if (access == PropertyAccess::ReadWrite || access == PropertyAccess::WriteOnly)
+	{
+		if (setter)
+		{
+			setter(new_value);
+		}
+	}
+	else
+	{
+		printf("ERR: property is ReadOnly\n");
+	}
 }

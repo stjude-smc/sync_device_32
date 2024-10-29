@@ -1,6 +1,7 @@
 #include "uart_comm.h"
 #include "events.h"
 #include "props.h"
+#include "ext_pTIRF.h"
 
 #define RSTC_KEY  0xA5000000  // password for reset controller
 
@@ -236,7 +237,14 @@ void _parse_UART_command(const DataPacket *data)
 	}
 	else if (strncasecmp(data->cmd, "GET", 3) == 0)
 	{
-		print_property((SysProps) data->arg1);
+		if (data->arg1 == SysProps::ro_VERSION)
+		{
+			printf("%s\n", VERSION);
+		}
+		else
+		{
+			printf("%lu\n", get_property((SysProps) data->arg1));
+		}
 	}
 	else if (strncasecmp(data->cmd, "SET", 3) == 0)
 	{
@@ -262,6 +270,18 @@ void _parse_UART_command(const DataPacket *data)
 	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
 	{
 		_send_event_queue();
+	}
+	else if (strncasecmp(data->cmd, "CON", 3) == 0)
+	{
+		start_continuous_acq(data);
+	}
+	else if (strncasecmp(data->cmd, "STR", 3) == 0)
+	{
+		start_stroboscopic_acq(data);
+	}
+	else if (strncasecmp(data->cmd, "ALX", 3) == 0)
+	{
+		start_ALEX_acq(data);
 	}
 	else
 	{

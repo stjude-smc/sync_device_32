@@ -9,79 +9,78 @@ enum SysProps {
 	ro_SYS_TIMER_STATUS,
 	ro_SYS_TIMER_VALUE,
 	ro_SYS_TIMER_OVF_COUNT,
-	ro_SYS_TIME_s,
+	ro_SYS_TIME_ms,
 	ro_SYS_TIMER_PRESCALER,
 	rw_DFLT_PULSE_DURATION_us,
 	ro_WATCHDOG_TIMEOUT_ms,
 	ro_N_EVENTS,
 	rw_INTLCK_ENABLED,
+
+	// pTIRF extension
+	rw_SELECTED_LASERS,
+	wo_OPEN_SHUTTERS,
+	wo_CLOSE_SHUTTERS,
+	rw_SHUTTER_DELAY_us,
+	rw_CAM_READOUT_us
 };
 
 enum class PropertyAccess {
 	ReadOnly,
-	ReadWrite
+	ReadWrite,
+	WriteOnly
 };
 
-using PropFunc = void (*)();
+using PropGetter = uint32_t (*)();
+using PropSetter = void (*)(uint32_t);
 
-// Abstract base class
 class DeviceProperty {
 public:
-    virtual ~DeviceProperty() = default;
-    virtual void print_value() const = 0;
+	explicit DeviceProperty(PropertyAccess access) : access(access) {}
+	virtual ~DeviceProperty() = default;
+
 	virtual uint32_t get_value() const = 0;
-    virtual void set_value(uint32_t newValue) = 0;
+	virtual void set_value(uint32_t newValue) = 0;
+
+protected:
+	PropertyAccess access;
 };
 
-
-// Internal property class
 class InternalProperty : public DeviceProperty {
 private:
-    uint32_t value;
-	PropertyAccess access;
+	uint32_t value;
 
 public:
-    InternalProperty(uint32_t value, PropertyAccess access = PropertyAccess::ReadOnly)
-        : value(value), access(access) {}
+	InternalProperty(uint32_t value, PropertyAccess access = PropertyAccess::ReadOnly);
 
-    void print_value() const override;
 	uint32_t get_value() const override;
-    void set_value(uint32_t newValue) override;
+	void set_value(uint32_t new_value) override;
 };
 
-
-// External property class
 class ExternalProperty : public DeviceProperty {
 private:
-    uint32_t* externalValue;
-	PropertyAccess access;
+	uint32_t* externalValue;
 
 public:
-    ExternalProperty(uint32_t* externalValue, PropertyAccess access = PropertyAccess::ReadOnly)
-        : externalValue(externalValue), access(access) {}
+	ExternalProperty(uint32_t* externalValue, PropertyAccess access = PropertyAccess::ReadOnly);
 
-    void print_value() const override;
 	uint32_t get_value() const override;
-    void set_value(uint32_t newValue) override;
+	void set_value(uint32_t new_value) override;
 };
 
-// Function property class
 class FunctionProperty : public DeviceProperty {
 private:
-    PropFunc valueFunction;
+	PropGetter getter;
+	PropSetter setter;
 
 public:
-    FunctionProperty(PropFunc func)
-        : valueFunction(func) {}
+	FunctionProperty(PropGetter getter, PropSetter setter, PropertyAccess access = PropertyAccess::ReadOnly);
 
-    void print_value() const override;
 	uint32_t get_value() const override;
-    void set_value(uint32_t) override;
+	void set_value(uint32_t new_value) override;
 };
-
 
 
 
 void init_props();
-void print_property(SysProps prop);
+uint32_t get_property(SysProps prop);
 void set_property(SysProps prop, uint32_t value);

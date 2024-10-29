@@ -632,7 +632,13 @@
     <Compile Include="src\events.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\ext_pTIRF.cpp">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\globals.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\ext_pTIRF.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\interlock.cpp">

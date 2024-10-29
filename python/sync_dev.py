@@ -99,7 +99,12 @@ class props(Enum):
     ro_WATCHDOG_TIMEOUT_ms = 7
     ro_N_EVENTS = 8
     rw_INTLCK_ENABLED = 9
-
+    # pTIRF extension
+    rw_SELECTED_LASERS = 10
+    wo_OPEN_SHUTTERS = 11
+    wo_CLOSE_SHUTTERS = 12
+    rw_SHUTTER_DELAY_us = 13
+    rw_CAM_READOUT_us = 14
 
 ####################################################################
 #        LOGGING SERIAL PORT CLASS
@@ -224,7 +229,8 @@ class SyncDevice(object):
                 + f"Expected message:\n{msg_template + __version__}"
             )
 
-        version_match = _compare_versions(self.version, __version__)
+        v = self.version
+        version_match = _compare_versions(v, __version__)
         if not version_match["major"] or not version_match["minor"]:
             raise RuntimeWarning(
                 f"Version mismatch: driver {__version__} != firmware {v}"
@@ -400,4 +406,51 @@ class SyncDevice(object):
             events.append(e)
         return events
 
+    ## pTIRF extension
+    def open_shutters(self, mask=0):
+        self.set_property(props.wo_OPEN_SHUTTERS, mask)
 
+    def close_shutters(self, mask=0):
+        self.set_property(props.wo_CLOSE_SHUTTERS, mask)
+
+    @property
+    def selected_lasers(self):
+        return int(self.get_property(props.rw_SELECTED_LASERS))
+
+    @selected_lasers.setter
+    def selected_lasers(self, mask):
+        self.set_property(props.rw_SELECTED_LASERS, mask)
+    
+    @property
+    def cam_readout_us(self):
+        return int(self.get_property(props.rw_CAM_READOUT_us))
+
+    @cam_readout_us.setter
+    def cam_readout_us(self, value):
+        self.set_property(props.rw_CAM_READOUT_us, value)
+
+    @property
+    def shutter_delay_us(self):
+        return int(self.get_property(props.rw_SHUTTER_DELAY_us))
+
+    @shutter_delay_us.setter
+    def shutter_delay_us(self, value):
+        self.set_property(props.rw_SHUTTER_DELAY_us, value)
+
+    def start_continuous_acq(self, exp_time, N_frames, ts=0):
+        self.write("CON", arg1=exp_time, ts=ts, N=N_frames)
+
+    def start_stroboscopic_acq(self, exp_time, N_frames, ts=0, frame_period=0):
+        self.write("STR", arg1=exp_time, ts=ts, N=N_frames, interval=frame_period)
+
+    def start_ALEX_acq(self, exp_time, N_bursts, ts=0, burst_period=0):
+        self.write("ALX", arg1=exp_time, ts=ts, N=N_bursts, interval=burst_period)
+
+    def N_frames_left(self):
+        """ Return number of frames left, if acquisition is running """
+        events = self.get_events()
+        if events:
+            for event in events:
+                if rev_pin_map[event.arg1] == "A12":
+                    return event.N
+        return 0
