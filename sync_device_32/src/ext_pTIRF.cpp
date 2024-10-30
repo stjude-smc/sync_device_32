@@ -120,23 +120,22 @@ void close_shutters_func(uint32_t mask, uint32_t){close_shutters(mask);}
 void start_continuous_acq(const DataPacket* data)
 {
 	uint32_t exp_us = data->arg1;
-	uint64_t acq_start_us = current_time_us() + data->ts_us;
+	uint32_t camera_us  = get_property(rw_CAM_READOUT_us);
+	uint32_t shutter_us = get_property(rw_SHUTTER_DELAY_us);
+	uint64_t acq_start_us = current_time_us() + data->ts_us + UNIFORM_TIME_DELAY;
 
-	// Schedule shutters
-	schedule_shutter_pulse(data->N * exp_us,          // duration
-		acq_start_us - get_property(rw_SHUTTER_DELAY_us), // timestamp
-		1, 0, false);  // once, no repeats, absolute time
+	// Schedule shutters (once, no repeats, absolute time)
+	schedule_shutter_pulse(
+		data->N * exp_us + shutter_us,			// duration
+		acq_start_us + camera_us - shutter_us,	// timestamp
+		1, 0, false);
 	
-	// Schedule dummy camera pulse to readout the sensor
-	schedule_pulse(CAMERA_PIN, default_pulse_duration_us,
-				   // once, at requested timestamp
-	               acq_start_us, 1, 0, false);
+	// Schedule a single dummy camera pulse to readout the sensor
+	schedule_pulse(CAMERA_PIN, default_pulse_duration_us, acq_start_us, 1, 0, false);
 	
-	// Schedule pulse train for the camera
-	schedule_pulse(CAMERA_PIN, default_pulse_duration_us,
-	               // N+1 times, after camera readout
-	               acq_start_us + get_property(rw_CAM_READOUT_us),
-				   data->N+1, exp_us, false);
+	// Schedule pulse train for the camera (N+1 times, after camera readout)
+	schedule_pulse(CAMERA_PIN, default_pulse_duration_us, acq_start_us + camera_us,
+	               data->N+1, exp_us, false);
 }
 
 // arg1 - exposure_time_us
@@ -149,7 +148,7 @@ void start_stroboscopic_acq(const DataPacket* data)
 	uint32_t exp_us = data->arg1;
 	uint32_t camera_us  = get_property(rw_CAM_READOUT_us);
 	uint32_t shutter_us = get_property(rw_SHUTTER_DELAY_us);
-	uint64_t acq_start_us = current_time_us() + data->ts_us;
+	uint64_t acq_start_us = current_time_us() + data->ts_us + UNIFORM_TIME_DELAY;
 
 	// make sure frame period isn't too short
 	uint32_t frame_period_us = std::max(exp_us + camera_us + shutter_us, data->interv_us);
@@ -174,7 +173,7 @@ void start_ALEX_acq(const DataPacket* data)
 	uint32_t exp_us = data->arg1;
 	uint32_t camera_us  = get_property(rw_CAM_READOUT_us);
 	uint32_t shutter_us = get_property(rw_SHUTTER_DELAY_us);
-	uint64_t acq_start_us = current_time_us() + data->ts_us;
+	uint64_t acq_start_us = current_time_us() + data->ts_us + UNIFORM_TIME_DELAY;
 
 	uint32_t N_channels = _count_set_bits(get_property(rw_SELECTED_LASERS));
 	
