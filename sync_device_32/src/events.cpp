@@ -187,20 +187,18 @@ void schedule_pulse(uint32_t pin_idx, uint32_t pulse_duration_us, uint64_t times
 {
 	uint64_t now_cts = (relative && sys_timer_running) ? current_time_cts() : 0;
 	
-	Event* event_p = new Event();
-	event_p->func = nullptr; // set_pin_event_func;
-	event_p->arg1 = pin_idx;
-	event_p->arg2 = 1;  // rising edge
-	event_p->ts64_cts = us2cts(timestamp_us) + now_cts;
-	event_p->N = N;
-	event_p->interv_cts = us2cts(interval_us);
-	schedule_event(event_p, false);
+	Event event;
+	event.func = set_pin_event_func;
+	event.arg1 = pin_idx;
+	event.arg2 = 1;  // rising edge
+	event.ts64_cts = us2cts(timestamp_us) + now_cts;
+	event.N = N;
+	event.interv_cts = us2cts(interval_us);
+	schedule_event(&event, false);
 	
-	event_p->arg2 = 0;  // falling edge
-	event_p->ts64_cts += us2cts(pulse_duration_us);
-	schedule_event(event_p, false);
-	
-	delete event_p;
+	event.arg2 = 0;  // falling edge
+	event.ts64_cts += us2cts(pulse_duration_us);
+	schedule_event(&event, false);
 }
 
 

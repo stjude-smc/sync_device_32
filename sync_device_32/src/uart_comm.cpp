@@ -266,6 +266,8 @@ void _parse_UART_command(const DataPacket *data)
 		printf("%lu BST_OFF\n", (uint32_t) &stop_burst_func);
 		printf("%lu EN__PIN\n", (uint32_t) &enable_pin_func);
 		printf("%lu DIS_PIN\n", (uint32_t) &disable_pin_func);
+		printf("%lu OPE_SHU\n", (uint32_t) &open_shutters_func);
+		printf("%lu CLS_SHU\n", (uint32_t) &close_shutters_func);
 	}
 	else if (strncasecmp(data->cmd, "QUE", 3) == 0)
 	{
