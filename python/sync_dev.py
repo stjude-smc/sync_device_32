@@ -121,48 +121,52 @@ class LoggingSerial(Serial):
             self.log_file = None
         else:
             self.log_to_stdout = False
-            self.log_file = open(log_file, 'a') if log_file else None
+            self.log_file = log_file if log_file else None
+
+    def _format_data(self, data):
+        # Convert each byte to ASCII or hex notation
+        formatted_data = ''.join(
+            chr(byte) if 32 <= byte <= 126 else f'\\x{byte:02X}' 
+            for byte in data
+        )
+        return formatted_data
 
     def write(self, data):
         if self.log_file or self.log_to_stdout:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-            arguments = data[1:]
-            argument_uint32 = int.from_bytes(arguments, byteorder='little', signed=False)
-            log_entry = (f"{timestamp} TX: {str(data)}\n")
+            log_entry = (f"{timestamp} TX: {self._format_data(data)}\n")
             if self.log_to_stdout:
                 print(log_entry, end='')
             else:
-                self.log_file.write(log_entry)
-                self.log_file.flush()
+                with open(self.log_file, 'a', encoding='utf-8') as f:
+                    f.write(log_entry)
         super().write(data)
 
     def readline(self, size=None):
         data = super().readline(size)
         if data and (self.log_file or self.log_to_stdout):
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-            log_entry = f"{timestamp} RX: {data.decode('utf-8', errors='ignore')}\n"
+            log_entry = f"{timestamp} RX: {self._format_data(data)}\n"
             if self.log_to_stdout:
                 print(log_entry, end='')
             else:
-                self.log_file.write(log_entry)
-                self.log_file.flush()
+                with open(self.log_file, 'a', encoding='utf-8') as f:
+                    f.write(log_entry)
         return data
 
     def readall(self):
         data = super().readall()
         if data and (self.log_file or self.log_to_stdout):
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-            log_entry = f"{timestamp} RX: {data.decode('utf-8', errors='ignore')}\n"
+            log_entry = f"{timestamp} RX: {self._format_data(data)}\n"
             if self.log_to_stdout:
                 print(log_entry, end='')
             else:
-                self.log_file.write(log_entry)
-                self.log_file.flush()
+                with open(self.log_file, 'a', encoding='utf-8') as f:
+                    f.write(log_entry)
         return data
 
     def close(self):
-        if self.log_file:
-            self.log_file.close()
         super().close()
 
 class Port(LoggingSerial):
