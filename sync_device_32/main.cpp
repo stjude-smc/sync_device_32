@@ -48,6 +48,20 @@ void out_of_memory_handler() {
 }
 
 
+extern "C" void HardFault_Handler() {
+	err_led_on();
+	const char err_msg[] = "ERR - function at `nullptr` address has been called; restarting system!\n";
+	
+	pdc_packet_t uart_tx_packet;
+	uart_tx_packet.ul_addr = (uint32_t) err_msg;
+	uart_tx_packet.ul_size = sizeof(err_msg);
+	pdc_tx_init(uart_get_pdc_base(UART), &uart_tx_packet, nullptr);
+	
+	delay_ms(50);
+	RSTC->RSTC_CR = 0xA5000000 | RSTC_CR_PROCRST;  // processor reset
+}
+
+
 extern "C" {
 	// Implementation of _write function for printf
 	// NOTE: printf is buffered and sends data out after \n symbol
@@ -118,7 +132,7 @@ int main() {
 void WDT_Handler(void)
 {
 	err_led_on();
-	const char err_msg[] = "ERR - watchdog timeout, restarting system!\n";
+	const char err_msg[] = "ERR - watchdog timeout; restarting system!\n";
 	
 	pdc_packet_t uart_tx_packet;
 	uart_tx_packet.ul_addr = (uint32_t) err_msg;
