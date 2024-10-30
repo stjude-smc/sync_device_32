@@ -100,47 +100,32 @@ void close_shutters_func(uint32_t mask, uint32_t){close_shutters(mask);}
 // interval - ignored
 void start_continuous_acq(const DataPacket* data)
 {
-	uint32_t exp_time_cts = us2cts(data->arg1);
-	uint32_t now_cts = (sys_timer_running) ? current_time_cts() : 0;
-	uint32_t ts_cts = us2cts(data->ts_us);
+	uint64_t acq_start_us = current_time_us() + data->ts_us;
+
 	uint32_t cam_readout_cts = us2cts(get_property(rw_CAM_READOUT_us));
 	uint32_t shutter_delay_cts = us2cts(get_property(rw_SHUTTER_DELAY_us));
-	uint32_t pulse_dur_cts = us2cts(default_pulse_duration_us);
 
 	// Schedule shutters
-	Event* event_p = event_from_datapacket(data, open_shutters_func);
-	event_p->ts64_cts += now_cts + cam_readout_cts - shutter_delay_cts;
-	event_p->N = 1;
-	event_p->arg1 = selected_lasers();
-	schedule_event(event_p, false); // open
+	Event event_p;
+	event_p.func = open_shutters_func;
+	event_p.arg1 = selected_lasers();
+	event_p.ts64_cts = us2cts(acq_start_us) + cam_readout_cts - shutter_delay_cts;
+	schedule_event(&event_p, false);  // open
 	
-	event_p->func = close_shutters_func;
-	event_p->ts64_cts += data->N*exp_time_cts + shutter_delay_cts;
-	schedule_event(event_p, false); // close
-
+	event_p.func = close_shutters_func;
+	event_p.ts64_cts += data->N * us2cts(data->arg1) + shutter_delay_cts;
+	schedule_event(&event_p, false);  // close
+	
 	// Schedule dummy camera pulse to readout the sensor
-	event_p->func = set_pin_event_func;
-	event_p->arg1 = CAMERA_PIN;
-	event_p->arg2 = 1;
-	event_p->ts64_cts = ts_cts + now_cts;
-	schedule_event(event_p, false);	// front
-
-	event_p->arg2 = 0;
-	event_p->ts64_cts += pulse_dur_cts;
-	schedule_event(event_p, false); // back
-
-	// Schedule pulse train for the camera
-	event_p->N = data->N + 1;   // TODO - check about +1
-	event_p->interv_cts = exp_time_cts;
-	event_p->arg2 = 1;
-	event_p->ts64_cts = ts_cts + now_cts + cam_readout_cts;
-	schedule_event(event_p, false); // front
-
-	event_p->arg2 = 0;
-	event_p->ts64_cts = ts_cts + now_cts + cam_readout_cts + pulse_dur_cts;
-	schedule_event(event_p, false); // back
+	schedule_pulse(CAMERA_PIN, default_pulse_duration_us,
+				   // once, at requested timestamp
+	               acq_start_us, 1, 0, false);
 	
-	delete event_p;
+	// Schedule pulse train for the camera
+	schedule_pulse(CAMERA_PIN, default_pulse_duration_us,
+	               // N+1 times, after camera readout
+	               acq_start_us + get_property(rw_CAM_READOUT_us),
+				   data->N+1, data->arg1, false);
 }
 
 // arg1 - exposure_time_us
