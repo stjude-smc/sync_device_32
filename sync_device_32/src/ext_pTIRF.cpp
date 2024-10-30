@@ -119,10 +119,11 @@ void close_shutters_func(uint32_t mask, uint32_t){close_shutters(mask);}
 // interval - ignored
 void start_continuous_acq(const DataPacket* data)
 {
+	uint32_t exp_us = data->arg1;
 	uint64_t acq_start_us = current_time_us() + data->ts_us;
 
 	// Schedule shutters
-	schedule_shutter_pulse(data->N * data->arg1,          // duration
+	schedule_shutter_pulse(data->N * exp_us,          // duration
 		acq_start_us - get_property(rw_SHUTTER_DELAY_us), // timestamp
 		1, 0, false);  // once, no repeats, absolute time
 	
@@ -135,7 +136,7 @@ void start_continuous_acq(const DataPacket* data)
 	schedule_pulse(CAMERA_PIN, default_pulse_duration_us,
 	               // N+1 times, after camera readout
 	               acq_start_us + get_property(rw_CAM_READOUT_us),
-				   data->N+1, data->arg1, false);
+				   data->N+1, exp_us, false);
 }
 
 // arg1 - exposure_time_us
@@ -145,48 +146,22 @@ void start_continuous_acq(const DataPacket* data)
 // interval - frame period
 void start_stroboscopic_acq(const DataPacket* data)
 {
-	// Schedule shutters
-	//schedule_pulse(CAMERA_PIN, default_pulse_duration_us,
-	// once, at requested timestamp
-	//acq_start_us, 1, 0, false);
-	
-	
-	uint32_t exp_time_cts = us2cts(data->arg1);
-	uint32_t now_cts = (sys_timer_running) ? current_time_cts() : 0;
-	uint32_t ts_cts = us2cts(data->ts_us);
-	uint32_t cam_readout_cts = us2cts(get_property(rw_CAM_READOUT_us));
-	uint32_t shutter_delay_cts = us2cts(get_property(rw_SHUTTER_DELAY_us));
-	uint32_t frame_period_cts = us2cts(data->interv_us);
-	
+	uint32_t exp_us = data->arg1;
+	uint32_t camera_us  = get_property(rw_CAM_READOUT_us);
+	uint32_t shutter_us = get_property(rw_SHUTTER_DELAY_us);
+	uint64_t acq_start_us = current_time_us() + data->ts_us;
+
 	// make sure frame period isn't too short
-	frame_period_cts = std::max(exp_time_cts + cam_readout_cts + shutter_delay_cts, frame_period_cts);
-
-	Event* event_p = event_from_datapacket(data, open_shutters_func);
-	event_p->interv_cts = frame_period_cts;
-	event_p->N = data->N;
-	// Schedule shutters
-	event_p->ts64_cts += now_cts;
-	event_p->arg1 = selected_lasers();
-	schedule_event(event_p, false); // open
+	uint32_t frame_period_us = std::max(exp_us + camera_us + shutter_us, data->interv_us);
 	
-	event_p->func = close_shutters_func;
-	event_p->ts64_cts += exp_time_cts;
-	schedule_event(event_p, false); // close
-
-
+	// Schedule pulse train for shutters
+	schedule_shutter_pulse(exp_us, acq_start_us, data->N, frame_period_us, false);
+	
 	// Schedule pulse train for the camera
-	//  TODO - do we need a dummy read?
-	event_p->func = set_pin_event_func;
-	event_p->arg1 = CAMERA_PIN;
-	event_p->arg2 = 1;
-	event_p->ts64_cts = ts_cts + now_cts + shutter_delay_cts;
-	schedule_event(event_p, false); // front
-
-	event_p->arg2 = 0;
-	event_p->ts64_cts += exp_time_cts;
-	schedule_event(event_p, false); // back
-	
-	delete event_p;
+	// TODO - do we need a dummy read??
+	schedule_pulse(CAMERA_PIN, exp_us,
+		acq_start_us + shutter_us,
+		data->N, frame_period_us, false);
 }
 
 // arg1 - exposure_time_us
@@ -196,57 +171,32 @@ void start_stroboscopic_acq(const DataPacket* data)
 // interval - frame period
 void start_ALEX_acq(const DataPacket* data)
 {
+	uint32_t exp_us = data->arg1;
+	uint32_t camera_us  = get_property(rw_CAM_READOUT_us);
+	uint32_t shutter_us = get_property(rw_SHUTTER_DELAY_us);
+	uint64_t acq_start_us = current_time_us() + data->ts_us;
+
 	uint32_t N_channels = _count_set_bits(get_property(rw_SELECTED_LASERS));
 	
-	uint32_t exp_time_cts = us2cts(data->arg1);
-	uint32_t now_cts = (sys_timer_running) ? current_time_cts() : 0;
-	uint32_t ts_cts = us2cts(data->ts_us);
-	uint32_t cam_readout_cts = us2cts(get_property(rw_CAM_READOUT_us));
-	uint32_t shutter_delay_cts = us2cts(get_property(rw_SHUTTER_DELAY_us));
-	uint32_t burst_period_cts = us2cts(data->interv_us);
-	
-	uint32_t frame_duration_cts = exp_time_cts + cam_readout_cts + shutter_delay_cts;
-	
 	// make sure burst period isn't too short
-	burst_period_cts = std::max(N_channels*frame_duration_cts, burst_period_cts);
+	uint32_t frame_duration_us = exp_us + camera_us + shutter_us;
+	uint32_t burst_period_us = std::max(N_channels*frame_duration_us, data->interv_us);
 
-	Event* event_p = new Event;
-	event_p->func = set_pin_event_func;
-	event_p->interv_cts = burst_period_cts;
-	event_p->N = data->N;
-	
 	// Iterate through laser channels
-	uint32_t frame_start_cts = ts_cts + now_cts;
+	uint32_t frame_start_us = acq_start_us;
 	for (uint32_t i = 0; i < 4; ++i)
 	{
 		if (pins[shutter_pins[i]].is_active()) // laser is enabled
 		{
-			// Schedule shutters
-			event_p->ts64_cts = frame_start_cts;
-			event_p->arg1 = pins[shutter_pins[i]].pin_idx;
-			event_p->arg2 = 1;
-			schedule_event(event_p, false); // open
-	
-			event_p->arg2 = 0;
-			event_p->ts64_cts += exp_time_cts;
-			schedule_event(event_p, false); // close
+			// Schedule laser shutter pulse
+			schedule_pulse(pins[shutter_pins[i]].pin_idx, exp_us, frame_start_us, data->N, burst_period_us, false);
 
-
-			// Schedule pulse train for the camera
+			// Schedule camera pulse
 			//  TODO - do we need a dummy read?
-			event_p->arg1 = CAMERA_PIN;
-			event_p->arg2 = 1;
-			event_p->ts64_cts = frame_start_cts + shutter_delay_cts;
-			schedule_event(event_p, false); // front
+			schedule_pulse(CAMERA_PIN, exp_us, frame_start_us + shutter_us, data->N, burst_period_us, false);
 
-			event_p->arg2 = 0;
-			event_p->ts64_cts += exp_time_cts;
-			schedule_event(event_p, false); // back
-
-			// Calculate start timepoint of the next frame
-			frame_start_cts += frame_duration_cts;
+			// Calculate the start time of the next frame
+			frame_start_us += frame_duration_us;
 		}
 	}
-
-	delete event_p;
 }
