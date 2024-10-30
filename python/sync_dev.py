@@ -148,6 +148,18 @@ class LoggingSerial(Serial):
                 self.log_file.flush()
         return data
 
+    def readall(self):
+        data = super().readall()
+        if data and (self.log_file or self.log_to_stdout):
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            log_entry = f"{timestamp} RX: {data.decode('utf-8', errors='ignore')}\n"
+            if self.log_to_stdout:
+                print(log_entry, end='')
+            else:
+                self.log_file.write(log_entry)
+                self.log_file.flush()
+        return data
+
     def close(self):
         if self.log_file:
             self.log_file.close()
