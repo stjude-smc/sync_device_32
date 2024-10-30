@@ -48,6 +48,11 @@ typedef struct  __attribute__((packed)) Event
 	uint32_t	  N;           // 4 bytes - number of remaining calls
 	uint32_t	  interv_cts;  // 4 bytes - interval between the calls
 
+   // Constructor
+   Event() : func([](uint32_t, uint32_t) { printf("ERR: Event func not set!\n"); }),
+	   arg1(0), arg2(0), ts64_cts(0), N(0), interv_cts(0) {}
+
+
 	bool operator<(const Event& other) const {
 		return this->ts64_cts > other.ts64_cts;
 	}
@@ -65,6 +70,8 @@ Event* event_from_datapacket(const DataPacket* packet, EventFunc func=nullptr);
 void schedule_event(const Event *event, bool relative = true);
 
 void schedule_pulse(const DataPacket *data, bool is_positive);
+void schedule_pulse(uint32_t pin_idx, uint32_t pulse_duration_us, uint64_t timestamp_us,
+                    uint32_t N, uint32_t interval_us, bool relative = true);
 void schedule_pin(const DataPacket *data);
 void schedule_toggle(const DataPacket *data);
 void schedule_burst(const DataPacket *data);
