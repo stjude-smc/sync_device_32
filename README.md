@@ -143,6 +143,26 @@ with sd as dev:
 - **Enable/Disable Pin:** `sd.enable_pin(pin)`, `sd.disable_pin(pin)`
 - **Clear/Stop/Go:** `sd.clear()`, `sd.stop()`, `sd.go()`
 
+#### Priority Queue System
+
+The device uses a **priority queue** to manage event scheduling with microsecond precision:
+
+**Event Structure (28 bytes):**
+- **Function pointer** (4 bytes) - what action to execute
+- **Arguments** (4 bytes) - parameters for the function (e.g., pin number, duration)
+- **Timestamp** (4 bytes) - 32-bit absolute time when to execute
+- **Count** (4 bytes) - number of repetitions remaining
+- **Interval** (4 bytes) - time between repetitions
+
+**Queue Operation:**
+1. **Sorting:** Events are automatically sorted by timestamp (earliest first)
+2. **Execution:** System timer triggers the next event at its exact timestamp
+3. **Repetition:** Events with `N > 1` are rescheduled with updated timestamps
+4. **Precision:** Hardware timer ensures microsecond-accurate execution
+5. **Capacity:** Up to 450 events can be queued simultaneously
+
+**Example:** When you schedule multiple events, they're automatically ordered and executed in time sequence, regardless of the order they were submitted.
+
 ### Laser Shutter and Interlock
 
 - **Open/Close shutters:** `sd.open_shutters(mask)`, `sd.close_shutters(mask)`
