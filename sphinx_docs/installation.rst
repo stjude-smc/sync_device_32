@@ -1,5 +1,5 @@
 Installation Guide
-=================
+==================
 
 This guide covers the installation and setup of the sync_device_32 project, including both the Python driver and firmware.
 
@@ -7,14 +7,14 @@ Python Driver Installation
 --------------------------
 
 Prerequisites
-^^^^^^^^^^^^
+^^^^^^^^^^^^^
 
 * Python 3.7 or higher
 * pip package manager
 * Serial port access (for device communication)
 
 Install Dependencies
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 Install the required Python packages:
 
@@ -47,7 +47,7 @@ Install the sync_device_32 Driver
    pip install -e .
 
 Verify Installation
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 Test that the driver can be imported:
 
@@ -60,7 +60,7 @@ Firmware Installation
 ---------------------
 
 Prerequisites
-^^^^^^^^^^^^
+^^^^^^^^^^^^^
 
 * Microchip Studio (free download from Microchip)
 * Arduino Due board
@@ -68,7 +68,7 @@ Prerequisites
 * Atmel ICE debugger (optional, for debugging)
 
 Build the Firmware
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 1. **Open the project in Microchip Studio:**
 
@@ -88,7 +88,7 @@ Build the Firmware
    - Verify successful compilation
 
 Upload to Arduino Due
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 
 **Method 1: Using Atmel ICE Debugger (Recommended)**
 
@@ -113,7 +113,7 @@ Hardware Setup
 --------------
 
 Required Connections
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 * **USB Connection:** Connect Arduino Due to host computer
 * **Laser Shutters:** Connect to pins A0-A3 (configurable)
@@ -121,22 +121,22 @@ Required Connections
 * **Interlock Circuit:** Connect between D12 (input) and D13 (output)
 
 Power Supply
-^^^^^^^^^^^
+^^^^^^^^^^^^
 
 The device is powered through the USB connection. No external power supply is required.
 
 Driver Installation (Windows)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Download Arduino drivers from `arduino.cc <https://www.arduino.cc/en/software>`_
 2. Install the drivers when prompted
 3. The device will appear as "Arduino Due" in Device Manager
 
 Verification
------------
+------------
 
 Test the Complete Setup
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 1. **Connect the device:**
 
@@ -168,10 +168,10 @@ Test the Complete Setup
       print(f"Number of events: {sd.N_events}")
 
 Troubleshooting
---------------
+---------------
 
 Common Issues
-^^^^^^^^^^^^
+^^^^^^^^^^^^^
 
 **Connection Error:**
 - Verify correct COM port
@@ -192,10 +192,10 @@ Common Issues
 - Ensure all dependencies are resolved
 
 Getting Help
-^^^^^^^^^^^
+^^^^^^^^^^^^
 
-* Check the :doc:`troubleshooting` guide
-* Review the :doc:`hardware` documentation
+* Check the README for troubleshooting tips
+* Review the README for hardware documentation
 * Open an issue on `GitHub <https://github.com/ximeg/sync_device_32>`_
 
 Next Steps
@@ -205,5 +205,5 @@ After successful installation:
 
 1. Read the :doc:`quickstart` guide
 2. Explore the :doc:`api/index` documentation
-3. Try the examples in :doc:`examples`
-4. Review the :doc:`hardware` setup guide 
+3. Try the examples in the Jupyter notebook
+4. Review the README for hardware setup 

@@ -29,9 +29,20 @@ def clean_build():
         shutil.rmtree(build_dir)
         print("✓ Build cleaned")
 
+def ensure_static_dir():
+    """Ensure _static directory exists."""
+    static_dir = Path("sphinx_docs/_static")
+    if not static_dir.exists():
+        print("Creating _static directory...")
+        static_dir.mkdir(parents=True, exist_ok=True)
+        print("✓ _static directory created")
+
 def build_html():
     """Build HTML documentation."""
     print("Building HTML documentation...")
+    
+    # Ensure _static directory exists
+    ensure_static_dir()
     
     # Change to docs directory
     os.chdir("sphinx_docs")

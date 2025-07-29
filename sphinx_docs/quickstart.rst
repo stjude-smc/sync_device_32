@@ -1,10 +1,10 @@
 Quick Start Guide
-================
+=================
 
 This guide will get you up and running with sync_device_32 in minutes. It covers the basic setup and common usage patterns.
 
 Basic Setup
-----------
+-----------
 
 1. **Install the Python driver:**
 
@@ -24,7 +24,7 @@ Basic Setup
       print(f"Connected! Firmware version: {sd.version}")
 
 Basic Event Scheduling
----------------------
+----------------------
 
 **Simple Pulse Generation:**
 
@@ -64,7 +64,7 @@ Basic Event Scheduling
    # All commands sent together
 
 Laser Control
--------------
+--------------
 
 **Basic Laser Shutter Control:**
 
@@ -90,7 +90,7 @@ Laser Control
    sd.interlock_enabled = False
 
 Acquisition Modes
-----------------
+-----------------
 
 **Continuous Imaging:**
 
@@ -124,7 +124,7 @@ Acquisition Modes
    sd.go()
 
 System Control
--------------
+--------------
 
 **Start/Stop Control:**
 
@@ -194,7 +194,7 @@ Configuration
    sd = SyncDevice("COM4", log_file="print")
 
 Common Patterns
---------------
+---------------
 
 **Timelapse Acquisition:**
 
@@ -237,8 +237,8 @@ Next Steps
 Now that you have the basics:
 
 1. **Explore the API:** See :doc:`api/index` for complete documentation
-2. **Try examples:** Check :doc:`examples` for more complex scenarios
-3. **Learn about hardware:** Review :doc:`hardware` for connection details
-4. **Understand firmware:** See :doc:`firmware` for technical details
+2. **Try examples:** Check the Jupyter notebook for more complex scenarios
+3. **Learn about hardware:** Review the README for connection details
+4. **Understand firmware:** See the source code for technical details
 
-**Need help?** Check the :doc:`troubleshooting` guide or open an issue on GitHub. 
+**Need help?** Open an issue on GitHub or check the README. 

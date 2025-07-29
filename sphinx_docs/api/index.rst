@@ -1,15 +1,16 @@
 Python API Reference
-===================
+====================
 
 This section provides detailed documentation for the sync_device_32 Python API.
 
 Core Classes
------------
+------------
 
 .. automodule:: sync_dev
    :members:
    :undoc-members:
    :show-inheritance:
+   :no-index:
 
 Modules
 -------
@@ -17,28 +18,20 @@ Modules
 .. automodule:: constants
    :members:
    :undoc-members:
+   :no-index:
 
 .. automodule:: rev_pin_map
    :members:
    :undoc-members:
+   :no-index:
 
 .. automodule:: __version__
    :members:
    :undoc-members:
-
-Data Structures
---------------
-
-.. autoclass:: sync_dev.Event
-   :members:
-   :undoc-members:
-
-.. autoclass:: sync_dev.props
-   :members:
-   :undoc-members:
+   :no-index:
 
 Utility Functions
-----------------
+-----------------
 
 .. automodule:: sync_dev
    :members:

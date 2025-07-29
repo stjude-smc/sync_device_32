@@ -14,10 +14,6 @@ A high-precision synchronization device for advanced microscope control, based o
    installation
    quickstart
    api/index
-   hardware
-   firmware
-   examples
-   troubleshooting
 
 Overview
 --------
@@ -25,7 +21,7 @@ Overview
 This project provides firmware and a Python driver for a high-precision synchronization device designed for advanced microscope control. The device enables precise timing and coordination of lasers, shutters, cameras, and other peripherals with microsecond precision.
 
 Key Features
-^^^^^^^^^^^
+^^^^^^^^^^^^
 
 * **Microsecond-precision event scheduling** with priority queue system
 * **Laser shutter and interlock safety logic**
@@ -35,7 +31,7 @@ Key Features
 * **Safety interlocks** for laser protection
 
 Hardware Platform
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 * **Microcontroller:** Arduino Due (SAM3X8E ARM Cortex-M3)
 * **Logic Levels:** 3.3V CMOS
@@ -61,7 +57,7 @@ The Python driver provides a high-level interface for controlling the device:
 For detailed API documentation, see :doc:`api/index`.
 
 Installation
-^^^^^^^^^^^
+^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -71,7 +67,7 @@ Installation
 For complete installation instructions, see :doc:`installation`.
 
 Quick Start
-^^^^^^^^^^
+^^^^^^^^^^^
 
 1. Connect laser shutters and cameras to the Arduino Due pins. Use LED during testing.
 1. Connect Arduino Due via USB
