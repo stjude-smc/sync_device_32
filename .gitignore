@@ -69,3 +69,8 @@ __pycache__/
 ~$*.pptx
 ~$*.docx
 
+# Sphinx documentation build files
+sphinx_docs/_build/
+sphinx_docs/_static/
+sphinx_docs/_templates/
+
