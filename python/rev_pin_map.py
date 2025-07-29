@@ -1,4 +1,22 @@
+"""
+Reverse pin mapping for sync_device_32 Python driver.
+
+This module provides a reverse mapping from internal pin IDs to human-readable
+Arduino Due pin names. The mapping converts the device's internal pin numbering
+system to the familiar Arduino pin names (D0-D65, A0-A15).
+
+The reverse pin map is used for:
+- Converting internal pin IDs to readable names in error messages
+- Providing user-friendly pin identification in logs and debugging
+- Maintaining compatibility with Arduino pin naming conventions
+
+Note:
+    This mapping is specific to the Arduino Due board and the SAM3X8E
+    microcontroller pin configuration used in sync_device_32.
+"""
+
 rev_pin_map = {
+    # Digital pins (D0-D65)
     8: "D0",
     9: "D1",
     32+25: "D2",
@@ -66,6 +84,7 @@ rev_pin_map = {
     32+19: "D64",
     32+20: "D65",
 
+    # Analog pins (A0-A15)
     16: "A0",
     24: "A1",
     23: "A2",
@@ -83,3 +102,20 @@ rev_pin_map = {
     1: "A14",
     0: "A15",
 }
+"""Reverse mapping from internal pin IDs to Arduino Due pin names.
+
+This dictionary maps the device's internal pin IDs to human-readable
+Arduino Due pin names. The mapping includes:
+- Digital pins D0 through D65
+- Analog pins A0 through A15
+
+The internal pin IDs are based on the SAM3X8E microcontroller's
+port and pin numbering system, while the Arduino names follow
+the standard Arduino Due pinout convention.
+
+Example:
+    >>> rev_pin_map[8]
+    'D0'
+    >>> rev_pin_map[16]
+    'A0'
+"""

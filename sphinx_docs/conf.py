@@ -82,6 +82,10 @@ autodoc_default_options = {
     'special-members': '__init__,__enter__,__exit__',
 }
 
+# Exclude patterns for autodoc
+autodoc_mock_imports = []
+exclude_patterns = ['*.log', '*.ipynb']
+
 # -- Options for napoleon ---------------------------------------------------
 
 # Use Google style docstrings

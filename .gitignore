@@ -74,3 +74,6 @@ sphinx_docs/_build/
 sphinx_docs/_static/
 sphinx_docs/_templates/
 
+# Python log files
+python/*.log
+

@@ -1,42 +1,39 @@
-API Reference
-=============
+Python API Reference
+===================
 
-This section contains the complete API documentation for the sync_device_32 Python driver.
+This section provides detailed documentation for the sync_device_32 Python API.
 
 Core Classes
 -----------
-
-.. toctree::
-   :maxdepth: 2
-
-   sync_dev
-   constants
-   props
-
-Modules
--------
 
 .. automodule:: sync_dev
    :members:
    :undoc-members:
    :show-inheritance:
 
+Modules
+-------
+
 .. automodule:: constants
    :members:
    :undoc-members:
 
-.. automodule:: props
+.. automodule:: rev_pin_map
+   :members:
+   :undoc-members:
+
+.. automodule:: __version__
    :members:
    :undoc-members:
 
 Data Structures
 --------------
 
-.. automodule:: sync_dev.Event
+.. autoclass:: sync_dev.Event
    :members:
    :undoc-members:
 
-.. automodule:: sync_dev.props
+.. autoclass:: sync_dev.props
    :members:
    :undoc-members:
 
