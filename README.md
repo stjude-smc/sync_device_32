@@ -15,7 +15,8 @@ This project provides firmware and a Python driver for a high-precision synchron
 ### Evolution from Legacy `sync_device`
 This is the **second generation** of the microscope synchronization device, based on a 32-bit ARM microcontroller (Arduino Due). The first generation was based on Arduino Mega2560 (8-bit ATMega2560) and had fundamental limitations:
 
-**Key Improvements in 32-bit Version:**
+**Key Changes and Improvements in 32-bit Version:**
+- **3.3V** logic – Arduino Due uses 3.3V CMOS logic levels for digital I/O, whereas the Arduino Mega2560 uses 5V logic levels
 - **Microsecond precision** (vs. 64µs steps in 8-bit version)
 - **No 4.19s exposure time limit** (vs. 16-bit timer limitation)
 - **Event-driven architecture** with priority queue (vs. fixed state machine)
@@ -56,18 +57,15 @@ This is the **second generation** of the microscope synchronization device, base
 **Default Connections:**
 - **Laser shutters:** Arduino pins A0-A3 (configurable in `globals.h`)
 - **Camera trigger:** Pin A12 (configurable)
-- **USB:** Used for host communication and power. Use the micro-USB port next to the power socket.
+- **USB connection:** Provides both power and host communication via the micro-USB port next to the power socket. The device is powered through this USB connection and is recognized by the host computer as a virtual COM port.
+
 - **Interlock circuit:** D12 (input) and D13 (output) for laser safety
-
-**Power:** The device is powered via USB connection to the host computer.
-
-**Recognition:** The device is recognized as a virtual COM port by the host system.
 
 ### Communication Protocol
 
 - **Interface:** UART at 115,200 baud (vs. 2,000,000 baud in legacy version)
 - **Data format:** 24-byte packets with command and arguments
-- **Timeout:** Automatic detection of incomplete transmissions
+- **Timeout:** Automatic detection of incomplete UART transmissions
 - **Version check:** Firmware version verification on connection
 
 **Startup Message:**
@@ -89,6 +87,17 @@ pip install pyserial
 ```
 
 Copy the `python/` directory or install as a package if desired.
+
+### Python Module Structure
+
+The Python driver consists of several modules:
+
+- **`sync_dev.py`** - Main `SyncDevice` class and communication interface
+- **`constants.py`** - Timing constants and system parameters
+- **`props.py`** - Property definitions and system settings
+- **`rev_pin_map.py`** - Hardware pin mapping (Arduino pin names to internal IDs)
+- **`__version__.py`** - Version information and package metadata
+- **`sync device demo.ipynb`** - Comprehensive Jupyter notebook with examples
 
 ### Basic Usage
 
@@ -118,7 +127,7 @@ sd.go()
 
 ### Context Manager
 
-Batch multiple commands for precise timing:
+Batch multiple commands for precise timing: all commands within the context manager are collected and sent together as a single data packet over UART, ensuring they are processed together on the device. This approach eliminates timing jitter caused by delays or variability in the host operating system, resulting in highly accurate event scheduling.
 
 ```python
 with sd as dev:
@@ -150,7 +159,7 @@ The device includes a sophisticated laser safety interlock that monitors the int
 - **External circuit:** Required between D12 and D13 for proper operation
 
 **Operation:**
-1. **Heartbeat Generation:** System sends pulse train on D13 (HIGH for ~1.56ms, LOW for ~23.44ms)
+1. **Heartbeat Generation:** System sends pulse train on D13 (HIGH for 1.56ms, LOW for 23.44ms)
 2. **Signal Monitoring:** System checks D12 at two critical moments:
    - When output goes LOW (should detect LOW on input)
    - When output goes HIGH (should detect HIGH on input)
@@ -161,18 +170,14 @@ The device includes a sophisticated laser safety interlock that monitors the int
 
 **Runtime Control:**
 ```python
-# Enable interlock (default)
-sd.interlock_enabled = True
-
-# Disable interlock (lasers always enabled)
-sd.interlock_enabled = False
+sd.interlock_enabled = True  # set to False to ignore the interlock circuit
 ```
 
 In practice, you want to have normally closed magnetic reed switches (such as [Magnasphere](https://magnasphere.com/product/s-series/)) installed on the doors of the microscope enclosure, connected in series.
 
 ### Acquisition Modes
 
-The device supports three main acquisition modes, each optimized for different imaging scenarios:
+The following high-level acquisition modes are provided as convenience functions for our pTIRF microscopes. Internally, each mode schedules a sequence of low-level events using the common event execution engine described above. This allows you to easily run complex imaging protocols, while retaining precise timing and coordination under the hood:
 
 #### Continuous Imaging
 - **Use case:** Continuous illumination with synchronous camera readout
@@ -180,13 +185,15 @@ The device supports three main acquisition modes, each optimized for different i
 - **Behavior:** Laser shutters remain open during entire acquisition, camera triggered at precise intervals
 - **First frame:** Automatically discarded as it contains pre-acquisition noise
 
-#### Stroboscopic Imaging  
+#### Stroboscopic/Timelapse Imaging  
 - **Use case:** Brief laser illumination during each camera exposure
 - **Method:** `sd.start_stroboscopic_acq(exp_time, N_frames, ts=0, frame_period=0)`
 - **Behavior:** Laser pulse synchronized with camera exposure, followed by readout period
 - **Timelapse:** Optional waiting period between frames when `frame_period > 0`
 
 #### ALEX (Alternating Laser Excitation)
+
+> **Note:** For ALEX, select lasers by setting `sd.selected_lasers` in Python (e.g., `sd.selected_lasers = 0b0110`), or send a `SET` command with the `rw_SELECTED_LASERS` property ID (from the `SysProps` enum) over UART.
 - **Use case:** Multi-spectral imaging with alternating laser illumination
 - **Method:** `sd.start_ALEX_acq(exp_time, N_bursts, ts=0, burst_period=0)`
 - **Behavior:** Bursts of frames, each illuminated by different laser channel
@@ -199,7 +206,9 @@ The device supports three main acquisition modes, each optimized for different i
 
 ### Timing Configuration
 
-For optimal performance, configure these timing parameters before starting acquisition:
+**Note:** All timing parameters for `sync_device_32` are specified in microseconds (µs).
+
+Configure these timing parameters to match your hardware before starting acquisition:
 
 ```python
 # Essential timing parameters (in microseconds)
@@ -212,10 +221,9 @@ sd.selected_lasers = 0b0110     # Enable Cy3 and Cy5 lasers
 ```
 
 **Important Notes:**
-- `shutter_delay_us` should match your laser shutter's actual opening time
-- `cam_readout_us` depends on camera ROI settings and should be measured
-- Timing values persist between acquisitions until changed
-- All timing is microsecond-precision (vs. 64µs steps in legacy 8-bit version)
+- `shutter_delay_us` should match your laser shutter's actual opening time. Use an oscilloscope and a photodiode to measure it.
+- `cam_readout_us` depends on camera ROI settings. See the camera manual to find out how to calculate or query it.
+- Timing values persist between acquisitions until changed. They drop back to defaults after system reset.
 
 ---
 
@@ -242,13 +250,6 @@ See [`python/sync device demo.ipynb`](python/sync%20device%20demo.ipynb) for a c
 | `shutter_delay_us`      | R/W        | Shutter delay (us)                          |
 | `cam_readout_us`        | R/W        | Camera readout time (us)                    |
 
----
-
-## Advanced
-
-- **Event queue:** Up to 450 events, microsecond-precision, priority-ordered.
-- **Safety:** Watchdog timer, interlock, error pin.
-- **Hardware abstraction:** All pins mapped by name (see `python/rev_pin_map.py`).
 
 ---
 
