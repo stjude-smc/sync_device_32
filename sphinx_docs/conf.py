@@ -37,6 +37,8 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.githubpages',
+    'breathe',
+    'exhale',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -118,6 +120,30 @@ html_theme_options = {
     'style_external_links': False,
     'vcs_pageview_mode': '',
     'style_nav_header_background': '#2980B9',
+}
+
+# -- Breathe configuration -------------------------------------------------
+
+# Breathe is the extension that parses the Doxygen XML output
+breathe_projects = {
+    "sync_device_32": "_doxygen/xml"
+}
+breathe_default_project = "sync_device_32"
+breathe_default_members = ('members', 'undoc-members')
+
+# -- Exhale configuration -------------------------------------------------
+
+# Setup the exhale extension
+exhale_args = {
+    # These arguments are required
+    "containmentFolder":     "./cpp_api",
+    "rootFileName":          "library_root.rst",
+    "rootFileTitle":         "C++ API Reference",
+    "doxygenStripFromPath":  "..",
+    # Suggested optional arguments
+    "createTreeView":        True,
+    "exhaleExecutesDoxygen": True,
+    "exhaleUseDoxyfile":     True,
 }
 
 # -- Additional settings ----------------------------------------------------

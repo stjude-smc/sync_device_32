@@ -73,6 +73,8 @@ __pycache__/
 sphinx_docs/_build/
 sphinx_docs/_static/
 sphinx_docs/_templates/
+sphinx_docs/_doxygen/
+sphinx_docs/cpp_api/
 
 # Python log files
 python/*.log

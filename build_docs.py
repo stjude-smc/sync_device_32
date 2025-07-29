@@ -44,6 +44,11 @@ def build_html():
     # Ensure _static directory exists
     ensure_static_dir()
     
+    # Add Doxygen to PATH if not already there
+    doxygen_path = r"C:\Program Files\doxygen\bin"
+    if doxygen_path not in os.environ.get('PATH', ''):
+        os.environ['PATH'] = doxygen_path + os.pathsep + os.environ.get('PATH', '')
+    
     # Change to docs directory
     os.chdir("sphinx_docs")
     

@@ -14,6 +14,9 @@ A high-precision synchronization device for advanced microscope control, based o
    installation
    quickstart
    api/index
+   cpp/architecture
+   cpp/firmware
+   cpp_api/library_root
 
 Overview
 --------
