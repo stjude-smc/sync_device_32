@@ -144,6 +144,8 @@ exhale_args = {
     "createTreeView":        True,
     "exhaleExecutesDoxygen": True,
     "exhaleUseDoxyfile":     True,
+    # Additional settings for better function resolution
+    "verboseBuild":          True,
 }
 
 # -- Additional settings ----------------------------------------------------
