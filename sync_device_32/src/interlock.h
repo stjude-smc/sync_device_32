@@ -1,13 +1,38 @@
-/*
- * interlock.h
- *
- * Created: 10/23/2024 5:08:09 PM
- *  Author: rkiselev
- */ 
+/**
+ * @file interlock.h
+ * @author Roman Kiselev (roman.kiselev@stjude.org)
+ * @brief Laser safety interlock system interface.
+ * 
+ * This module provides laser safety interlock functionality to ensure safe
+ * operation of laser systems. It monitors interlock conditions and can
+ * automatically disable lasers when safety conditions are not met.
+ * 
+ * @version 2.3.0
+ * @date 2024-10-23
+ */
 
 #pragma once
 
+/**
+ * @brief Initialize the laser interlock system.
+ * 
+ * Sets up the interlock timer/counter, configures monitoring pins,
+ * and enables interlock detection interrupts.
+ */
 void init_interlock();
 
+/**
+ * @brief Global laser enable/disable state.
+ * 
+ * Controls whether lasers are currently enabled. This can be modified
+ * by the interlock system or manually by the user.
+ */
 extern volatile bool lasers_enabled;
+
+/**
+ * @brief Interlock system enabled state.
+ * 
+ * Controls whether the interlock system is active and monitoring
+ * safety conditions.
+ */
 extern bool interlock_enabled;
