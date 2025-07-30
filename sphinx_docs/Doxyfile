@@ -1,0 +1,50 @@
+# Doxygen configuration for sync_device_32 C++ documentation
+# This file is used by Exhale to generate XML output for Sphinx
+
+PROJECT_NAME           = "sync_device_32"
+PROJECT_NUMBER         = "2.3.0"
+PROJECT_BRIEF          = "Microscope Synchronization Device Firmware"
+
+# Input files - only header files to avoid duplicate declarations
+INPUT                  = ../sync_device_32/src/events.h
+INPUT                 += ../sync_device_32/src/ext_pTIRF.h
+INPUT                 += ../sync_device_32/src/globals.h
+INPUT                 += ../sync_device_32/src/interlock.h
+INPUT                 += ../sync_device_32/src/pins.h
+INPUT                 += ../sync_device_32/src/props.h
+INPUT                 += ../sync_device_32/src/uart_comm.h
+INPUT                 += ../sync_device_32/main.cpp
+
+# File patterns to include
+FILE_PATTERNS          = *.h *.cpp
+
+# Exclude ASF and config directories
+EXCLUDE_PATTERNS       = */ASF/*
+EXCLUDE_PATTERNS      += */config/*
+
+# Don't recursively scan directories
+RECURSIVE              = NO
+
+# Extract settings
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
+EXTRACT_LOCAL_CLASSES  = NO
+
+# Output settings
+GENERATE_HTML          = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = _doxygen/xml
+
+# Disable features we don't need
+HAVE_DOT               = NO
+UML_LOOK               = NO
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+
+# Predefined macros to handle includes
+PREDEFINED             = __DOXYGEN__
+PREDEFINED            += DOXYGEN_SHOULD_SKIP_THIS
+
+# Include paths (minimal)
+INCLUDE_PATH           = ../sync_device_32/src 

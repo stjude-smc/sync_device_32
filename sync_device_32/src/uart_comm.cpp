@@ -39,29 +39,56 @@ public:
 	}
 };
 
-// Memory buffer for outgoing DMA transmissions
+/** @brief Queue for outgoing UART transmission messages */
 std::queue<UartTxMessage*> tx_queue;
 
 //////////////////////////////////////////////////////////////////////////
 
-// Memory buffers for incoming DMA transmissions
+/** @brief First receive buffer for double-buffered DMA reception */
 static volatile uint8_t rx_buffer_A[UART_BUFFER_SIZE];
+
+/** @brief Second receive buffer for double-buffered DMA reception */
 static volatile uint8_t rx_buffer_B[UART_BUFFER_SIZE];
+
+/** @brief Flag indicating that receive buffer is ready for processing */
 volatile bool rx_buffer_ready = false;
 
-// Pointer to buffer with pending data to be processed
+/** @brief Pointer to the buffer containing received data ready for processing */
 volatile uint8_t *rx_filled_buffer_p = NULL;
 
 
 /************************************************************************/
 /*                  INTERNAL FUNCTION PROTOTYPES                        */
 /************************************************************************/
+/**
+ * @brief Wait for DMA transmission to complete
+ * @param p_uart_pdc Pointer to UART PDC peripheral
+ */
 void _DMA_tx_wait(Pdc* p_uart_pdc);
+
+/**
+ * @brief Parse and execute UART command from received data packet
+ * @param data Pointer to received DataPacket
+ */
 void _parse_UART_command(const DataPacket *data);
+
+/**
+ * @brief Initialize UART timer/counter for timeout detection
+ */
 void _init_UART_TC(void);
+
+/**
+ * @brief Initialize UART DMA receiver with specified buffer size
+ * @param size Size of the receive buffer
+ */
 inline void _init_UART_DMA_rx(size_t size);
+
+/**
+ * @brief Send event queue status to host
+ */
 void _send_event_queue();
 
+#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void init_uart_comm(void)
 {
 	// Enable clock for PIOA
@@ -100,6 +127,7 @@ void init_uart_comm(void)
 	// Initialize TC for timeout detection
 	_init_UART_TC();
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 
@@ -130,6 +158,13 @@ void poll_uart()
 }
 
 
+/**
+ * @brief Initialize UART DMA receiver with specified buffer size
+ * @param size Size of the receive buffer
+ * 
+ * Configures PDC for double-buffered reception using two alternating buffers.
+ * Swaps between rx_buffer_A and rx_buffer_B for continuous reception.
+ */
 inline void _init_UART_DMA_rx(size_t size)
 {
 	// Configure PDC for double-buffered reception
@@ -151,7 +186,12 @@ inline void _init_UART_DMA_rx(size_t size)
 }
 
 
-// Timer/counter for UART timeout
+/**
+ * @brief Initialize UART timer/counter for timeout detection
+ * 
+ * Sets up a timer/counter to detect UART communication timeouts.
+ * The timer is configured with a prescaler of MCK/8 and counts up to TC_RC.
+ */
 void _init_UART_TC(void)
 {
 	sysclk_enable_peripheral_clock(ID_UART_TC);
@@ -179,7 +219,14 @@ void _init_UART_TC(void)
 /************************************************************************/
 /* Implementation of the communication protocol                         */
 /************************************************************************/
-// This takes about 280-360 us
+/**
+ * @brief Parse and execute UART command from received data packet
+ * @param data Pointer to received DataPacket containing the command
+ * 
+ * Parses the command string in the data packet and executes the corresponding action.
+ * Supported commands include PIN, TGL, PPL, NPL, BST, ENP, DSP, GO!, STP, CLR, etc.
+ * This function takes approximately 280-360 microseconds to execute.
+ */
 void _parse_UART_command(const DataPacket *data)
 {
 	if (strncasecmp(data->cmd, "PIN", 3) == 0)
@@ -291,6 +338,12 @@ void _parse_UART_command(const DataPacket *data)
 	}
 }
 
+/**
+ * @brief Send event queue status to host
+ * 
+ * Sends the current event queue contents to the host via UART.
+ * Each event in the queue is transmitted as a binary Event structure.
+ */
 void _send_event_queue()
 {
 	Event event;
@@ -309,6 +362,12 @@ void _send_event_queue()
 /************************************************************************/
 /*                   UART-RELATED INTERRUPTS                            */
 /************************************************************************/
+/**
+ * @brief UART timeout interrupt handler
+ * 
+ * Handles UART communication timeout by resetting the receiver buffer.
+ * This prevents the system from hanging if communication is interrupted.
+ */
 void UART_TIMEOUT_Handler(void)
 {
 	uint32_t status = tc_get_status(UART_TC, UART_TC_CH);
@@ -320,6 +379,12 @@ void UART_TIMEOUT_Handler(void)
 }
 
 
+/**
+ * @brief UART interrupt handler
+ * 
+ * Handles UART interrupts for both reception and transmission.
+ * Resets the timeout timer on character arrival and processes completed DMA transfers.
+ */
 void UART_Handler(void)
 {
 	uint32_t status = uart_get_status(UART);

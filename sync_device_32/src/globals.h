@@ -1,5 +1,5 @@
 /**
- * @file sys_globals.h
+ * @file globals.h
  * @author Roman Kiselev (roman.kiselev@stjude.org)
  * @brief Global system definitions: pinouts and settings.
  */

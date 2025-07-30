@@ -26,6 +26,7 @@ int _count_set_bits(unsigned int bitmask) {
 /*                SHORTCUTS FOR SHUTTER CONTROL                         */
 /************************************************************************/
 
+#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void open_shutters(uint32_t mask)
 {
 	if (mask == 0)
@@ -55,7 +56,9 @@ void close_shutters(uint32_t mask)
 		}
 	}
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
+#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void select_lasers(uint32_t mask)
 {
 	for (uint32_t i = 0; i < 4; ++i)
@@ -83,6 +86,7 @@ uint32_t selected_lasers()
 	}
 	return mask;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 void schedule_shutter_pulse(uint32_t pulse_duration_us,
                             uint64_t timestamp_us, uint32_t N, uint32_t interval_us,

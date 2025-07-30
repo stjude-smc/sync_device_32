@@ -75,6 +75,8 @@ sphinx_docs/_static/
 sphinx_docs/_templates/
 sphinx_docs/_doxygen/
 sphinx_docs/cpp_api/
+sphinx_docs/latex/
+sphinx_docs/xml/
 
 # Python log files
 python/*.log

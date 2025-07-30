@@ -1,9 +1,15 @@
-/*
- * sd_events.h
- *
- * Created: 9/9/2024 5:07:21 PM
- *  Author: rkiselev
- */ 
+/**
+ * @file events.h
+ * @author Roman Kiselev (roman.kiselev@stjude.org)
+ * @brief Event scheduling system for microsecond-precision timing control.
+ * 
+ * This module implements a priority queue-based event scheduler that provides
+ * microsecond-precision timing control for microscope synchronization. The system
+ * can handle up to 450 scheduled events with 64-bit timestamp precision.
+ * 
+ * @version 2.3.0
+ * @date 2024-09-09
+ */
 
 
 #pragma once
@@ -26,27 +32,49 @@
 #include "globals.h"
 #include "uart_comm.h"
 
-// Default pulse duration, us
+/**
+ * @brief Default pulse duration in microseconds.
+ * 
+ * This value is used when no specific pulse duration is provided.
+ * Can be modified at runtime via system properties.
+ */
 extern volatile uint32_t default_pulse_duration_us;
 
-// An event function expects two uint32_t arguments
+/**
+ * @brief Function pointer type for event execution.
+ * 
+ * Event functions receive two 32-bit arguments and perform the actual
+ * hardware control operations (pin setting, toggling, etc.).
+ * 
+ * @param arg1 First argument (typically pin index or duration)
+ * @param arg2 Second argument (typically additional parameters)
+ */
 using EventFunc = void (*)(uint32_t, uint32_t);
 
-typedef struct  __attribute__((packed)) Event
+/**
+ * @brief Event structure for priority queue scheduling.
+ * 
+ * This structure represents a single scheduled event in the system.
+ * Events are ordered by timestamp in a priority queue for precise execution.
+ * The structure is packed to minimize memory usage.
+ * 
+ * @note Total size: 28 bytes
+ */
+typedef struct Event
 {
-	EventFunc     func;		   // 4 bytes - pointer to a function to call
-	uint32_t	  arg1;        // 4 bytes - first function argument
-	uint32_t	  arg2;        // 4 bytes - second function argument
-	union                      // 8 bytes - timestamp for function call
+	EventFunc     func;		   /**< Function pointer to execute (4 bytes) */
+	uint32_t	  arg1;        /**< First function argument (4 bytes) */
+	uint32_t	  arg2;        /**< Second function argument (4 bytes) */
+	union                      /**< 64-bit timestamp in clock ticks (8 bytes) */
 	{
-		uint64_t  ts64_cts;
+		uint64_t  ts64_cts;    /**< Full 64-bit timestamp */
 		struct {
-			uint32_t ts_lo32_cts;  // lower 4 bytes - for timer/counter value
-			uint32_t ts_hi32_cts;  // upper 4 bytes - for timer/counter overflows
+			uint32_t ts_lo32_cts;  /**< Lower 32 bits - timer/counter value */
+			uint32_t ts_hi32_cts;  /**< Upper 32 bits - timer/counter overflows */
 		};
 	};
-	uint32_t	  N;           // 4 bytes - number of remaining calls
-	uint32_t	  interv_cts;  // 4 bytes - interval between the calls
+	uint32_t	  N;           /**< Number of remaining executions (4 bytes) */
+	uint32_t	  interv_cts;  /**< Interval between executions in clock ticks (4 bytes) */
 
    // Constructor
    Event() : func([](uint32_t, uint32_t) { printf("ERR: Event func not set!\n"); }),
@@ -59,14 +87,42 @@ typedef struct  __attribute__((packed)) Event
 } Event;  // 28 bytes
 
 
-// Scheduled events, sorted by timestamp
+/**
+ * @brief Priority queue of scheduled events.
+ * 
+ * Events are automatically sorted by timestamp (earliest first).
+ * The queue is processed by the system timer interrupt handler.
+ */
 extern std::priority_queue<Event> event_queue;
 
+/**
+ * @brief System timer overflow counter.
+ * 
+ * Tracks the number of timer overflows to maintain 64-bit precision
+ * across the full time range of the system.
+ */
 extern volatile uint64_t sys_tc_ovf_count;
 
-// Allocate memory and create an event from data packet
+/**
+ * @brief Create an event from a data packet.
+ * 
+ * Allocates memory and initializes an Event structure from the provided
+ * data packet. If no function is specified, a default error handler is used.
+ * 
+ * @param packet Pointer to the data packet containing event parameters
+ * @param func Optional function pointer (defaults to nullptr)
+ * @return Pointer to the allocated Event structure
+ */
 Event* event_from_datapacket(const DataPacket* packet, EventFunc func=nullptr);
 
+/**
+ * @brief Schedule an event for execution.
+ * 
+ * Adds an event to the priority queue for execution at the specified time.
+ * 
+ * @param event Pointer to the event to schedule
+ * @param relative If true, timestamp is relative to current time (default: true)
+ */
 void schedule_event(const Event *event, bool relative = true);
 
 void schedule_pulse(const DataPacket *data, bool is_positive);

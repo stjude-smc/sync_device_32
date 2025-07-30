@@ -28,21 +28,36 @@ def clean_build():
         print("Cleaning previous build...")
         shutil.rmtree(build_dir)
         print("✓ Build cleaned")
+    
+    # Also clean Doxygen output
+    doxygen_dir = Path("sphinx_docs/_doxygen")
+    if doxygen_dir.exists():
+        print("Cleaning Doxygen output...")
+        shutil.rmtree(doxygen_dir)
+        print("✓ Doxygen output cleaned")
 
-def ensure_static_dir():
-    """Ensure _static directory exists."""
+def ensure_directories():
+    """Ensure required directories exist."""
+    # Ensure _static directory exists
     static_dir = Path("sphinx_docs/_static")
     if not static_dir.exists():
         print("Creating _static directory...")
         static_dir.mkdir(parents=True, exist_ok=True)
         print("✓ _static directory created")
+    
+    # Ensure _doxygen directory exists for Doxygen output
+    doxygen_dir = Path("sphinx_docs/_doxygen")
+    if not doxygen_dir.exists():
+        print("Creating _doxygen directory...")
+        doxygen_dir.mkdir(parents=True, exist_ok=True)
+        print("✓ _doxygen directory created")
 
 def build_html():
     """Build HTML documentation."""
     print("Building HTML documentation...")
     
-    # Ensure _static directory exists
-    ensure_static_dir()
+    # Ensure required directories exist
+    ensure_directories()
     
     # Add Doxygen to PATH if not already there
     doxygen_path = r"C:\Program Files\doxygen\bin"

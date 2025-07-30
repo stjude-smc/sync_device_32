@@ -132,6 +132,7 @@ uint32_t pin_name_to_ioport_id(const uint32_t pin_name_uint32) {
 	return 0;
 }
 
+#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 // Initialize predefined pins for camera and laser shutters
 void init_pins()
 {
@@ -162,6 +163,7 @@ void init_pins()
 		}
 	}
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 void Pin::set_level(bool level)

@@ -9,17 +9,35 @@
 #include "globals.h"
 #include "pins.h"
 
+/** @brief First interlock condition match flag */
 volatile bool intlck_match_1 = false;
+
+/** @brief Second interlock condition match flag */
 volatile bool intlck_match_2 = false;
+
+/** @brief Global laser enable/disable state */
 volatile bool lasers_enabled = true;
 
+/** @brief Cy2 laser active state */
 volatile bool cy2_active = true;
+
+/** @brief Cy3 laser active state */
 volatile bool cy3_active = true;
+
+/** @brief Cy5 laser active state */
 volatile bool cy5_active = true;
+
+/** @brief Cy7 laser active state */
 volatile bool cy7_active = true;
 
 bool interlock_enabled = true;
 
+/**
+ * @brief Initialize the interlock timer/counter
+ * 
+ * Sets up a timer/counter for laser interlock monitoring with waveform generation.
+ * Configures TIOA or TIOB output pins and enables interrupts for interlock detection.
+ */
 void _init_interlock_timer()
 {
     sysclk_enable_peripheral_clock(ID_INTLCK_TC);
@@ -56,6 +74,7 @@ void _init_interlock_timer()
 }
 
 
+#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void init_interlock()
 {
     _init_interlock_timer();
@@ -67,6 +86,7 @@ void init_interlock()
 
     tc_start(INTLCK_TC, INTLCK_TC_CH);
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 void enable_lasers()
