@@ -2,12 +2,18 @@
 """
 Simple build script for sync_device_32 documentation.
 No external tools required - just Python and pip.
+
+Usage:
+    python build_docs.py          # Build documentation
+    python build_docs.py clean    # Clean generated files only
+    python build_docs.py build    # Build documentation (explicit)
 """
 
 import os
 import sys
 import subprocess
 import shutil
+import argparse
 from pathlib import Path
 
 def install_deps():
@@ -22,19 +28,32 @@ def install_deps():
         return False
 
 def clean_build():
-    """Remove previous build."""
-    build_dir = Path("sphinx_docs/_build")
-    if build_dir.exists():
-        print("Cleaning previous build...")
-        shutil.rmtree(build_dir)
-        print("✓ Build cleaned")
+    """Remove all generated documentation files and directories."""
+    sphinx_docs = Path("sphinx_docs")
     
-    # Also clean Doxygen output
-    doxygen_dir = Path("sphinx_docs/_doxygen")
-    if doxygen_dir.exists():
-        print("Cleaning Doxygen output...")
-        shutil.rmtree(doxygen_dir)
-        print("✓ Doxygen output cleaned")
+    # List of directories and files to clean
+    to_clean = [
+        "_build",           # Sphinx build output
+        "_doxygen",         # Doxygen XML output
+        "_static",          # Generated static files
+        "cpp_api",          # Generated C++ API documentation
+        "latex",            # LaTeX output (if generated)
+        "xml",              # Additional XML output
+    ]
+    
+    print("Cleaning all generated documentation files...")
+    
+    for item in to_clean:
+        item_path = sphinx_docs / item
+        if item_path.exists():
+            if item_path.is_dir():
+                shutil.rmtree(item_path)
+                print(f"  ✓ Removed directory: {item}")
+            else:
+                item_path.unlink()
+                print(f"  ✓ Removed file: {item}")
+    
+    print("✓ All generated files cleaned")
 
 def ensure_directories():
     """Ensure required directories exist."""
@@ -99,7 +118,26 @@ def open_browser():
         print("✗ HTML file not found")
 
 def main():
-    print("=== sync_device_32 Documentation Builder ===\n")
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description="Build or clean sync_device_32 documentation",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python build_docs.py          # Build documentation
+  python build_docs.py clean    # Clean generated files only
+  python build_docs.py build    # Build documentation (explicit)
+        """
+    )
+    parser.add_argument(
+        'command', 
+        nargs='?', 
+        default='build',
+        choices=['build', 'clean'],
+        help='Command to run (default: build)'
+    )
+    
+    args = parser.parse_args()
     
     # Check if docs directory exists
     if not Path("sphinx_docs").exists():
@@ -107,23 +145,32 @@ def main():
         print("Please run this script from the project root directory.")
         return 1
     
-    # Install dependencies
-    if not install_deps():
-        return 1
+    if args.command == 'clean':
+        print("=== sync_device_32 Documentation Cleaner ===\n")
+        clean_build()
+        print("\n=== Clean Complete! ===")
+        return 0
     
-    # Clean previous build
-    clean_build()
-    
-    # Build documentation
-    if not build_html():
-        return 1
-    
-    # Open in browser
-    open_browser()
-    
-    print("\n=== Build Complete! ===")
-    print("Documentation is available at: sphinx_docs/_build/html/index.html")
-    return 0
+    elif args.command == 'build':
+        print("=== sync_device_32 Documentation Builder ===\n")
+        
+        # Install dependencies
+        if not install_deps():
+            return 1
+        
+        # Clean previous build
+        clean_build()
+        
+        # Build documentation
+        if not build_html():
+            return 1
+        
+        # Open in browser
+        open_browser()
+        
+        print("\n=== Build Complete! ===")
+        print("Documentation is available at: sphinx_docs/_build/html/index.html")
+        return 0
 
 if __name__ == "__main__":
     sys.exit(main()) 

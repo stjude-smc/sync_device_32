@@ -35,6 +35,9 @@ EXTRACT_ANON_NSPACES   = NO
 # Handle typedefs properly to avoid duplicate declarations
 TYPEDEF_HIDES_STRUCT   = YES
 
+# Extract settings
+EXTRACT_LOCAL_CLASSES  = YES
+
 # Output settings
 GENERATE_HTML          = NO
 GENERATE_XML           = YES
