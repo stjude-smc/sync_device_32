@@ -74,7 +74,6 @@ void _init_interlock_timer()
 }
 
 
-#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void init_interlock()
 {
     _init_interlock_timer();
@@ -86,7 +85,6 @@ void init_interlock()
 
     tc_start(INTLCK_TC, INTLCK_TC_CH);
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 void enable_lasers()

@@ -42,7 +42,6 @@ uint32_t get_N_events(){return (uint32_t) event_queue.size();}
 
 
 
-#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void init_props() {
 	props[ro_SYS_TIMER_STATUS]       = new ExternalProperty((uint32_t*) &sys_timer_running);
 	props[ro_SYS_TIMER_VALUE]        = new ExternalProperty((uint32_t*) &(SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV));
@@ -61,11 +60,9 @@ void init_props() {
 	props[rw_SHUTTER_DELAY_us]       = new InternalProperty(1000UL, PropertyAccess::ReadWrite);
 	props[rw_CAM_READOUT_us]         = new InternalProperty(12000UL, PropertyAccess::ReadWrite);
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 
-#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 uint32_t get_property(SysProps id)
 {
 	auto iterator = props.find(id);
@@ -87,7 +84,6 @@ void set_property(SysProps id, uint32_t value)
     }
     iterator->second->set_value(value);
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 // InternalProperty methods

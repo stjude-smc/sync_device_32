@@ -27,7 +27,7 @@ RECURSIVE              = NO
 # Enable preprocessing to handle extern "C" blocks
 ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES
-EXPAND_ONLY_PREDEF    = NO
+EXPAND_ONLY_PREDEF     = NO
 
 # Extract settings
 EXTRACT_ALL            = YES
@@ -50,7 +50,7 @@ CALLER_GRAPH           = NO
 
 # Predefined macros to handle includes
 PREDEFINED             = __DOXYGEN__
-PREDEFINED            += DOXYGEN_SHOULD_SKIP_THIS
+
 PREDEFINED            += extern
 PREDEFINED            += "C"
 

@@ -88,7 +88,6 @@ inline void _init_UART_DMA_rx(size_t size);
  */
 void _send_event_queue();
 
-#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void init_uart_comm(void)
 {
 	// Enable clock for PIOA
@@ -127,7 +126,6 @@ void init_uart_comm(void)
 	// Initialize TC for timeout detection
 	_init_UART_TC();
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 
