@@ -5,23 +5,18 @@ PROJECT_NAME           = "sync_device_32"
 PROJECT_NUMBER         = "2.3.0"
 PROJECT_BRIEF          = "Microscope Synchronization Device Firmware"
 
-# Input files - only header files to avoid duplicate declarations
-INPUT                  = ../sync_device_32/src/events.h
-INPUT                 += ../sync_device_32/src/ext_pTIRF.h
-INPUT                 += ../sync_device_32/src/globals.h
-INPUT                 += ../sync_device_32/src/interlock.h
-INPUT                 += ../sync_device_32/src/pins.h
-INPUT                 += ../sync_device_32/src/props.h
-INPUT                 += ../sync_device_32/src/uart_comm.h
+# Input directory - Doxygen will scan all files in the directory
+INPUT                  = ../sync_device_32/src
 
 # File patterns to include
-FILE_PATTERNS          = *.h *.cpp *.c
+FILE_PATTERNS          = *.h
 
-# Exclude ASF and config directories
+# Exclude ASF and config directories, and third-party files
 EXCLUDE_PATTERNS       = */ASF/*
 EXCLUDE_PATTERNS      += */config/*
+EXCLUDE_PATTERNS      += asf.h
 
-# Don't recursively scan directories
+# Don't scan recursively since all header files are in the top-level src directory
 RECURSIVE              = NO
 
 # Enable preprocessing to handle extern "C" blocks
@@ -35,7 +30,10 @@ EXTRACT_PRIVATE        = NO
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_LOCAL_METHODS  = YES
-EXTRACT_ANON_NSPACES   = YES
+EXTRACT_ANON_NSPACES   = NO
+
+# Handle typedefs properly to avoid duplicate declarations
+TYPEDEF_HIDES_STRUCT   = YES
 
 # Output settings
 GENERATE_HTML          = NO
@@ -60,5 +58,6 @@ HIDE_UNDOC_CLASSES     = NO
 SHOW_GROUPED_MEMB_INC  = YES
 SHOW_USED_FILES        = YES
 
-# Include paths (minimal)
-INCLUDE_PATH           = ../sync_device_32/src 
+# Include paths - add parent directory for cross-references
+INCLUDE_PATH           = ../sync_device_32/src
+INCLUDE_PATH          += ../sync_device_32 
