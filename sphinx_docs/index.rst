@@ -1,7 +1,7 @@
 Welcome to sync_device_32 documentation!
 ==========================================
 
-**Version:** 2.3.0  
+**Version:** |version|  
 **Author:** Roman Kiselev  
 **License:** Apache 2.0
 

@@ -11,10 +11,10 @@ import shutil
 from pathlib import Path
 
 def install_deps():
-    """Install Sphinx and theme."""
+    """Install Sphinx and dependencies from requirements.txt."""
     print("Installing Sphinx and dependencies...")
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "sphinx", "sphinx-rtd-theme"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "sphinx_docs/requirements.txt"])
         print("✓ Dependencies installed successfully!")
         return True
     except subprocess.CalledProcessError:

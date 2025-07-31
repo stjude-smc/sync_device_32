@@ -21,8 +21,10 @@ copyright = '2025, Roman Kiselev'
 author = 'Roman Kiselev'
 
 # The full version, including alpha/beta/rc tags
-release = '2.3.0'
-version = '2.3.0'
+# Import version from the package
+from __version__ import __version__
+release = __version__
+version = __version__
 
 # -- General configuration ---------------------------------------------------
 
