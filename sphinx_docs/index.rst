@@ -7,6 +7,8 @@ Welcome to sync_device_32 documentation!
 
 A high-precision synchronization device for advanced microscope control, based on a 32-bit ARM microcontroller (Arduino Due).
 
+`View on GitHub <https://github.com/stjude-smc/sync_device_32>`_
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
