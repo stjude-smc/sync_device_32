@@ -279,6 +279,31 @@ See [`python/sync device demo.ipynb`](python/sync%20device%20demo.ipynb) for a c
 - **Python API:** See `python/sync_dev.py` and the Jupyter notebook.
 - **Data packet structure:** See `doc/data packet structure.xlsx`.
 
+### Building Documentation
+
+This project includes comprehensive Sphinx/Doxygen documentation that combines Python API documentation with C++ firmware documentation.
+
+#### Prerequisites
+
+**Doxygen:** Required for C++ documentation generation
+   - **Windows:** Download and install from [Doxygen website](https://www.doxygen.nl/download.html)
+   - **Linux:** `sudo apt-get install doxygen` (Ubuntu/Debian) or `sudo yum install doxygen` (CentOS/RHEL)
+   - **macOS:** `brew install doxygen`
+
+#### Building the Documentation
+
+Run the automated build script from the project root:
+
+```bash
+python build_docs.py
+```
+
+The documentation will be available at `sphinx_docs/_build/html/index.html`. The generated documentation includes:
+- **Python API Reference:** Auto-generated from docstrings in the Python modules
+- **C++ API Reference:** Generated from firmware header files using Doxygen + Breathe
+- **User Guide:** Manual documentation and examples
+- **Firmware Architecture:** Detailed explanations of the C++ implementation
+
 ## Firmware Development
 
 ### Building the Firmware
