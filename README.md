@@ -3,7 +3,7 @@
 **Version:** 2.3.0  
 **Author:** Roman Kiselev  
 **License:** Apache 2.0  
-**URL:** [https://github.com/ximeg/sync_device_32](https://github.com/ximeg/sync_device_32)
+**URL:** [https://github.com/stjude-smc/sync_device_32](https://github.com/stjude-smc/sync_device_32)
 
 ## Overview
 
@@ -25,7 +25,7 @@ This is the **second generation** of the microscope synchronization device, base
 - **Safety interlocks** for laser protection
 - **Modern Python API** with context management and logging
 
-**Legacy Repository:** The original 8-bit version is available at [sync_device](https://github.com/ximeg/sync_device) for reference.
+**Legacy Repository:** The original 8-bit version is available at [sync_device_8bit_legacy](https://github.com/stjude-smc/sync_device_8bit_legacy) for reference.
 
 
 ---
@@ -350,4 +350,4 @@ Apache 2.0.
 
 ---
 
-**For questions or contributions, please open an issue or pull request on [GitHub](https://github.com/ximeg/sync_device_32).** 
+**For questions or contributions, please open an issue or pull request on [GitHub](https://github.com/stjude-smc/sync_device_32).** 

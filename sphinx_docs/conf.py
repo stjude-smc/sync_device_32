@@ -169,4 +169,23 @@ language = 'en'
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-modindex_common_prefix = ['sync_dev.'] 
+modindex_common_prefix = ['sync_dev.']
+
+# -- GitHub Pages specific settings -----------------------------------------
+
+# Ensure proper base URL for GitHub Pages
+html_baseurl = 'https://stjude-smc.github.io/sync_device_32/'
+
+# Add canonical URL
+html_use_index = True
+html_split_index = False
+
+# Ensure proper encoding
+html_output_encoding = 'utf-8'
+
+# Add meta tags for better SEO
+html_meta = {
+    'viewport': 'width=device-width, initial-scale=1',
+    'description': 'Documentation for sync_device_32 - A synchronization device library',
+    'keywords': 'synchronization, device, library, documentation',
+} 

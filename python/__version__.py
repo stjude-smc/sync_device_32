@@ -12,4 +12,4 @@ __version__ = "2.3.0"  # Major and minor MUST be the same as in `globals.h`, pat
 __author__ = "Roman Kiselev"
 __author_email__ = "roman.kiselev@stjude.org"
 __license__ = "Apache 2.0"
-__url__ = "https://github.com/ximeg/sync_device_32"
+__url__ = "https://github.com/stjude-smc/sync_device_32"

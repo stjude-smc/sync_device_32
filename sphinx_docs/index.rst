@@ -87,4 +87,4 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. _GitHub: https://github.com/ximeg/sync_device_32 
+.. _GitHub: https://github.com/stjude-smc/sync_device_32 

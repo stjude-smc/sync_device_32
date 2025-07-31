@@ -30,7 +30,7 @@ Install the sync_device_32 Driver
 .. code-block:: bash
 
    # Clone or download the repository
-   git clone https://github.com/ximeg/sync_device_32.git
+   git clone https://github.com/stjude-smc/sync_device_32.git
    cd sync_device_32
    
    # Copy the python directory to your project
@@ -196,7 +196,7 @@ Getting Help
 
 * Check the README for troubleshooting tips
 * Review the README for hardware documentation
-* Open an issue on `GitHub <https://github.com/ximeg/sync_device_32>`_
+* Open an issue on `GitHub <https://github.com/stjude-smc/sync_device_32>`_
 
 Next Steps
 ----------
