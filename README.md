@@ -5,6 +5,8 @@
 **License:** Apache 2.0  
 **URL:** [https://github.com/stjude-smc/sync_device_32](https://github.com/stjude-smc/sync_device_32)
 
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://stjude-smc.github.io/sync_device_32/)
+
 ## Overview
 
 This project provides firmware and a Python driver for a high-precision synchronization device based on a 32-bit ARM microcontroller (Arduino Due). The device is designed for advanced microscope control, enabling precise timing and coordination of lasers, shutters, cameras, and other peripherals.
@@ -275,6 +277,8 @@ See [`python/sync device demo.ipynb`](python/sync%20device%20demo.ipynb) for a c
 
 ## Documentation
 
+📖 **[Full Documentation](https://stjude-smc.github.io/sync_device_32/)** - Complete API reference, user guides, and examples
+
 - **Firmware:** See `sync_device_32/src/` for C++ source and hardware logic.
 - **Python API:** See `python/sync_dev.py` and the Jupyter notebook.
 - **Data packet structure:** See `doc/data packet structure.xlsx`.
@@ -303,6 +307,8 @@ The documentation will be available at `sphinx_docs/_build/html/index.html`. The
 - **C++ API Reference:** Generated from firmware header files using Doxygen + Breathe
 - **User Guide:** Manual documentation and examples
 - **Firmware Architecture:** Detailed explanations of the C++ implementation
+
+The Sphinx documentation automatically builds and deploys to GitHub pages on every push to branches `develop` and `master` via GitHub actions.
 
 ## Firmware Development
 
