@@ -79,7 +79,7 @@ This is the **second generation** of the microscope synchronization device, base
 
 The device communicates via UART at 115,200 baud using a fixed-length 24-byte packet format. Each packet contains a command and associated parameters for precise event scheduling. All 24 bytes of a packet must arrive together, with no delay longer than 25 ms between individual bytes; otherwise, the packet is considered incomplete and will be discarded.
 
-![Data Packet Structure](doc/data%20packet%20structure.svg)
+<img src="doc/data%20packet%20structure.svg" alt="Data Packet Structure" width="100%">
 
 **Packet Format:**
 - **Command (4 bytes):** 3-character command string, null-terminated
