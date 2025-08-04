@@ -150,11 +150,12 @@ with sd as dev:
 The device uses a **priority queue** to manage event scheduling with microsecond precision:
 
 **Event Structure (28 bytes):**
-- **Function pointer** (4 bytes) - what action to execute
-- **Arguments** (4 bytes) - parameters for the function (e.g., pin number, duration)
-- **Timestamp** (4 bytes) - 32-bit absolute time when to execute
-- **Count** (4 bytes) - number of repetitions remaining
-- **Interval** (4 bytes) - time between repetitions
+- **Function pointer** (4 bytes) — what action to execute (`EventFunc func`)
+- **Argument 1** (4 bytes) — first parameter for the function (e.g., pin number)
+- **Argument 2** (4 bytes) — second parameter for the function (e.g., duration)
+- **Timestamp** (8 bytes) — 64-bit absolute time when to execute (`ts64_cts`)
+- **Count** (4 bytes) — number of repetitions remaining (`N`)
+- **Interval** (4 bytes) — time between repetitions (`interv_cts`)
 
 **Queue Operation:**
 1. **Sorting:** Events are automatically sorted by timestamp (earliest first)
