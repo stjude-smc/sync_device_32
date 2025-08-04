@@ -57,7 +57,12 @@ This is the **second generation** of the microscope synchronization device, base
 
 ## 🔧 Hardware
 
-- **Platform:** Arduino Due (SAM3X8E ARM Cortex-M3)
+- **Platform:** Arduino Due (32-bit SAM3X8E ARM Cortex-M3 microcontroller)
+
+<img src="https://store-usa.arduino.cc/cdn/shop/files/A000062_00.front_475x357.jpg" alt="Arduino Due Board">
+
+*Arduino Due board - the hardware platform for sync_device_32*
+
 - **Key Pins:**
   - **Laser shutters:** A0 (Cy2), A1 (Cy3), A2 (Cy5), A3 (Cy7)
   - **Camera trigger:** A12
