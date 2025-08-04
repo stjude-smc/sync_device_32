@@ -75,14 +75,24 @@ This is the **second generation** of the microscope synchronization device, base
 
 - **Interlock circuit:** D12 (input) and D13 (output) for laser safety
 
-### Communication Protocol
+### Communication Protocol & Data Structure
 
-- **Interface:** UART at 115,200 baud (vs. 2,000,000 baud in legacy version)
-- **Data format:** 24-byte packets with command and arguments
-- **Timeout:** Automatic detection of incomplete UART transmissions
-- **Version check:** Firmware version verification on connection
+The device communicates via UART at 115,200 baud using a fixed-length 24-byte packet format. Each packet contains a command and associated parameters for precise event scheduling. All 24 bytes of a packet must arrive together, with no delay longer than 25 ms between individual bytes; otherwise, the packet is considered incomplete and will be discarded.
+
+![Data Packet Structure](doc/data%20packet%20structure.svg)
+
+**Packet Format:**
+- **Command (4 bytes):** 3-character command string, null-terminated
+- **Argument 1 (4 bytes):** First parameter (pin index, duration, etc.)
+- **Argument 2 (4 bytes):** Second parameter (additional settings)
+- **Timestamp (4 bytes):** Scheduled time point of function call, in microseconds
+- **Count (4 bytes):** Number of repetitions (0 = infinite)
+- **Interval (4 bytes):** Time between repetitions in microseconds
+
+
 
 **Startup Message:**
+Upon opening of the COM port, the device resets and sends the startup message the includes the firmware version.
 ```
 Sync device is ready. Firmware version: 2.3.0
 ```
@@ -155,11 +165,11 @@ with sd as dev:
 - **Enable/Disable Pin:** `sd.enable_pin(pin)`, `sd.disable_pin(pin)`
 - **Clear/Stop/Go:** `sd.clear()`, `sd.stop()`, `sd.go()`
 
-#### Priority Queue System
+#### Event Queue & Execution System
 
-The device uses a **priority queue** to manage event scheduling with microsecond precision:
+The device uses a **priority queue** to manage event scheduling with microsecond precision. Each data packet received from the host is converted into an internal event structure for scheduling. The most significant change is the conversion of timestamp from 4-byte to 8-byte integer, as well as mapping of pins from name to internal IOPORT index.
 
-**Event Structure (28 bytes):**
+**Internal Event Structure (28 bytes):**
 - **Function pointer** (4 bytes) — what action to execute (`EventFunc func`)
 - **Argument 1** (4 bytes) — first parameter for the function (e.g., pin number)
 - **Argument 2** (4 bytes) — second parameter for the function (e.g., duration)
@@ -168,13 +178,14 @@ The device uses a **priority queue** to manage event scheduling with microsecond
 - **Interval** (4 bytes) — time between repetitions (`interv_cts`)
 
 **Queue Operation:**
-1. **Sorting:** Events are automatically sorted by timestamp (earliest first)
-2. **Execution:** System timer triggers the next event at its exact timestamp
-3. **Repetition:** Events with `N > 1` are rescheduled with updated timestamps
-4. **Precision:** Hardware timer ensures microsecond-accurate execution
-5. **Capacity:** Up to 450 events can be queued simultaneously
+1. **Packet Processing:** 24-byte data packets are converted to 28-byte event structures
+2. **Sorting:** Events are automatically sorted by timestamp (earliest first)
+3. **Execution:** System timer triggers the next event at its exact timestamp
+4. **Repetition:** Events with `N > 1` are rescheduled with updated timestamps
+5. **Precision:** Hardware timer ensures microsecond-accurate execution
+6. **Capacity:** Up to 450 events can be queued simultaneously
 
-**Example:** When you schedule multiple events, they're automatically ordered and executed in time sequence, regardless of the order they were submitted.
+**Example:** When you schedule multiple events, they're automatically ordered and executed in time sequence, regardless of the order they were submitted. If two events have exactly the same timestamp, their execution order is undefined.
 
 ### Laser Shutter and Interlock
 

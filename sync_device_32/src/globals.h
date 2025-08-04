@@ -98,7 +98,7 @@ inline void dbg_pin_dn(){
 /************************************************************************/
 #define UART_BUFFER_SIZE 512   // Size of DMA-controlled UART buffers
 #define UART_BAUDRATE 115200   // bits per second
-#define UART_TIMEOUT  25       // ms
+#define UART_TIMEOUT  25       // ms - timeout for UART communication
 // UART uses timer 4 (module TC1 channel 1)
 #define ID_UART_TC           ID_TC4
 #define UART_TC              TC1	// ID / 3
