@@ -58,23 +58,23 @@ using EventFunc = void (*)(uint32_t, uint32_t);
  * Events are ordered by timestamp in a priority queue for precise execution.
  * The structure is packed to minimize memory usage.
  * 
- * @note Total size: 28 bytes
+ * @note The Event struct is 28 bytes in total. The event timestamp is stored as a 64-bit integer (ts64_cts), which can also be accessed as two 32-bit fields: ts_lo32_cts (lower 32 bits) and ts_hi32_cts (upper 32 bits).
  */
 typedef struct Event
 {
-	EventFunc     func;		   /**< Function pointer to execute (4 bytes) */
+	EventFunc func;            /**< Pointer to the function that will be executed for this event (4 bytes) */
 	uint32_t	  arg1;        /**< First function argument (4 bytes) */
 	uint32_t	  arg2;        /**< Second function argument (4 bytes) */
 	union                      /**< 64-bit timestamp in clock ticks (8 bytes) */
 	{
-		uint64_t  ts64_cts;    /**< Full 64-bit timestamp */
+		uint64_t  ts64_cts;    /**< Full 64-bit timestamp, shared with ts_lo32_cts and ts_hi32_cts */
 		struct {
-			uint32_t ts_lo32_cts;  /**< Lower 32 bits - timer/counter value */
-			uint32_t ts_hi32_cts;  /**< Upper 32 bits - timer/counter overflows */
+			uint32_t ts_lo32_cts;  /**< Lower 32 bits of the 64-bit timestamp - value of the hardware timer/counter */
+			uint32_t ts_hi32_cts;  /**< Upper 32 bits of the 64-bit timestamp - number of timer/counter overflows */
 		};
 	};
-	uint32_t	  N;           /**< Number of remaining executions (4 bytes) */
-	uint32_t	  interv_cts;  /**< Interval between executions in clock ticks (4 bytes) */
+	uint32_t	  N;           /**< Number of remaining event repetitions (4 bytes) */
+	uint32_t	  interv_cts;  /**< Interval between event repetitions in clock ticks (4 bytes) */
 
    // Constructor
    Event() : func([](uint32_t, uint32_t) { printf("ERR: Event func not set!\n"); }),
