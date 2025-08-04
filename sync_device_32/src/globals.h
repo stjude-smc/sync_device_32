@@ -28,18 +28,46 @@ const uint32_t shutter_pins[] = { CY2_PIN, CY3_PIN, CY5_PIN, CY7_PIN };
 
 // Error indicator trigger
 #define ERR_PIN		PIO_PB14_IDX	// D53
+
+/**
+ * @brief Turn on the error indicator LED.
+ * 
+ * Sets the error LED pin high to indicate an error condition.
+ * The LED is connected to pin D53 on the Arduino Due.
+ */
 inline void err_led_on(){
 	ioport_set_pin_level(ERR_PIN, 1);
 }
+
+/**
+ * @brief Turn off the error indicator LED.
+ * 
+ * Sets the error LED pin low to clear the error indication.
+ * The LED is connected to pin D53 on the Arduino Due.
+ */
 inline void err_led_off(){
 	ioport_set_pin_level(ERR_PIN, 0);
 }
 
 // Debug pin
 #define DBG_PIN  PIO_PA7_IDX        // D31
+
+/**
+ * @brief Set the debug pin high.
+ * 
+ * Sets the debug pin high for debugging and timing measurements.
+ * The debug pin is connected to D31 on the Arduino Due.
+ */
 inline void dbg_pin_up(){
 	ioport_set_pin_level(DBG_PIN, 1);
 }
+
+/**
+ * @brief Set the debug pin low.
+ * 
+ * Sets the debug pin low for debugging and timing measurements.
+ * The debug pin is connected to D31 on the Arduino Due.
+ */
 inline void dbg_pin_dn(){
 	ioport_set_pin_level(DBG_PIN, 0);
 }

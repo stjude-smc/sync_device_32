@@ -125,39 +125,211 @@ Event* event_from_datapacket(const DataPacket* packet, EventFunc func=nullptr);
  */
 void schedule_event(const Event *event, bool relative = true);
 
+/**
+ * @brief Schedule a pulse event from a data packet.
+ * @param data Pointer to the data packet containing pulse parameters
+ * @param is_positive If true, generate positive pulse; if false, negative pulse
+ * 
+ * Creates and schedules a pulse event based on the provided data packet.
+ * The pulse will be generated on the pin specified in the data packet.
+ */
 void schedule_pulse(const DataPacket *data, bool is_positive);
+
+/**
+ * @brief Schedule a pulse event with explicit parameters.
+ * @param pin_idx IOPORT index of the pin to pulse (see pin_map_t in pins.cpp for pin names)
+ * @param pulse_duration_us Duration of the pulse in microseconds
+ * @param timestamp_us Timestamp for the pulse in microseconds
+ * @param N Number of pulses to generate
+ * @param interval_us Interval between pulses in microseconds
+ * @param relative If true, timestamp is relative to current time
+ * 
+ * Creates and schedules a pulse event with the specified parameters.
+ * This function provides direct control over all pulse parameters.
+ */
 void schedule_pulse(uint32_t pin_idx, uint32_t pulse_duration_us, uint64_t timestamp_us,
                     uint32_t N, uint32_t interval_us, bool relative = true);
+
+/**
+ * @brief Schedule a pin set event from a data packet.
+ * @param data Pointer to the data packet containing pin parameters
+ * 
+ * Creates and schedules a pin set event based on the provided data packet.
+ * The pin will be set to the level specified in the data packet.
+ */
 void schedule_pin(const DataPacket *data);
+
+/**
+ * @brief Schedule a pin toggle event from a data packet.
+ * @param data Pointer to the data packet containing pin parameters
+ * 
+ * Creates and schedules a pin toggle event based on the provided data packet.
+ * The pin will be toggled at the specified time.
+ */
 void schedule_toggle(const DataPacket *data);
+
+/**
+ * @brief Schedule a burst event from a data packet.
+ * @param data Pointer to the data packet containing burst parameters
+ * 
+ * Creates and schedules a burst event based on the provided data packet.
+ * The burst will generate a train of pulses with the specified parameters.
+ */
 void schedule_burst(const DataPacket *data);
+
+/**
+ * @brief Schedule a pin enable event from a data packet.
+ * @param data Pointer to the data packet containing pin parameters
+ * 
+ * Creates and schedules a pin enable event based on the provided data packet.
+ * The pin will be enabled at the specified time.
+ */
 void schedule_enable_pin(const DataPacket *data);
+
+/**
+ * @brief Schedule a pin disable event from a data packet.
+ * @param data Pointer to the data packet containing pin parameters
+ * 
+ * Creates and schedules a pin disable event based on the provided data packet.
+ * The pin will be disabled at the specified time.
+ */
 void schedule_disable_pin(const DataPacket *data);
 
+/**
+ * @brief Process all pending events in the queue.
+ * 
+ * Checks the event queue and executes any events whose timestamps have been reached.
+ * This function should be called regularly by the system timer interrupt handler.
+ */
 void process_events();
 
+/**
+ * @brief Initialize the burst timer.
+ * 
+ * Sets up the timer/counter used for generating burst pulse trains.
+ * Configures the timer hardware and enables necessary interrupts.
+ */
 void init_burst_timer();
 
+/**
+ * @brief Initialize the system timer.
+ * 
+ * Sets up the main system timer/counter used for event scheduling.
+ * Configures the timer hardware, prescaler, and interrupt handling.
+ */
 void init_sys_timer();
+
+/**
+ * @brief Start the system timer.
+ * 
+ * Enables the system timer and begins processing scheduled events.
+ * Events will start executing at their specified timestamps.
+ */
 void start_sys_timer();
+
+/**
+ * @brief Stop the system timer.
+ * 
+ * Disables the system timer and halts event processing.
+ * The event queue is preserved and can be resumed with start_sys_timer().
+ */
 void stop_sys_timer();
+
+/**
+ * @brief Pause the system timer.
+ * 
+ * Temporarily stops the system timer without clearing the event queue.
+ * Event processing can be resumed with start_sys_timer().
+ */
 void pause_sys_timer();
+
+/**
+ * @brief System timer running state.
+ * 
+ * Indicates whether the system timer is currently running and processing events.
+ */
 extern volatile bool sys_timer_running;
 
 inline uint64_t current_time_cts()
 {
 	return sys_tc_ovf_count | SYS_TC->TC_CHANNEL[SYS_TC_CH].TC_CV;
 }
+/**
+ * @brief Get current system time in microseconds.
+ * @return Current system time in microseconds
+ * 
+ * Returns the current system time converted to microseconds.
+ * Uses the system timer value and overflow counter for 64-bit precision.
+ */
 uint64_t current_time_us();
 
+/**
+ * @brief Get current system time in seconds.
+ * @return Current system time in seconds as a float
+ * 
+ * Returns the current system time converted to seconds.
+ * Uses the system timer value and overflow counter for 64-bit precision.
+ */
 float current_time_s();
 
-// Functions to use within Event structure
+/**
+ * @brief Event function for toggling a pin.
+ * @param arg1_pin_idx IOPORT index of the pin to toggle (see pin_map_t in pins.cpp for pin names)
+ * @param arg2 Unused parameter (for event function compatibility)
+ * 
+ * Event callback function that toggles the state of the specified pin.
+ * This function is used internally by the event system.
+ */
 void tgl_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2);
+
+/**
+ * @brief Event function for setting a pin level.
+ * @param arg1_pin_idx IOPORT index of the pin to set (see pin_map_t in pins.cpp for pin names)
+ * @param arg2 Pin level to set (0=low, 1=high)
+ * 
+ * Event callback function that sets the level of the specified pin.
+ * This function is used internally by the event system.
+ */
 void set_pin_event_func(uint32_t arg1_pin_idx, uint32_t arg2);
+
+/**
+ * @brief Event function for starting a burst.
+ * @param arg1_period Period of the burst in microseconds
+ * @param arg2_unused Unused parameter (for event function compatibility)
+ * 
+ * Event callback function that starts a burst pulse train.
+ * This function is used internally by the event system.
+ */
 void start_burst_func  (uint32_t arg1_period,  uint32_t arg2_unused);
+
+/**
+ * @brief Event function for stopping a burst.
+ * @param arg1_unused Unused parameter (for event function compatibility)
+ * @param arg2_unused Unused parameter (for event function compatibility)
+ * 
+ * Event callback function that stops a burst pulse train.
+ * This function is used internally by the event system.
+ */
 void stop_burst_func   (uint32_t arg1_unused,  uint32_t arg2_unused);
+
+/**
+ * @brief Event function for enabling a pin.
+ * @param arg1_pin_idx IOPORT index of the pin to enable (see pin_map_t in pins.cpp for pin names)
+ * @param arg2 Unused parameter (for event function compatibility)
+ * 
+ * Event callback function that enables the specified pin.
+ * This function is used internally by the event system.
+ */
 void enable_pin_func   (uint32_t arg1_pin_idx, uint32_t arg2);
+
+/**
+ * @brief Event function for disabling a pin.
+ * @param arg1_pin_idx IOPORT index of the pin to disable (see pin_map_t in pins.cpp for pin names)	
+ * @param arg2 Unused parameter (for event function compatibility)
+ * 
+ * Event callback function that disables the specified pin.
+ * This function is used internally by the event system.
+ */
 void disable_pin_func  (uint32_t arg1_pin_idx, uint32_t arg2);
 
 inline bool is_event_missed()
