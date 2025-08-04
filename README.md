@@ -6,6 +6,23 @@
 **URL:** [https://github.com/stjude-smc/sync_device_32](https://github.com/stjude-smc/sync_device_32)
 
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://stjude-smc.github.io/sync_device_32/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/)
+
+## 🚀 Quick Start
+
+```python
+from sync_dev import SyncDevice
+
+# Connect to device
+sd = SyncDevice("COM4")  # or "/dev/ttyUSB0" on Linux
+
+# Schedule a laser pulse
+sd.pos_pulse("A0", 1000, ts=1000)  # 1ms pulse on A0 after 1ms delay
+sd.go()  # Start execution
+```
+
+**📖 [Full Documentation](https://stjude-smc.github.io/sync_device_32/) | 📓 [Interactive Demo](python/sync%20device%20demo.ipynb)**
 
 ## Overview
 
@@ -29,10 +46,7 @@ This is the **second generation** of the microscope synchronization device, base
 
 **Legacy Repository:** The original 8-bit version is available at [sync_device_8bit_legacy](https://github.com/stjude-smc/sync_device_8bit_legacy) for reference.
 
-
----
-
-## Features
+## ✨ Features
 
 - **Microsecond-precision event scheduling** (pulses, toggles, pin set/reset, bursts)
 - **Priority event queue** with hardware-timed execution
@@ -41,9 +55,7 @@ This is the **second generation** of the microscope synchronization device, base
 - **Comprehensive Python API** with logging and context management
 - **Extensive examples and documentation in Jupyter notebook**
 
----
-
-## Hardware
+## 🔧 Hardware
 
 - **Platform:** Arduino Due (SAM3X8E ARM Cortex-M3)
 - **Key Pins:**
@@ -75,9 +87,7 @@ This is the **second generation** of the microscope synchronization device, base
 Sync device is ready. Firmware version: 2.3.0
 ```
 
----
-
-## Python Driver
+## 🐍 Python Driver
 
 ### Installation
 
@@ -248,15 +258,11 @@ sd.selected_lasers = 0b0110     # Enable Cy3 and Cy5 lasers
 - `cam_readout_us` depends on camera ROI settings. See the camera manual to find out how to calculate or query it.
 - Timing values persist between acquisitions until changed. They drop back to defaults after system reset.
 
----
-
-## Examples
+## 📚 Examples
 
 See [`python/sync device demo.ipynb`](python/sync%20device%20demo.ipynb) for a comprehensive, step-by-step tutorial with code, explanations, and advanced usage patterns.
 
----
-
-## Properties
+## 📋 Properties
 
 | Property                | Access     | Description                                 |
 |-------------------------|------------|---------------------------------------------|
@@ -273,10 +279,7 @@ See [`python/sync device demo.ipynb`](python/sync%20device%20demo.ipynb) for a c
 | `shutter_delay_us`      | R/W        | Shutter delay (us)                          |
 | `cam_readout_us`        | R/W        | Camera readout time (us)                    |
 
-
----
-
-## Documentation
+## 📖 Documentation
 
 📖 **[Full Documentation](https://stjude-smc.github.io/sync_device_32/)** - Complete API reference, user guides, and examples
 
@@ -311,7 +314,7 @@ The documentation will be available at `sphinx_docs/_build/html/index.html`. The
 
 The Sphinx documentation automatically builds and deploys to GitHub pages on every push to branches `develop` and `master` via GitHub actions.
 
-## Firmware Development
+## 🔧 Firmware Development
 
 ### Building the Firmware
 
@@ -340,16 +343,12 @@ The firmware is built using Microchip Studio or compatible IDEs:
 
 **Note:** These limitations are significantly improved compared to the legacy 8-bit version, which had 4.19s exposure limits and 64µs timing resolution.
 
----
-
-## License
+## 📝 License
 
 Apache 2.0.  
 (c) Roman Kiselev, St. Jude Children's Research Hospital
 
----
-
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - Based on Atmel SAM3X8E microcontroller (Arduino Due board)
 - Uses `ASF` (Atmel Software Framework)
