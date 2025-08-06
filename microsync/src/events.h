@@ -59,7 +59,7 @@ using EventFunc = void (*)(uint32_t, uint32_t);
  * 
  * @note The Event struct is 28 bytes in total. The event timestamp is stored as a 64-bit integer (ts64_cts), which can also be accessed as two 32-bit fields: ts_lo32_cts (lower 32 bits) and ts_hi32_cts (upper 32 bits).
  */
-typedef struct Event
+typedef struct  __attribute__((packed)) Event
 {
 	EventFunc func;            /**< Pointer to the function that will be executed for this event (4 bytes) */
 	uint32_t	  arg1;        /**< First function argument (4 bytes) */
