@@ -1,0 +1,2 @@
+# Core dependencies for syncdev32 package
+pyserial>=3.0 

@@ -78,6 +78,7 @@ sphinx_docs/cpp_api/
 sphinx_docs/latex/
 sphinx_docs/xml/
 
-# Python log files
+# Python
 python/*.log
+*.egg-info/
 
