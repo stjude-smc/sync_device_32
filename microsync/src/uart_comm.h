@@ -7,8 +7,7 @@
  * synchronization device. It implements a command protocol for controlling device
  * functions and receiving status information.
  * 
- * @version 2.3.0
- * @date 2024-09-05
+ * @version \projectnumber
  */
 
 #pragma once

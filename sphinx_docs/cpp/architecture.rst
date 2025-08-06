@@ -4,7 +4,7 @@ C++ Firmware Architecture
 Overview
 --------
 
-The sync_device_32 firmware is built on the Arduino Due platform using the SAM3X8E ARM Cortex-M3 microcontroller. The firmware provides microsecond-precision timing control for microscope synchronization with a focus on safety, reliability, and performance.
+The microsync firmware is built on the Arduino Due platform using the SAM3X8E ARM Cortex-M3 microcontroller. The firmware provides microsecond-precision timing control for microscope synchronization with a focus on safety, reliability, and performance.
 
 System Architecture
 -------------------

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Simple installation script for syncdev32 package.
+Simple installation script for microsync package.
 
-This script provides an easy way to install the syncdev32 package
+This script provides an easy way to install the microsync package
 either in development mode or as a regular installation.
 
 Usage:
@@ -41,7 +41,7 @@ def run_command(cmd, description):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Install syncdev32 package",
+        description="Install microsync package",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -84,13 +84,13 @@ Examples:
         cmd.append('--user')
     
     # Run the installation
-    success = run_command(cmd, "Installing syncdev32 package")
+    success = run_command(cmd, "Installing microsync package")
     
     if success:
         print("\n🎉 Installation completed successfully!")
         print("\nYou can now use the package:")
-        print("  import sync_dev")
-        print("  device = sync_dev.SyncDevice('COM3')  # or '/dev/ttyUSB0' on Linux")
+        print("  import microsync")
+        print("  device = microsync.SyncDevice('COM3')  # or '/dev/ttyUSB0' on Linux")
         
         if args.dev:
             print("\nNote: This is a development installation.")

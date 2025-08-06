@@ -1,12 +1,12 @@
 Python API Reference
 ====================
 
-This section provides detailed documentation for the sync_device_32 Python API.
+This section provides detailed documentation for the microsync Python API.
 
 Core Classes
 ------------
 
-.. automodule:: sync_dev
+.. automodule:: microsync
    :members:
    :undoc-members:
    :show-inheritance:
@@ -33,7 +33,7 @@ Modules
 Utility Functions
 -----------------
 
-.. automodule:: sync_dev
+.. automodule:: microsync
    :members:
    :undoc-members:
    :special-members: __init__,__enter__,__exit__ 

@@ -7,8 +7,7 @@
  * and status information. Properties can be read-only, read-write, or write-only,
  * and can be backed by internal values, external variables, or function calls.
  * 
- * @version 2.3.0
- * @date 2024-10-16
+ * @version \projectnumber
  */
 
 #pragma once

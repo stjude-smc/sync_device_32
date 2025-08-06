@@ -7,8 +7,7 @@
  * the Arduino Due microcontroller. It includes support for digital and analog pins
  * with state management and safety features.
  * 
- * @version 2.3.0
- * @date 2024-09-19
+ * @version \projectnumber
  */
 
 #pragma once

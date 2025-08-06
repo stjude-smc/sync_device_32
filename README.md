@@ -1,18 +1,18 @@
-# Microscope Synchronization Device (`sync_device_32`)
+# `microsync` — Microscope Control with Microsecond Precision
 
-**Version:** 2.3.0  
+**Version:** 2.4.0  
 **Author:** Roman Kiselev  
 **License:** Apache 2.0  
-**URL:** [https://github.com/stjude-smc/sync_device_32](https://github.com/stjude-smc/sync_device_32)
+**URL:** [https://github.com/stjude-smc/microsync](https://github.com/stjude-smc/microsync)
 
-[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://stjude-smc.github.io/sync_device_32/)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://stjude-smc.github.io/microsync/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/)
 
 ## 🚀 Quick Start
 
 ```python
-from sync_dev import SyncDevice
+from microsync import SyncDevice
 
 # Connect to device
 sd = SyncDevice("COM4")  # or "/dev/ttyUSB0" on Linux
@@ -22,7 +22,7 @@ sd.pos_pulse("A0", 1000, ts=1000)  # 1ms pulse on A0 after 1ms delay
 sd.go()  # Start execution
 ```
 
-**📖 [Full Documentation](https://stjude-smc.github.io/sync_device_32/) | 📓 [Interactive Demo](python/sync%20device%20demo.ipynb)**
+**📖 [Full Documentation](https://stjude-smc.github.io/microsync/) | 📓 [Interactive Demo](python/sync%20device%20demo.ipynb)**
 
 ## Overview
 
@@ -61,7 +61,7 @@ This is the **second generation** of the microscope synchronization device, base
 
 <img src="https://store-usa.arduino.cc/cdn/shop/files/A000062_00.front_475x357.jpg" alt="Arduino Due Board">
 
-*Arduino Due board - the hardware platform for sync_device_32*
+*Arduino Due board - the hardware platform for microsync*
 
 - **Key Pins:**
   - **Laser shutters:** A0 (Cy2), A1 (Cy3), A2 (Cy5), A3 (Cy7)
@@ -69,7 +69,7 @@ This is the **second generation** of the microscope synchronization device, base
   - **Error indicator:** D53
   - **Interlock:** D12 (input), D13 (output)
   - **Burst pulse:** D5
-- **See** `doc/Arduino Due pinout.pdf` and `sync_device_32/src/globals.h` for full pin mapping.
+- **See** `doc/Arduino Due pinout.pdf` and `microsync/src/globals.h` for full pin mapping.
 
 ### Wiring and Setup
 
@@ -99,7 +99,7 @@ The device communicates via UART at 115,200 baud using a fixed-length 24-byte pa
 **Startup Message:**
 Upon opening of the COM port, the device resets and sends the startup message the includes the firmware version.
 ```
-Sync device is ready. Firmware version: 2.3.0
+Sync device is ready. Firmware version: 2.4.0
 ```
 
 ## 🐍 Python Driver
@@ -119,7 +119,7 @@ Copy the `python/` directory or install as a package if desired.
 
 The Python driver consists of several modules:
 
-- **`sync_dev.py`** - Main `SyncDevice` class and communication interface
+- **`microsync.py`** - Main `SyncDevice` class and communication interface
 - **`constants.py`** - Timing constants and system parameters
 - **`props.py`** - Property definitions and system settings
 - **`rev_pin_map.py`** - Hardware pin mapping (Arduino pin names to internal IDs)
@@ -129,7 +129,7 @@ The Python driver consists of several modules:
 ### Basic Usage
 
 ```python
-from sync_dev import SyncDevice
+from microsync import SyncDevice
 
 # Connect to the device (replace COM4 with your port)
 sd = SyncDevice("COM4", log_file='print')  # log_file can be None, 'print', or a filename
@@ -255,7 +255,7 @@ The following high-level acquisition modes are provided as convenience functions
 
 ### Timing Configuration
 
-**Note:** All timing parameters for `sync_device_32` are specified in microseconds (µs).
+**Note:** All timing parameters for `microsync` are specified in microseconds (µs).
 
 Configure these timing parameters to match your hardware before starting acquisition:
 
@@ -297,10 +297,10 @@ See [`python/sync device demo.ipynb`](python/sync%20device%20demo.ipynb) for a c
 
 ## 📖 Documentation
 
-📖 **[Full Documentation](https://stjude-smc.github.io/sync_device_32/)** - Complete API reference, user guides, and examples
+📖 **[Full Documentation](https://stjude-smc.github.io/microsync/)** - Complete API reference, user guides, and examples
 
-- **Firmware:** See `sync_device_32/src/` for C++ source and hardware logic.
-- **Python API:** See `python/sync_dev.py` and the Jupyter notebook.
+- **Firmware:** See `microsync/src/` for C++ source and hardware logic.
+- **Python API:** See `python/microsync.py` and the Jupyter notebook.
 - **Data packet structure:** See `doc/data packet structure.xlsx`.
 
 ### Building Documentation
@@ -336,7 +336,7 @@ The Sphinx documentation automatically builds and deploys to GitHub pages on eve
 
 The firmware is built using Microchip Studio or compatible IDEs:
 
-1. **Open the project:** Load `sync_device_32.atsln` in Microchip Studio
+1. **Open the project:** Load `microsync.atsln` in Microchip Studio
 2. **Build target:** Select "Release" configuration
 3. **Upload:** Use the Atmel ICE debugger, connected via JTAG interface to the microcontroller board. Hit `Ctrl+Shift+P` to open the programming dialog.
 4. **Debugging:** If you upload the "Debug" configuration, you can set a breakpoint and pause the code execution on Arduino Due when it's connected via JTAG to Atmel ICE. You will have a normal step-by-step debugging with the direct access to the device registers and memory via Microchip Studio . The caveat is that the hardware timers keep running while you're in the debug mode. Use an oscilloscope when verifying event order and timing in addition to the code debugging.
@@ -372,4 +372,4 @@ Apache 2.0.
 
 ---
 
-**For questions or contributions, please open an issue or pull request on [GitHub](https://github.com/stjude-smc/sync_device_32).** 
+**For questions or contributions, please open an issue or pull request on [GitHub](https://github.com/stjude-smc/microsync).** 

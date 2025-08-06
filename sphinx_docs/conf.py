@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath('../python'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'sync_device_32'
+project = 'microsync'
 copyright = '2025, Roman Kiselev'
 author = 'Roman Kiselev'
 
@@ -128,9 +128,9 @@ html_theme_options = {
 
 # Breathe is the extension that parses the Doxygen XML output
 breathe_projects = {
-    "sync_device_32": "_doxygen/xml"
+    "microsync": "_doxygen/xml"
 }
-breathe_default_project = "sync_device_32"
+breathe_default_project = "microsync"
 breathe_default_members = ('members', 'undoc-members')
 
 # -- Exhale configuration -------------------------------------------------
@@ -169,12 +169,12 @@ language = 'en'
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-modindex_common_prefix = ['sync_dev.']
+modindex_common_prefix = ['microsync.']
 
 # -- GitHub Pages specific settings -----------------------------------------
 
 # Ensure proper base URL for GitHub Pages
-html_baseurl = 'https://stjude-smc.github.io/sync_device_32/'
+html_baseurl = 'https://stjude-smc.github.io/microsync/'
 
 # Add canonical URL
 html_use_index = True
@@ -186,6 +186,6 @@ html_output_encoding = 'utf-8'
 # Add meta tags for better SEO
 html_meta = {
     'viewport': 'width=device-width, initial-scale=1',
-    'description': 'Documentation for sync_device_32 - A synchronization device library',
+    'description': 'Documentation for microsync - A synchronization device library',
     'keywords': 'synchronization, device, library, documentation',
 } 

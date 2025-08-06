@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple build script for sync_device_32 documentation.
+Simple build script for microsync documentation.
 No external tools required - just Python and pip.
 
 Usage:
@@ -120,7 +120,7 @@ def open_browser():
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description="Build or clean sync_device_32 documentation",
+        description="Build or clean microsync documentation",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -146,13 +146,13 @@ Examples:
         return 1
     
     if args.command == 'clean':
-        print("=== sync_device_32 Documentation Cleaner ===\n")
+        print("=== microsync Documentation Cleaner ===\n")
         clean_build()
         print("\n=== Clean Complete! ===")
         return 0
     
     elif args.command == 'build':
-        print("=== sync_device_32 Documentation Builder ===\n")
+        print("=== microsync Documentation Builder ===\n")
         
         # Install dependencies
         if not install_deps():

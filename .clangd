@@ -1,14 +1,14 @@
 CompileFlags:
   Add: 
     - -target=arm-none-eabi
-    - -I./sync_device_32/src
-    - -I./sync_device_32/src/ASF/sam/utils/cmsis/sam3x/include
-    - -I./sync_device_32/src/ASF/sam/utils/cmsis/sam3x/include/component
-    - -I./sync_device_32/src/ASF/sam/utils/cmsis/sam3x/include/instance
-    - -I./sync_device_32/src/ASF/sam/utils/cmsis/sam3x/include/pio
-    - -I./sync_device_32/src/ASF/common/utils
-    - -I./sync_device_32/src/ASF/sam/drivers
-    - -I./sync_device_32/src/ASF/sam/boards
+    - -I./microsync/src
+    - -I./microsync/src/ASF/sam/utils/cmsis/sam3x/include
+    - -I./microsync/src/ASF/sam/utils/cmsis/sam3x/include/component
+    - -I./microsync/src/ASF/sam/utils/cmsis/sam3x/include/instance
+    - -I./microsync/src/ASF/sam/utils/cmsis/sam3x/include/pio
+    - -I./microsync/src/ASF/common/utils
+    - -I./microsync/src/ASF/sam/drivers
+    - -I./microsync/src/ASF/sam/boards
     - -DSAM3X8E
     - -DARDUINO_DUE_X
     - -D__SAM3X8E__

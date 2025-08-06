@@ -7,8 +7,7 @@
  * operation of laser systems. It monitors interlock conditions and can
  * automatically disable lasers when safety conditions are not met.
  * 
- * @version 2.3.0
- * @date 2024-10-23
+ * @version \projectnumber
  */
 
 #pragma once

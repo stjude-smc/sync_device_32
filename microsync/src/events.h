@@ -7,8 +7,7 @@
  * microsecond-precision timing control for microscope synchronization. The system
  * can handle up to 450 scheduled events with 64-bit timestamp precision.
  * 
- * @version 2.3.0
- * @date 2024-09-09
+ * @version \projectnumber
  */
 
 

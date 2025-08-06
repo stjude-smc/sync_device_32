@@ -1,5 +1,5 @@
 """
-Reverse pin mapping for sync_device_32 Python driver.
+Reverse pin mapping for microsync Python driver.
 
 This module provides a reverse mapping from internal pin IDs to human-readable
 Arduino Due pin names. The mapping converts the device's internal pin numbering
@@ -12,7 +12,7 @@ The reverse pin map is used for:
 
 Note:
     This mapping is specific to the Arduino Due board and the SAM3X8E
-    microcontroller pin configuration used in sync_device_32.
+    microcontroller pin configuration used in microsync.
 """
 
 rev_pin_map = {

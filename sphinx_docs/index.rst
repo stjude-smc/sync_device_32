@@ -1,4 +1,4 @@
-Welcome to sync_device_32 documentation!
+Welcome to microsync documentation!
 ==========================================
 
 **Version:** |version|  
@@ -7,7 +7,7 @@ Welcome to sync_device_32 documentation!
 
 A high-precision synchronization device for advanced microscope control, based on a 32-bit ARM microcontroller (Arduino Due).
 
-`View on GitHub <https://github.com/stjude-smc/sync_device_32>`_
+`View on GitHub <https://github.com/stjude-smc/microsync>`_
 
 .. toctree::
    :maxdepth: 2
@@ -50,7 +50,7 @@ The Python driver provides a high-level interface for controlling the device:
 
 .. code-block:: python
 
-   from sync_dev import SyncDevice
+   from microsync import SyncDevice
    
    # Connect to device
    sd = SyncDevice("COM4")
@@ -89,4 +89,4 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. _GitHub: https://github.com/stjude-smc/sync_device_32 
+.. _GitHub: https://github.com/stjude-smc/microsync 

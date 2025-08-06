@@ -7,8 +7,7 @@
  * Total Internal Reflection Fluorescence) microscopes. It includes shutter control,
  * laser selection, and acquisition mode functions optimized for pTIRF imaging.
  * 
- * @version 2.3.0
- * @date 2024-10-28
+ * @version \projectnumber
  */
 
 #pragma once

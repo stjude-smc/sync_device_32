@@ -1,12 +1,12 @@
-# Doxygen configuration for sync_device_32 C++ documentation
+# Doxygen configuration for microsync C++ documentation
 # This file is used by Exhale to generate XML output for Sphinx
 
-PROJECT_NAME           = "sync_device_32"
-PROJECT_NUMBER         = "2.3.0"
+PROJECT_NAME           = "microsync"
+PROJECT_NUMBER         = "2.4.0"
 PROJECT_BRIEF          = "Microscope Synchronization Device Firmware"
 
 # Input directory - Doxygen will scan all files in the directory
-INPUT                  = ../sync_device_32/src
+INPUT                  = ../microsync/src
 
 # File patterns to include
 FILE_PATTERNS          = *.h
@@ -62,5 +62,5 @@ SHOW_GROUPED_MEMB_INC  = YES
 SHOW_USED_FILES        = YES
 
 # Include paths - add parent directory for cross-references
-INCLUDE_PATH           = ../sync_device_32/src
-INCLUDE_PATH          += ../sync_device_32 
+INCLUDE_PATH           = ../microsync/src
+INCLUDE_PATH          += ../microsync 

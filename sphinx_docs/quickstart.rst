@@ -1,7 +1,7 @@
 Quick Start Guide
 =================
 
-This guide will get you up and running with sync_device_32 in minutes. It covers the basic setup and common usage patterns.
+This guide will get you up and running with microsync in minutes. It covers the basic setup and common usage patterns.
 
 Basic Setup
 -----------
@@ -17,7 +17,7 @@ Basic Setup
 
    .. code-block:: python
 
-      from sync_dev import SyncDevice
+      from microsync import SyncDevice
       
       # Connect to device (replace COM4 with your port)
       sd = SyncDevice("COM4")

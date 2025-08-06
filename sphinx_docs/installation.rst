@@ -1,7 +1,7 @@
 Installation Guide
 ==================
 
-This guide covers the installation and setup of the sync_device_32 project, including both the Python driver and firmware.
+This guide covers the installation and setup of the microsync project, including both the Python driver and firmware.
 
 Python Driver Installation
 --------------------------
@@ -22,7 +22,7 @@ Install the required Python packages:
 
    pip install pyserial
 
-Install the sync_device_32 Driver
+Install the microsync Driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Option 1: Copy the Python directory**
@@ -30,14 +30,14 @@ Install the sync_device_32 Driver
 .. code-block:: bash
 
    # Clone or download the repository
-   git clone https://github.com/stjude-smc/sync_device_32.git
-   cd sync_device_32
+   git clone https://github.com/stjude-smc/microsync.git
+cd microsync
    
    # Copy the python directory to your project
    cp -r python/ /path/to/your/project/
    
    # Or add to your Python path
-   export PYTHONPATH="${PYTHONPATH}:/path/to/sync_device_32/python"
+   export PYTHONPATH="${PYTHONPATH}:/path/to/microsync/python"
 
 **Option 2: Install as a package (recommended for development)**
 
@@ -53,7 +53,7 @@ Test that the driver can be imported:
 
 .. code-block:: python
 
-   from sync_dev import SyncDevice
+   from microsync import SyncDevice
    print("Installation successful!")
 
 Firmware Installation
@@ -75,7 +75,7 @@ Build the Firmware
    .. code-block:: bash
 
       # Open the solution file
-      sync_device_32.atsln
+      microsync.atsln
 
 2. **Configure build settings:**
 
@@ -142,7 +142,7 @@ Test the Complete Setup
 
    .. code-block:: python
 
-      from sync_dev import SyncDevice
+      from microsync import SyncDevice
       
       # Connect to device (replace COM4 with your port)
       sd = SyncDevice("COM4")
@@ -196,7 +196,7 @@ Getting Help
 
 * Check the README for troubleshooting tips
 * Review the README for hardware documentation
-* Open an issue on `GitHub <https://github.com/stjude-smc/sync_device_32>`_
+* Open an issue on `GitHub <https://github.com/stjude-smc/microsync>`_
 
 Next Steps
 ----------

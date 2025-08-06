@@ -1,2 +1,2 @@
-# Core dependencies for syncdev32 package
+# Core dependencies for microsync package
 pyserial>=3.0 

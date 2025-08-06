@@ -3,8 +3,8 @@ requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "syncdev32"
-version = "2.3.0"
+name = "microsync"
+version = "2.4.0"
 description = "Python driver for 32-bit microscope synchronization device."
 license = {text = "Apache 2.0"}
 authors = [
@@ -51,13 +51,13 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/stjude-smc/sync_device_32"
-Repository = "https://github.com/stjude-smc/sync_device_32"
-Documentation = "https://stjude-smc.github.io/sync_device_32/"
-"Bug Tracker" = "https://github.com/stjude-smc/sync_device_32/issues"
+Homepage = "https://github.com/stjude-smc/microsync"
+Repository = "https://github.com/stjude-smc/microsync"
+Documentation = "https://stjude-smc.github.io/microsync/"
+"Bug Tracker" = "https://github.com/stjude-smc/microsync/issues"
 
 [project.scripts]
-syncdev32 = "sync_dev:main"
+microsync = "microsync:main"
 
 [tool.setuptools]
-py-modules = ["sync_dev", "constants", "rev_pin_map", "__version__"] 
+py-modules = ["microsync", "constants", "rev_pin_map", "__version__"] 

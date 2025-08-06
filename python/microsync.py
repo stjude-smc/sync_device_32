@@ -705,7 +705,7 @@ class SyncDevice(object):
         of the firmware and the driver must match.
 
         Returns:
-            str: Firmware version string (e.g., "2.3.0")
+            str: Firmware version string (e.g., "2.4.0")
         """
         return self.get_property(props.ro_VERSION)
 

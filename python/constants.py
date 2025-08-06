@@ -1,7 +1,7 @@
 """
-Constants module for sync_device_32 Python driver.
+Constants module for `microsync` Python driver.
 
-This module defines fundamental constants used throughout the sync_device_32
+This module defines fundamental constants used throughout the microsync
 Python driver, including time units, frequency units, and device-specific
 configuration values.
 

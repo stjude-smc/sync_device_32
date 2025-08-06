@@ -122,7 +122,7 @@ extern "C" {
 /*                       ENTRY POINT                                    */
 /************************************************************************/
 /**
- * @brief Main entry point for the sync_device_32 firmware
+ * @brief Main entry point for the microsync firmware
  * @return Never returns (infinite loop)
  * 
  * Initializes all system components, starts the system timer, and enters the main event loop.

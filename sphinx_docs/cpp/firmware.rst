@@ -17,7 +17,7 @@ Project Structure
 
 .. code-block:: text
 
-   sync_device_32/
+   microsync/
    ├── main.cpp                 # Main application entry point
    ├── src/
    │   ├── globals.h           # Global definitions and constants
@@ -27,7 +27,7 @@ Project Structure
    │   ├── pins.h/cpp          # Pin management
    │   ├── props.h/cpp         # System properties
    │   └── ASF/                # Atmel Software Framework
-   └── sync_device_32.atsln    # Microchip Studio solution
+   └── microsync.atsln    # Microchip Studio solution
 
 Build Configuration
 ^^^^^^^^^^^^^^^^^^^
@@ -49,7 +49,7 @@ Build Steps
 
 1. **Open Project:**
    - Launch Microchip Studio
-   - Open `sync_device_32.atsln`
+   - Open `microsync.atsln`
 
 2. **Select Configuration:**
    - Choose Debug or Release build
