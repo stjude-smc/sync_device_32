@@ -11,6 +11,10 @@
 
 ## 🚀 Quick Start
 
+Upload `microsync-<x.y.z>.bin` firmware file to Arduino Due (e.g. using [BOSSA](https://github.com/shumatech/BOSSA/releases)).
+
+Install Python `microsync` module.
+
 ```python
 from microsync import SyncDevice
 
@@ -70,6 +74,42 @@ This is the **second generation** of the microscope synchronization device, base
   - **Interlock:** D12 (input), D13 (output)
   - **Burst pulse:** D5
 - **See** `doc/Arduino Due pinout.pdf` and `microsync/src/globals.h` for full pin mapping.
+
+## Firmware Upload
+Upload `microsync-<x.y.z>.bin` to your Arduino Due using BOSSA or Atmel-ICE with Microchip Studio.
+
+### Uploading firmware with BOSSA (no extra hardware required)
+
+1. Download BOSSA from https://github.com/shumatech/BOSSA/releases (pick the right binary for your OS).
+2. Connect Due to your computer, use the USB port next to the power jack.
+3. Find newly created Arduino Due COM port (e.g. in the Device manager).
+4. On your Due, press **Erase** and **Reset** buttons at the same time (to enter programming mode).
+
+
+#### Upload via BOSSA GUI
+1. Run BOSSA GUI.
+2. Select the correct COM port.
+3. Select `microsync-<x.y.z>.bin` file.
+4. **Important**: Check the "Boot from Flash" option (this sets GPNVM0=1).
+5. Click "Write".
+
+#### Upload via command line
+1. Put `bossac.exe` (or `bossac` on Mac/Linux) and `microsync-<x.y.z>.bin` in the same folder.
+2. Open a terminal in that folder and run (replace `<COM-PORT>` with the actual COM port of your Due):
+
+```sh
+bossac.exe -e -w -v -b microsync-<x.y.z>.bin -p <COM-PORT>
+```
+
+
+### Uploading firmware with Microchip Studio using Atmel-ICE debugger
+1. Connect Atmel-ICE SAM connector to JTAG header on your Due.
+2. Connect Atmel-ICE to your computer.
+3. Power up your Due with a USB cable.
+4. Open Microchip Studio.
+5. Open the Device Programming dialog (Ctrl+Shift+P).
+6. Select Atmel-ICE tool, `ATSAM3X8E` device, JTAG interface, click "Apply".
+7. Go to "Memory" tab, select `microsync-{version}.bin` file, click "Program".
 
 ### Wiring and Setup
 
