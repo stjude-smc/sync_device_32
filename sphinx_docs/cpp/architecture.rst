@@ -9,8 +9,12 @@ The microsync firmware is built on the Arduino Due platform using the SAM3X8E AR
 System Architecture
 -------------------
 
-.. note::
-   Architecture diagram will be added in a future update.
+.. image:: ../../doc/system_arch_diagram.drawio.svg
+   :alt: System architecture diagram
+   :align: center
+   :width: 100%
+
+Color legend: green – software components, yellow – microcontroller peripherals, purple – external hardware.
 
 Core Components
 ---------------
