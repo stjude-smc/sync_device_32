@@ -28,27 +28,18 @@ sd.go()  # Start execution
 
 **📖 [Full Documentation](https://stjude-smc.github.io/microsync/) | 📓 [Interactive Demo](python/sync%20device%20demo.ipynb)**
 
-## Overview
+## Overview & System Architecture
 
-This project provides firmware and a Python driver for a high-precision synchronization device based on a 32-bit ARM microcontroller (Arduino Due). The device is designed for advanced microscope control, enabling precise timing and coordination of lasers, shutters, cameras, and other peripherals.
+This project is a high-precision sync device for advanced microscope control, built around an Arduino Due (32-bit ARM Cortex-M3). It combines:
 
-- **Firmware:** C++ code for the Arduino Due, handling real-time event scheduling, pin control, and safety interlocks.
-- **Python Driver:** A user-friendly API for communicating with the device, scheduling events, and running complex acquisition protocols.
+- **Firmware (C++):** Handles real-time event scheduling, pin control, and safety interlocks directly on the microcontroller. Uses a priority queue to manage up to 450 timed events (e.g., laser pulses, camera triggers) with microsecond accuracy.
+- **Python API:** Lets you easily talk to the device, schedule events, and run complex acquisition protocols from your computer.
 
-### Evolution from Legacy `sync_device`
-This is the **second generation** of the microscope synchronization device, based on a 32-bit ARM microcontroller (Arduino Due). The first generation was based on Arduino Mega2560 (8-bit ATMega2560) and had fundamental limitations:
+The device connects to your computer via UART (115,200 baud). All timing and pin logic runs on the microcontroller for reliable, low-latency operation.
 
-**Key Changes and Improvements in 32-bit Version:**
-- **3.3V** logic – Arduino Due uses 3.3V CMOS logic levels for digital I/O, whereas the Arduino Mega2560 uses 5V logic levels
-- **Microsecond precision** (vs. 64µs steps in 8-bit version)
-- **No 4.19s exposure time limit** (vs. 16-bit timer limitation)
-- **Event-driven architecture** with priority queue (vs. fixed state machine)
-- **Up to 450 scheduled events** (vs. limited to 4 hardware timers)
-- **Advanced acquisition modes** with precise timing control
-- **Safety interlocks** for laser protection
-- **Modern Python API** with context management and logging
+![](doc/system_arch_diagram.drawio.svg)
 
-**Legacy Repository:** The original 8-bit version is available at [sync_device_8bit_legacy](https://github.com/stjude-smc/sync_device_8bit_legacy) for reference.
+*Color legend:* green – software components, yellow – microcontroller peripherals, purple – external hardware.
 
 ## ✨ Features
 
@@ -399,6 +390,22 @@ The firmware is built using Microchip Studio or compatible IDEs:
 - **External triggers:** Not available yet, but possible to add. In the future, we could make it so the device reacts to changes on an input pin (like a button press or signal) and schedules events automatically.
 
 **Note:** These limitations are significantly improved compared to the legacy 8-bit version, which had 4.19s exposure limits and 64µs timing resolution.
+
+### Evolution from Legacy `sync_device`
+This is the **second generation** of the microscope synchronization device, based on a 32-bit ARM microcontroller (Arduino Due). The first generation was based on Arduino Mega2560 (8-bit ATMega2560) and had fundamental limitations:
+
+**Key Changes and Improvements in 32-bit Version:**
+- **3.3V** logic – Arduino Due uses 3.3V CMOS logic levels for digital I/O, whereas the Arduino Mega2560 uses 5V logic levels
+- **Microsecond precision** (vs. 64µs steps in 8-bit version)
+- **No 4.19s exposure time limit** (vs. 16-bit timer limitation)
+- **Event-driven architecture** with priority queue (vs. fixed state machine)
+- **Up to 450 scheduled events** (vs. limited to 4 hardware timers)
+- **Advanced acquisition modes** with precise timing control
+- **Safety interlocks** for laser protection
+- **Modern Python API** with context management and logging
+
+**Legacy Repository:** The original 8-bit version is available at [sync_device_8bit_legacy](https://github.com/stjude-smc/sync_device_8bit_legacy) for reference.
+
 
 ## 📝 License
 
