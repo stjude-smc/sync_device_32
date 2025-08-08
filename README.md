@@ -396,6 +396,7 @@ The firmware is built using Microchip Studio or compatible IDEs:
 - **Jitter:** Events scheduled within ~10µs of each other may have timing jitter
 - **Overload protection:** A watchdog timer automatically resets the system if event queue overflows
 - **Interlock:** Requires external circuit between D12 and D13 for laser safety
+- **External triggers:** Not available yet, but possible to add. In the future, we could make it so the device reacts to changes on an input pin (like a button press or signal) and schedules events automatically.
 
 **Note:** These limitations are significantly improved compared to the legacy 8-bit version, which had 4.19s exposure limits and 64µs timing resolution.
 
