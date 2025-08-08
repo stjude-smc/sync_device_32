@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "microsync"
+version = "2.4.0"
+description = "Python driver for 32-bit microscope synchronization device."
+license = {text = "Apache 2.0"}
+authors = [
+    {name = "Roman Kiselev", email = "roman.kiselev@stjude.org"}
+]
+keywords = [
+    "microscope",
+    "synchronization", 
+    "device",
+    "arduino",
+    "sam3x",
+    "serial",
+    "timing",
+    "laser",
+    "camera",
+    "ptirf"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Bio-Physics",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "pyserial>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter>=1.0",
+    "sphinx>=4.0",
+    "sphinx-rtd-theme>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/stjude-smc/microsync"
+Repository = "https://github.com/stjude-smc/microsync"
+Documentation = "https://stjude-smc.github.io/microsync/"
+"Bug Tracker" = "https://github.com/stjude-smc/microsync/issues"
+
+[project.scripts]
+microsync = "microsync:main"
+
+[tool.setuptools]
+py-modules = ["microsync", "constants", "rev_pin_map", "__version__"] 

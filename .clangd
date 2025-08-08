@@ -1,0 +1,25 @@
+CompileFlags:
+  Add: 
+    - -target=arm-none-eabi
+    - -I./microsync/src
+    - -I./microsync/src/ASF/sam/utils/cmsis/sam3x/include
+    - -I./microsync/src/ASF/sam/utils/cmsis/sam3x/include/component
+    - -I./microsync/src/ASF/sam/utils/cmsis/sam3x/include/instance
+    - -I./microsync/src/ASF/sam/utils/cmsis/sam3x/include/pio
+    - -I./microsync/src/ASF/common/utils
+    - -I./microsync/src/ASF/sam/drivers
+    - -I./microsync/src/ASF/sam/boards
+    - -DSAM3X8E
+    - -DARDUINO_DUE_X
+    - -D__SAM3X8E__
+    - -std=c++11
+    - -fno-exceptions
+    - -fno-rtti
+
+Diagnostics:
+  ClangTidy:
+    Add: [readability-*]
+    Remove: [*]
+
+Index:
+  Background: true 

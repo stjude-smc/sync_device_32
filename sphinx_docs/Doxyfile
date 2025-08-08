@@ -1,0 +1,66 @@
+# Doxygen configuration for microsync C++ documentation
+# This file is used by Exhale to generate XML output for Sphinx
+
+PROJECT_NAME           = "microsync"
+PROJECT_NUMBER         = "2.4.0"
+PROJECT_BRIEF          = "Microscope Synchronization Device Firmware"
+
+# Input directory - Doxygen will scan all files in the directory
+INPUT                  = ../microsync/src
+
+# File patterns to include
+FILE_PATTERNS          = *.h
+
+# Exclude ASF and config directories, and third-party files
+EXCLUDE_PATTERNS       = */ASF/*
+EXCLUDE_PATTERNS      += */config/*
+EXCLUDE_PATTERNS      += asf.h
+
+# Don't scan recursively since all header files are in the top-level src directory
+RECURSIVE              = NO
+
+# Enable preprocessing to handle extern "C" blocks
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+
+# Extract settings
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+EXTRACT_LOCAL_METHODS  = YES
+EXTRACT_ANON_NSPACES   = NO
+
+# Handle typedefs properly to avoid duplicate declarations
+TYPEDEF_HIDES_STRUCT   = YES
+
+# Extract settings
+EXTRACT_LOCAL_CLASSES  = YES
+
+# Output settings
+GENERATE_HTML          = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = _doxygen/xml
+
+# Disable features we don't need
+HAVE_DOT               = NO
+UML_LOOK               = NO
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+
+# Predefined macros to handle includes
+PREDEFINED             = __DOXYGEN__
+
+PREDEFINED            += extern
+PREDEFINED            += "C"
+
+# Ensure all functions are documented
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+SHOW_GROUPED_MEMB_INC  = YES
+SHOW_USED_FILES        = YES
+
+# Include paths - add parent directory for cross-references
+INCLUDE_PATH           = ../microsync/src
+INCLUDE_PATH          += ../microsync 
