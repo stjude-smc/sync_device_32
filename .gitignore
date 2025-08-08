@@ -15,7 +15,7 @@ build/
 *.sav
 
 # Ignore IDE-specific files and folders
-.vscode/
+# .vscode/  # IntelliSense settings for Cursor IDE
 *.atsuo
 *.suo
 *.user

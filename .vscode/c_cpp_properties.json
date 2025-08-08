@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Arduino Due",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/sync_device_32/src/ASF/sam/utils/cmsis/sam3x/include",
+                "${workspaceFolder}/sync_device_32/src/ASF/sam/utils/cmsis/sam3x/include/component",
+                "${workspaceFolder}/sync_device_32/src/ASF/sam/utils/cmsis/sam3x/include/instance",
+                "${workspaceFolder}/sync_device_32/src/ASF/sam/utils/cmsis/sam3x/include/pio",
+                "${workspaceFolder}/sync_device_32/src/ASF/common/utils",
+                "${workspaceFolder}/sync_device_32/src/ASF/sam/drivers",
+                "${workspaceFolder}/sync_device_32/src/ASF/sam/boards",
+                "${workspaceFolder}/sync_device_32/src"
+            ],
+            "defines": ["SAM3X8E", "ARDUINO_DUE_X"],
+            "cStandard": "c11",
+            "cppStandard": "c++11"
+        }
+    ],
+    "version": 4
+}
