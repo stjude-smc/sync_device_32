@@ -4,6 +4,8 @@ Release/
 obj/
 bin/
 build/
+python/dist/
+release_artifacts/
 
 # Ignore generated files from the build process
 *.elf
