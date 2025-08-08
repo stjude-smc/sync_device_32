@@ -139,11 +139,16 @@ uint32_t pio_handler_set(Pio *p_pio, uint32_t ul_id, uint32_t ul_mask,
 		return 1;
 
     /* Check interrupt for this pin, if already defined, redefine it. */
-	for (i = 0; i <= gs_ul_nb_sources; i++) {
+	for (i = 0; i < gs_ul_nb_sources; i++) {
 		pSource = &(gs_interrupt_sources[i]);
 		if (pSource->id == ul_id && pSource->mask == ul_mask) {
 			break;
 		}
+	}
+
+	/* If not found, use the next available slot */
+	if (i >= gs_ul_nb_sources) {
+		pSource = &(gs_interrupt_sources[gs_ul_nb_sources]);
 	}
 
 	/* Define new source */
