@@ -311,20 +311,23 @@ See [`python/sync device demo.ipynb`](python/sync%20device%20demo.ipynb) for a c
 
 ## 📋 Properties
 
-| Property                | Access     | Description                                 |
-|-------------------------|------------|---------------------------------------------|
-| `version`               | Read-only  | Firmware version                            |
-| `running`               | Read-only  | System timer status                         |
-| `sys_time_cts`          | Read-only  | System timer value (counter ticks)          |
-| `sys_time_s`            | Read-only  | System time (seconds)                       |
-| `prescaler`             | Read-only  | Timer prescaler                             |
-| `pulse_duration_us`     | R/W        | Default pulse duration (microseconds)       |
-| `watchdog_timeout_ms`   | Read-only  | Watchdog timeout (ms)                       |
-| `N_events`              | Read-only  | Number of scheduled events                  |
-| `interlock_enabled`     | R/W        | Laser interlock status                      |
-| `selected_lasers`       | R/W        | Bitmask of enabled laser channels           |
-| `shutter_delay_us`      | R/W        | Shutter delay (us)                          |
-| `cam_readout_us`        | R/W        | Camera readout time (us)                    |
+| ID | Property                | Access     | Description                                  |
+|----|-------------------------|------------|----------------------------------------------|
+| 0  | `version`               | Read-only  | Firmware version                             |
+| 1  | `running`               | Read-only  | System timer running status                  |
+| 2  | `sys_timer_value`       | Read-only  | System timer value (counter ticks)           |
+| 3  | `sys_timer_ovf_count`   | Read-only  | System timer overflow count                  |
+| 4  | `sys_time_ms`           | Read-only  | System time (milliseconds)                   |
+| 5  | `prescaler`             | Read-only  | System timer prescaler                       |
+| 6  | `pulse_duration_us`     | R/W        | Default pulse duration (microseconds)        |
+| 7  | `watchdog_timeout_ms`   | Read-only  | Watchdog timeout (ms)                        |
+| 8  | `N_events`              | Read-only  | Number of events in queue                    |
+| 9  | `interlock_enabled`     | R/W        | Laser interlock state (0=disabled)           |
+| 10 | `selected_lasers`       | R/W        | Bitmask of enabled laser channels            |
+| 11 | `open_shutters`         | Write-only | Open specified laser shutters                |
+| 12 | `close_shutters`        | Write-only | Close specified laser shutters               |
+| 13 | `shutter_delay_us`      | R/W        | Shutter delay (microseconds)                 |
+| 14 | `cam_readout_us`        | R/W        | Camera readout time (microseconds)           |
 
 ## 📖 Documentation
 
