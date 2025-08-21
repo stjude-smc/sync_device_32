@@ -8,6 +8,8 @@
 #include "ext_pTIRF.h"
 #include "events.h"
 #include "props.h"
+#include <cstdint>
+#include <algorithm>
 
 /************************************************************************/
 /*                 HELPER FUNCTIONS                                     */
@@ -120,9 +122,14 @@ struct AcqParams {
 
 	AcqParams(const DataPacket* data) {
 		exp = data->arg1;
-		cam = get_property(rw_CAM_READOUT_us);
+		// Camera readout time cannot be longer than the exposure time in this mode
+		cam = std::min(exp, get_property(rw_CAM_READOUT_us));
 		shutter = get_property(rw_SHUTTER_DELAY_us);
-		start = current_time_us() + data->ts_us + UNIFORM_TIME_DELAY;
+		// start time is either the requested timestamp or as early as possible (can't be in the past)
+		start = std::max(
+			std::max(cam, shutter),
+			data->ts_us
+		) + current_time_us() + UNIFORM_TIME_DELAY;
 	}
 };
 
@@ -130,16 +137,20 @@ struct AcqParams {
 void start_continuous_acq(const DataPacket* data) {
     AcqParams p(data);
 
+	// In case the exposure is shorter than the default pulse duration,
+	// use half of the exposure time as the pulse duration
+	uint32_t cam_pulse_duration = std::min(p.exp/2, (uint32_t)default_pulse_duration_us);
+
+	// Sacrificial frame to read out the camera while we are opening the shutters
+	schedule_pulse(CAMERA_PIN, cam_pulse_duration, p.start - p.cam, 1, 0, false);
+
     schedule_shutter_pulse(
-		data->N * p.exp + p.shutter,         // duration
-		p.start + p.cam - p.shutter,         // timestamp
-		1, 0, false);						 // just once
-    
-	// Single pulse to read out the camera
-    schedule_pulse(CAMERA_PIN, default_pulse_duration_us, p.start, 1, 0, false);
-	
+		data->N * p.exp + p.shutter, // duration
+		p.start - p.shutter,              // timestamp
+		1, 0, false);			 // just once
+    	
 	// N+1 pulses to trigger camera in sync mode
-    schedule_pulse(CAMERA_PIN, default_pulse_duration_us, p.start + p.cam,
+    schedule_pulse(CAMERA_PIN, cam_pulse_duration, p.start,
 				   data->N + 1, p.exp, false);
 }
 
