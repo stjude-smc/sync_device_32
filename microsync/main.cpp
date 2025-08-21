@@ -1,8 +1,5 @@
-/*
- * GccApplication2.cpp
- *
- * Created: 9/17/2024 3:00:55 PM
- * Author : rkiselev
+/*/
+ * main.cpp - Entry point to microsync firmware
  */ 
 
 extern "C" {

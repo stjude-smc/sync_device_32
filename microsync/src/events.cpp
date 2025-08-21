@@ -333,6 +333,7 @@ void start_sys_timer()
 void stop_sys_timer()
 {
 	sys_timer_running = false;
+	sys_tc_ovf_count = 0;
 	tc_stop(SYS_TC, SYS_TC_CH);
 }
 
